@@ -153,6 +153,7 @@ sealed class Recording with _$Recording {
     String? participants,
     @JsonKey(name: 'file_size') int? fileSize,
     @JsonKey(name: 'is_highlighted') @Default(false) bool isHighlighted,
+    @JsonKey(name: 'is_archived') @Default(false) bool isArchived,
     @JsonKey(name: 'is_inbox') @Default(false) bool isInbox,
     @JsonKey(fromJson: _parseRecordingStatus)
     @Default(RecordingStatus.completed)

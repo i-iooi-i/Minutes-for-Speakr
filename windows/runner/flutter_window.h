@@ -70,6 +70,7 @@ class FlutterWindow : public Win32Window {
   // When true the first-frame callback skips Show() so an auto-start
   // launch goes straight to the tray.
   bool start_hidden_ = false;
+  bool window_prefs_ready_ = false;
 };
 
 #endif  // RUNNER_FLUTTER_WINDOW_H_

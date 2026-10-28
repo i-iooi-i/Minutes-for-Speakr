@@ -10,6 +10,38 @@ namespace {
 // tray callback (tray_icon.cpp), so this uses + 2.
 constexpr UINT kShowInstanceMessage = WM_APP + 2;
 
+constexpr wchar_t kWindowPrefs[] = L"Software\\MinutesForSpeakr";
+void SaveWindowPlacement(HWND hwnd) {
+  WINDOWPLACEMENT placement{sizeof(WINDOWPLACEMENT)};
+  if (!GetWindowPlacement(hwnd, &placement)) return;
+  // Minimized state must never cause the next launch to open invisibly.
+  if (placement.showCmd == SW_SHOWMINIMIZED) {
+    placement.showCmd = (placement.flags & WPF_RESTORETOMAXIMIZED) ? SW_SHOWMAXIMIZED : SW_SHOWNORMAL;
+  }
+  placement.flags = 0;
+  HKEY key;
+  if (RegCreateKeyExW(HKEY_CURRENT_USER, kWindowPrefs, 0, nullptr, 0,
+      KEY_SET_VALUE, nullptr, &key, nullptr) == ERROR_SUCCESS) {
+    RegSetValueExW(key, L"Placement", 0, REG_BINARY,
+      reinterpret_cast<const BYTE*>(&placement), sizeof(placement));
+    RegCloseKey(key);
+  }
+}
+void RestoreWindowPlacement(HWND hwnd, bool hidden) {
+  WINDOWPLACEMENT placement{sizeof(WINDOWPLACEMENT)};
+  DWORD size = sizeof(placement);
+  if (RegGetValueW(HKEY_CURRENT_USER, kWindowPrefs, L"Placement", RRF_RT_REG_BINARY,
+      nullptr, &placement, &size) != ERROR_SUCCESS || size != sizeof(placement)) return;
+  if (placement.rcNormalPosition.right <= placement.rcNormalPosition.left ||
+      placement.rcNormalPosition.bottom <= placement.rcNormalPosition.top) return;
+  placement.length = sizeof(placement);
+  placement.flags = 0;
+  placement.showCmd = placement.showCmd == SW_SHOWMAXIMIZED ? SW_SHOWMAXIMIZED : SW_SHOWNORMAL;
+  // SetWindowPlacement adjusts an off-screen saved rectangle to a connected monitor.
+  if (hidden) placement.showCmd = SW_HIDE;
+  SetWindowPlacement(hwnd, &placement);
+}
+
 void BringWindowToForegroundImpl(HWND hwnd) {
   if (hwnd == nullptr) return;
   ::ShowWindow(hwnd, SW_SHOW);
@@ -92,11 +124,11 @@ bool FlutterWindow::OnCreate() {
 
   SetChildContent(flutter_controller_->view()->GetNativeWindow());
 
-  if (!start_hidden_) {
-    flutter_controller_->engine()->SetNextFrameCallback([&]() {
-      this->Show();
-    });
-  }
+  flutter_controller_->engine()->SetNextFrameCallback([&]() {
+    RestoreWindowPlacement(GetHandle(), start_hidden_);
+    if (!start_hidden_) ShowWindow(GetHandle(), SW_SHOW);
+    window_prefs_ready_ = true;
+  });
 
   // Flutter can complete the first frame before the "show window" callback is
   // registered. The following call ensures a frame is pending to ensure the
@@ -120,6 +152,7 @@ void FlutterWindow::OnDestroy() {
 }
 
 void FlutterWindow::RequestExit() {
+  SaveWindowPlacement(GetHandle());
   force_quit_ = true;
   if (tray_icon_) {
     tray_icon_->Remove();
@@ -137,6 +170,10 @@ LRESULT
 FlutterWindow::MessageHandler(HWND hwnd, UINT const message,
                               WPARAM const wparam,
                               LPARAM const lparam) noexcept {
+  if (window_prefs_ready_ && (message == WM_EXITSIZEMOVE || message == WM_CLOSE ||
+      (message == WM_SIZE && (wparam == SIZE_MAXIMIZED || wparam == SIZE_RESTORED) && IsWindowVisible(hwnd)))) {
+    SaveWindowPlacement(hwnd);
+  }
   // Wake-up message from a second-instance launch — surface the main window.
   if (message == kShowInstanceMessage) {
     BringWindowToForegroundImpl(hwnd);

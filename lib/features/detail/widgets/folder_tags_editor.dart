@@ -19,15 +19,20 @@ import '../detail_controller.dart';
 /// persists immediately with optimistic UI; failures revert and surface via
 /// a SnackBar.
 class FolderTagsEditor extends ConsumerStatefulWidget {
-  const FolderTagsEditor({super.key, required this.recording});
+  const FolderTagsEditor({
+    super.key,
+    required this.recording,
+    this.initiallyEditing = false,
+  });
   final Recording recording;
+  final bool initiallyEditing;
 
   @override
   ConsumerState<FolderTagsEditor> createState() => _FolderTagsEditorState();
 }
 
 class _FolderTagsEditorState extends ConsumerState<FolderTagsEditor> {
-  bool _editing = false;
+  late bool _editing = widget.initiallyEditing;
   late int? _folderId = widget.recording.folderId;
   late List<Tag> _selectedTags = List.of(widget.recording.tags);
 

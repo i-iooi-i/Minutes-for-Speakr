@@ -76,6 +76,7 @@ class _DesktopWaveState extends State<DesktopWave>
                 seed: widget.seed,
                 color: widget.color,
                 motion: _motion,
+                showPlayhead: widget.onSeek != null,
               ),
             ),
           ),
@@ -100,7 +101,9 @@ class _WavePainter extends CustomPainter {
     required this.seed,
     required this.color,
     required this.motion,
+    required this.showPlayhead,
   }) : super(repaint: motion);
+  final bool showPlayhead;
   final Animation<double> motion;
   final double progress;
   final int seed;
@@ -134,6 +137,14 @@ class _WavePainter extends CustomPainter {
         ),
         p,
       );
+    }
+    if (showPlayhead) {
+      final x = (progress.clamp(0.0, 1.0) * w).clamp(3.0, w - 3.0);
+      p
+        ..color = SpeakrColors.accent
+        ..strokeWidth = 2;
+      canvas.drawLine(Offset(x, 4), Offset(x, h - 1), p);
+      canvas.drawCircle(Offset(x, 4), 3, p);
     }
   }
 

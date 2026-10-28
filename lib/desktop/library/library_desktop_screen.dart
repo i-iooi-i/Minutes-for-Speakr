@@ -19,7 +19,7 @@ import '../../theme/typography.dart';
 import '../../utils/formatters.dart';
 import '../../widgets/speakr_icons.dart';
 import '../../widgets/tag_chip.dart';
-import '../shell/desktop_shortcuts.dart';
+import '../widgets/recording_action_menu.dart';
 import '../widgets/desktop_controls.dart';
 import '../widgets/desktop_wave.dart';
 import '../widgets/desktop_record_button.dart';
@@ -110,7 +110,7 @@ class _LibraryDesktopScreenState extends ConsumerState<LibraryDesktopScreen> {
                 onRetry: () => ref.invalidate(libraryRecordingsProvider),
               ),
               data: (items) {
-                if (items.isEmpty) return const _Empty();
+                if (items.isEmpty) return const SizedBox.shrink();
                 final sorted = _applySort(items, _sort);
                 return _view == _ViewMode.list
                     ? _ListView(items: sorted, folders: folders)
@@ -199,53 +199,43 @@ class _Header extends ConsumerWidget {
           final title = Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              if (folder != null && folderColor != null) ...[
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      width: 9,
-                      height: 9,
-                      decoration: BoxDecoration(
-                        color: folderColor,
-                        borderRadius: BorderRadius.circular(2),
-                      ),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (folder != null) ...[
+                    Icon(
+                      Icons.graphic_eq_rounded,
+                      color: folderColor ?? SpeakrColors.ink2,
+                      size: 26,
                     ),
-                    const SizedBox(width: 8),
-                    Text(
-                      folder.name.toUpperCase(),
-                      style: SpeakrText.mono(
-                        size: 10,
-                        color: folderColor,
-                        letterSpacing: 1.5,
-                      ),
-                    ),
+                    const SizedBox(width: 10),
                   ],
-                ),
+                  Text(
+                    ref.watch(libraryFilterProvider).statusKey == 'archived'
+                        ? tr("Archived")
+                        : folder?.name ?? tr("Recordings"),
+                    style: SpeakrText.serif(
+                      size: 28,
+                      height: 1,
+                      weight: FontWeight.w400,
+                    ),
+                  ),
+                ],
+              ),
+              if (folder == null && items.isNotEmpty) ...[
                 const SizedBox(height: 8),
-              ],
-              Text(
-                ref.watch(libraryFilterProvider).statusKey == 'archived'
-                    ? tr("Archived")
-                    : folder?.name ?? tr("Recordings"),
-                style: SpeakrText.serif(
-                  size: 28,
-                  height: 1,
-                  weight: FontWeight.w400,
+                Text(
+                  items.isEmpty
+                      ? tr("No recordings yet")
+                      : tr("{0} {1} · {2}h {3}m of audio", [
+                          items.length,
+                          tr(items.length == 1 ? "recording" : "recordings"),
+                          hrs,
+                          mins,
+                        ]),
+                  style: SpeakrText.sans(size: 13, color: SpeakrColors.muted),
                 ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                items.isEmpty
-                    ? tr("No recordings yet")
-                    : tr("{0} {1} · {2}h {3}m of audio", [
-                        items.length,
-                        tr(items.length == 1 ? "recording" : "recordings"),
-                        hrs,
-                        mins,
-                      ]),
-                style: SpeakrText.sans(size: 13, color: SpeakrColors.muted),
-              ),
+              ],
             ],
           );
           final controls = Wrap(
@@ -582,6 +572,8 @@ class _ListRowState extends ConsumerState<_ListRow> {
                         ],
                       ),
                     ),
+                    const SizedBox(width: 8),
+                    RecordingActionMenu(recording: r),
                   ],
                 );
               },
@@ -1150,6 +1142,7 @@ class _GridCardState extends ConsumerState<_GridCard> {
               const SizedBox(height: 8),
               Row(
                 children: [
+                  RecordingActionMenu(recording: r),
                   Expanded(
                     child: Wrap(
                       spacing: 4,
@@ -1299,53 +1292,6 @@ class _Loading extends StatelessWidget {
     LanguageScope.watch(context);
     return const Center(
       child: CircularProgressIndicator(color: SpeakrColors.ink, strokeWidth: 2),
-    );
-  }
-}
-
-class _Empty extends ConsumerWidget {
-  const _Empty();
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    LanguageScope.watch(context);
-    return Padding(
-      padding: const EdgeInsets.all(40),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            tr("EMPTY"),
-            style: SpeakrText.mono(
-              size: 10,
-              color: SpeakrColors.muted,
-              letterSpacing: 1.5,
-            ),
-          ),
-          const SizedBox(height: 12),
-          Text(
-            tr(ref.watch(libraryFilterProvider).statusKey == 'archived' ? "No archived recordings." : "Nothing to show yet."),
-            style: SpeakrText.serif(size: 26, height: 1.15),
-          ),
-          const SizedBox(height: 14),
-          Text(
-            ref.watch(libraryFilterProvider).statusKey == 'archived'
-                ? tr("Recordings archived in Speakr appear here.")
-                : supportsKeyboardShortcuts
-                ? tr(
-                    "Use {0}R or the New recording button at the top to make your first recording.",
-                    [modLabel],
-                  )
-                : tr(
-                    "Use the New recording button at the top to make your first recording.",
-                  ),
-            style: SpeakrText.sans(
-              size: 15,
-              height: 1.5,
-              color: SpeakrColors.ink2,
-            ),
-          ),
-        ],
-      ),
     );
   }
 }

@@ -114,6 +114,7 @@ Future<void> reprocessRecording(
       await api.reprocessSummary(recordingId);
     }
     container.invalidate(recordingDetailProvider(recordingId));
+    container.read(uploadKickProvider.notifier).state++;
     messenger.showSnackBar(
       SnackBar(
         content: Text(

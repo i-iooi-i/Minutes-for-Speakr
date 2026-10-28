@@ -330,6 +330,23 @@ class SpeakrApi {
     }
   }
 
+  Future<void> deleteRecordingAudio(int id) async {
+    await _post<dynamic>('/recordings/$id/delete-audio', {});
+  }
+
+  Future<String> createRecordingShare(int id) async {
+    final res = await _post<Map<String, dynamic>>('/recordings/$id/share', {
+      'share_summary': true,
+      'share_notes': false,
+      'force_new': true,
+    });
+    final url = res['share_url'];
+    if (url is! String || Uri.tryParse(url)?.scheme != 'https') {
+      throw SpeakrApiException(null, 'Invalid share URL', null);
+    }
+    return url;
+  }
+
   // ── Internals ─────────────────────────────────────────────────────────────
   Future<T> _get<T>(String path, {Map<String, dynamic>? query}) =>
       _request<T>(() => _dio.get<T>(path, queryParameters: query));

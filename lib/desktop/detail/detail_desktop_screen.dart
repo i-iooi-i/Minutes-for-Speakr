@@ -12,7 +12,7 @@ import 'package:just_audio/just_audio.dart';
 import '../../api/models.dart';
 import '../../features/detail/detail_actions.dart';
 import '../../features/detail/detail_controller.dart';
-import '../../features/detail/speaker_review_screen.dart';
+import '../widgets/recording_action_menu.dart';
 import '../../features/detail/tabs/chat_tab.dart';
 import '../../features/detail/tabs/notes_tab.dart';
 import '../../features/detail/tabs/recording_stats_tab.dart';
@@ -48,7 +48,7 @@ class _DetailDesktopScreenState extends ConsumerState<DetailDesktopScreen> {
   final _audioPlayer = AudioPlayer();
   StreamSubscription<PlayerState>? _stateSub;
   bool _audioReady = false;
-  int _tab = 0; // 0 = summary, 1 = chat
+  int _tab = 0; // Summary, notes, statistics, chat
   double _speed = 1.0;
 
   @override
@@ -131,6 +131,12 @@ class _DetailDesktopScreenState extends ConsumerState<DetailDesktopScreen> {
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    ref.listen(recordingDetailProvider(widget.recordingId), (_, next) {
+      if (next.value?.audioAvailable == false) {
+        unawaited(_audioPlayer.stop());
+        if (_audioReady) setState(() => _audioReady = false);
+      }
+    });
     final asyncR = ref.watch(recordingDetailProvider(widget.recordingId));
     return asyncR.when(
       loading: () => const Center(
@@ -160,7 +166,7 @@ class _DetailDesktopScreenState extends ConsumerState<DetailDesktopScreen> {
       data: (r) => _Body(
         recording: r,
         player: _audioPlayer,
-        audioReady: _audioReady,
+        audioReady: _audioReady && r.audioAvailable != false,
         speed: _speed,
         tab: _tab,
         onTab: (i) => setState(() => _tab = i),
@@ -272,7 +278,6 @@ class _BreadcrumbBar extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     LanguageScope.watch(context);
     final highlighted = recording.isHighlighted;
-    final inInbox = recording.isInbox;
 
     return Container(
       decoration: const BoxDecoration(
@@ -301,86 +306,7 @@ class _BreadcrumbBar extends ConsumerWidget {
             ),
           ),
           const SizedBox(width: 6),
-          DesktopActionMenu(
-            items: [
-              DesktopActionItem(
-                icon: SpeakrIcon.star,
-                label: highlighted
-                    ? tr("Remove highlight")
-                    : tr("Highlight recording"),
-                onTap: () => toggleRecordingField(
-                  context,
-                  ref,
-                  recordingId: recording.id,
-                  patch: {'is_highlighted': !highlighted},
-                  successMessage: highlighted
-                      ? tr("Highlight removed")
-                      : tr("Highlighted"),
-                ),
-              ),
-              DesktopActionItem(
-                icon: SpeakrIcon.flag,
-                label: inInbox ? tr("Remove from inbox") : tr("Move to inbox"),
-                onTap: () => toggleRecordingField(
-                  context,
-                  ref,
-                  recordingId: recording.id,
-                  patch: {'is_inbox': !inInbox},
-                  successMessage: inInbox
-                      ? tr("Removed from inbox")
-                      : tr("Moved to inbox"),
-                ),
-              ),
-              DesktopActionItem(
-                dividerAbove: true,
-                icon: SpeakrIcon.search,
-                label: tr("Edit speakers"),
-                subtitle: tr("Rename detected speakers"),
-                onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (_) =>
-                        SpeakerReviewScreen(recordingId: recording.id),
-                  ),
-                ),
-              ),
-              DesktopActionItem(
-                icon: SpeakrIcon.mic,
-                label: tr("Reprocess transcription"),
-                subtitle: tr("Replaces the current transcript"),
-                onTap: () => reprocessRecording(
-                  context,
-                  ref,
-                  recordingId: recording.id,
-                  kind: ReprocessKind.transcription,
-                ),
-              ),
-              DesktopActionItem(
-                icon: SpeakrIcon.flagBookmark,
-                label: tr("Reprocess summary"),
-                subtitle: tr("Regenerates the summary from the transcript"),
-                onTap: () => reprocessRecording(
-                  context,
-                  ref,
-                  recordingId: recording.id,
-                  kind: ReprocessKind.summary,
-                ),
-              ),
-              DesktopActionItem(
-                dividerAbove: true,
-                icon: SpeakrIcon.trash,
-                label: tr("Delete recording"),
-                subtitle: tr("Removes the recording, transcript, and audio"),
-                danger: true,
-                onTap: () =>
-                    deleteRecording(context, ref, recordingId: recording.id),
-              ),
-            ],
-            builder: (context, toggle) => DesktopToolButton(
-              icon: SpeakrIcon.more,
-              tooltip: tr("More"),
-              onTap: toggle,
-            ),
-          ),
+          RecordingActionMenu(recording: recording),
         ],
       ),
     );
@@ -723,6 +649,26 @@ class _TranscriptColumn extends ConsumerWidget {
                 ),
               ),
               const Spacer(),
+              IconButton(
+                tooltip: tr(
+                  ref.watch(transcriptFollowProvider(recordingId))
+                      ? 'Disable scrolling'
+                      : 'Enable scrolling',
+                ),
+                isSelected: ref.watch(transcriptFollowProvider(recordingId)),
+                icon: const Icon(Icons.unfold_more_rounded, size: 18),
+                selectedIcon: const Icon(
+                  Icons.unfold_more_rounded,
+                  size: 18,
+                  color: SpeakrColors.accent,
+                ),
+                onPressed: () {
+                  final p = ref.read(
+                    transcriptFollowProvider(recordingId).notifier,
+                  );
+                  p.state = !p.state;
+                },
+              ),
               DesktopSmallButton(label: tr("Copy"), onTap: onCopy),
             ],
           ),

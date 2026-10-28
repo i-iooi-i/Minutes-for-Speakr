@@ -1,3 +1,5 @@
+import 'package:flutter_riverpod/legacy.dart';
+import 'dart:math' as math;
 import 'package:speakr_app/l10n/strings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -9,7 +11,11 @@ import '../../theme/colors.dart';
 import '../../theme/typography.dart';
 
 /// Compact timestamp, speaker and transcript columns.
-class DesktopTranscriptPane extends ConsumerWidget {
+final transcriptFollowProvider = StateProvider.autoDispose.family<bool, int>(
+  (ref, id) => true,
+);
+
+class DesktopTranscriptPane extends ConsumerStatefulWidget {
   const DesktopTranscriptPane({
     super.key,
     required this.recordingId,
@@ -18,6 +24,23 @@ class DesktopTranscriptPane extends ConsumerWidget {
 
   final int recordingId;
   final AudioPlayer player;
+
+  @override
+  ConsumerState<DesktopTranscriptPane> createState() =>
+      _DesktopTranscriptPaneState();
+}
+
+class _DesktopTranscriptPaneState extends ConsumerState<DesktopTranscriptPane> {
+  final _scroll = ScrollController();
+  int _lastActive = -2;
+  bool _wasFollowing = false;
+  int get recordingId => widget.recordingId;
+  AudioPlayer get player => widget.player;
+  @override
+  void dispose() {
+    _scroll.dispose();
+    super.dispose();
+  }
 
   static const _palette = [
     SpeakrColors.tagRoadmap,
@@ -29,8 +52,9 @@ class DesktopTranscriptPane extends ConsumerWidget {
   ];
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    final follow = ref.watch(transcriptFollowProvider(recordingId));
     final async = ref.watch(transcriptProvider(recordingId));
     return async.when(
       loading: () => const Center(
@@ -85,129 +109,187 @@ class DesktopTranscriptPane extends ConsumerWidget {
           return _palette[i % _palette.length];
         }
 
-        return StreamBuilder<Duration>(
-          stream: player.positionStream,
-          builder: (context, snap) {
-            final pos = snap.data ?? Duration.zero;
-            final secs = pos.inMilliseconds / 1000.0;
-            // Find the active segment — the latest one whose start_time
-            // is <= the current playback time. Falls back to -1 when the
-            // playhead is before the first segment.
-            int activeIdx = -1;
-            for (var i = 0; i < segments.length; i++) {
-              final t = segments[i].startTime ?? 0;
-              if (t <= secs) {
-                activeIdx = i;
-              } else {
-                break;
-              }
+        return LayoutBuilder(
+          builder: (context, constraints) {
+            final offsets = <double>[];
+            var offset = 12.0;
+            for (final segment in segments) {
+              offsets.add(offset);
+              final painter = TextPainter(
+                text: TextSpan(
+                  text: segment.sentence ?? '',
+                  style: SpeakrText.serif(size: 13.5, height: 1.5),
+                ),
+                textDirection: Directionality.of(context),
+                textScaler: MediaQuery.textScalerOf(context),
+              )..layout(maxWidth: math.max(1, constraints.maxWidth - 206));
+              offset += math.max(painter.height + 2, 18) + 18;
+              painter.dispose();
             }
-
-            return ListView.separated(
-              padding: const EdgeInsets.fromLTRB(12, 12, 12, 40),
-              itemCount: segments.length,
-              separatorBuilder: (_, __) => const SizedBox(height: 2),
-              itemBuilder: (context, i) {
-                final s = segments[i];
-                final speakerName = s.speaker;
-                final color = colorFor(speakerName);
-                final active = i == activeIdx;
-                final ts = s.startTime ?? 0;
-                final mm = (ts ~/ 60).toString().padLeft(2, '0');
-                final ss = (ts % 60).floor().toString().padLeft(2, '0');
-
-                void seekAndPlay() {
-                  final start = s.startTime;
-                  if (start == null) return;
-                  player.seek(Duration(milliseconds: (start * 1000).round()));
-                  player.play();
+            return StreamBuilder<Duration>(
+              stream: player.positionStream,
+              builder: (context, snap) {
+                final pos = snap.data ?? Duration.zero;
+                final secs = pos.inMilliseconds / 1000.0;
+                // Find the active segment — the latest one whose start_time
+                // is <= the current playback time. Falls back to -1 when the
+                // playhead is before the first segment.
+                int activeIdx = -1;
+                for (var i = 0; i < segments.length; i++) {
+                  final t = segments[i].startTime ?? 0;
+                  if (t <= secs) {
+                    activeIdx = i;
+                  } else {
+                    break;
+                  }
                 }
 
-                void showCopy(Offset globalPosition) {
-                  showTranscriptCopyMenu(
-                    context,
-                    globalPosition,
-                    s.sentence ?? '',
-                  );
+                if (follow && (activeIdx != _lastActive || !_wasFollowing)) {
+                  final target = activeIdx < 0 ? 0.0 : offsets[activeIdx];
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    if (!mounted ||
+                        !_scroll.hasClients ||
+                        !ref.read(transcriptFollowProvider(recordingId))) {
+                      return;
+                    }
+                    final destination =
+                        (target - _scroll.position.viewportDimension * .25)
+                            .clamp(0.0, _scroll.position.maxScrollExtent);
+                    if (MediaQuery.disableAnimationsOf(context)) {
+                      _scroll.jumpTo(destination);
+                    } else {
+                      _scroll.animateTo(
+                        destination,
+                        duration: const Duration(milliseconds: 220),
+                        curve: Curves.easeOut,
+                      );
+                    }
+                  });
                 }
+                _lastActive = activeIdx;
+                _wasFollowing = follow;
+                return ListView.separated(
+                  controller: _scroll,
+                  padding: const EdgeInsets.fromLTRB(12, 12, 12, 40),
+                  itemCount: segments.length,
+                  separatorBuilder: (_, __) => const SizedBox(height: 2),
+                  itemBuilder: (context, i) {
+                    final s = segments[i];
+                    final speakerName = s.speaker;
+                    final color = colorFor(speakerName);
+                    final active = i == activeIdx;
+                    final ts = s.startTime ?? 0;
+                    final mm = (ts ~/ 60).toString().padLeft(2, '0');
+                    final ss = (ts % 60).floor().toString().padLeft(2, '0');
 
-                return MouseRegion(
-                  cursor: SystemMouseCursors.click,
-                  child: GestureDetector(
-                    behavior: HitTestBehavior.opaque,
-                    onTap: seekAndPlay,
-                    onSecondaryTapDown: (d) => showCopy(d.globalPosition),
-                    onLongPressStart: (d) => showCopy(d.globalPosition),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 14,
-                        vertical: 8,
-                      ),
-                      decoration: BoxDecoration(
-                        color: active
-                            ? SpeakrColors.accent.withValues(alpha: .09)
-                            : Colors.transparent,
-                        borderRadius: BorderRadius.circular(9),
-                      ),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          SizedBox(
-                            width: 42,
-                            child: Text(
-                              '$mm:$ss',
-                              style: SpeakrText.mono(
-                                size: 11,
-                                color: SpeakrColors.muted,
-                                letterSpacing: 0,
-                              ),
-                            ),
+                    void seekAndPlay() {
+                      final start = s.startTime;
+                      if (start == null ||
+                          ref
+                                  .read(recordingDetailProvider(recordingId))
+                                  .value
+                                  ?.audioAvailable ==
+                              false) {
+                        return;
+                      }
+                      player.seek(
+                        Duration(milliseconds: (start * 1000).round()),
+                      );
+                      player.play();
+                    }
+
+                    void showCopy(Offset globalPosition) {
+                      showTranscriptCopyMenu(
+                        context,
+                        globalPosition,
+                        s.sentence ?? '',
+                      );
+                    }
+
+                    return MouseRegion(
+                      cursor: SystemMouseCursors.click,
+                      child: GestureDetector(
+                        behavior: HitTestBehavior.opaque,
+                        onTap: seekAndPlay,
+                        onSecondaryTapDown: (d) => showCopy(d.globalPosition),
+                        onLongPressStart: (d) => showCopy(d.globalPosition),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 14,
+                            vertical: 8,
                           ),
-                          const SizedBox(width: 12),
-                          SizedBox(
-                            width: 84,
-                            child: Tooltip(
-                              message: speakerName ?? '—',
-                              child: Text(
-                                speakerName ?? '—',
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: SpeakrText.sans(
-                                  size: 11.5,
-                                  color: color,
-                                  weight: FontWeight.w600,
-                                ),
-                              ),
-                            ),
+                          decoration: BoxDecoration(
+                            color: active
+                                ? SpeakrColors.accent.withValues(alpha: .09)
+                                : Colors.transparent,
+                            borderRadius: BorderRadius.circular(9),
                           ),
-                          const SizedBox(width: 14),
-                          Expanded(
-                            child: Container(
-                              padding: const EdgeInsets.fromLTRB(0, 1, 0, 1),
-                              decoration: BoxDecoration(
-                                border: Border(
-                                  left: BorderSide(
-                                    color: Colors.transparent,
-                                    width: 2,
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              SizedBox(
+                                width: 42,
+                                child: Text(
+                                  '$mm:$ss',
+                                  style: SpeakrText.mono(
+                                    size: 11,
+                                    color: SpeakrColors.muted,
+                                    letterSpacing: 0,
                                   ),
                                 ),
                               ),
-                              child: Text(
-                                s.sentence ?? '',
-                                style: SpeakrText.serif(
-                                  size: 13.5,
-                                  height: 1.5,
-                                  color: active
-                                      ? SpeakrColors.ink
-                                      : SpeakrColors.ink2,
+                              const SizedBox(width: 12),
+                              SizedBox(
+                                width: 84,
+                                child: Tooltip(
+                                  message: speakerName ?? '—',
+                                  child: Text(
+                                    speakerName ?? '—',
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: SpeakrText.sans(
+                                      size: 11.5,
+                                      color: color,
+                                      weight: FontWeight.w600,
+                                    ),
+                                  ),
                                 ),
                               ),
-                            ),
+                              const SizedBox(width: 14),
+                              Expanded(
+                                child: Container(
+                                  padding: const EdgeInsets.fromLTRB(
+                                    0,
+                                    1,
+                                    0,
+                                    1,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    border: Border(
+                                      left: BorderSide(
+                                        color: Colors.transparent,
+                                        width: 2,
+                                      ),
+                                    ),
+                                  ),
+                                  child: Text(
+                                    s.sentence ?? '',
+                                    style: SpeakrText.serif(
+                                      size: 13.5,
+                                      height: 1.5,
+                                      color: active
+                                          ? SpeakrColors.ink
+                                          : SpeakrColors.ink2,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
-                        ],
+                        ),
                       ),
-                    ),
-                  ),
+                    );
+                  },
                 );
               },
             );

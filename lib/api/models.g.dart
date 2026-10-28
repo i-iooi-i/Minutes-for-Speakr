@@ -82,6 +82,7 @@ _Recording _$RecordingFromJson(Map<String, dynamic> json) => _Recording(
   participants: json['participants'] as String?,
   fileSize: (json['file_size'] as num?)?.toInt(),
   isHighlighted: json['is_highlighted'] as bool? ?? false,
+  isArchived: json['is_archived'] as bool? ?? false,
   isInbox: json['is_inbox'] as bool? ?? false,
   status: json['status'] == null
       ? RecordingStatus.completed
@@ -121,6 +122,7 @@ Map<String, dynamic> _$RecordingToJson(_Recording instance) =>
       'participants': instance.participants,
       'file_size': instance.fileSize,
       'is_highlighted': instance.isHighlighted,
+      'is_archived': instance.isArchived,
       'is_inbox': instance.isInbox,
       'status': _$RecordingStatusEnumMap[instance.status]!,
       'tags': instance.tags,

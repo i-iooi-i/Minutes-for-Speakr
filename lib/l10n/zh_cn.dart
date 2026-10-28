@@ -1,11 +1,30 @@
 // UI copy only. Keep API values, user content and diagnostic logs unchanged.
 const zhCN = <String, String>{
+  'Mark as read': '标记为已读',
+  'Mark as unread': '标记为未读',
+  'Archive recording': '归档录音',
+  'Unarchive recording': '取消归档',
+  'Folder and tags': '文件夹与标签',
+  'Create share link?': '创建分享链接？',
+  'Anyone with this link can access this recording and summary. Notes are excluded.':
+      '任何获得链接的人都可以访问录音及摘要，不包含笔记。',
+  'Share recording': '分享录音',
+  'Copy link': '复制链接',
+  'Delete audio only': '仅删除音频',
+  'Delete audio only?': '仅删除音频？',
+  'The audio will be permanently deleted. Transcript, summary and notes will be kept.':
+      '音频将永久删除，转录、摘要和笔记会保留。',
+  'Enable scrolling': '启用滚动',
+  'Disable scrolling': '关闭自动滚动',
+  'Updated': '已更新',
   "Search recordings, press Enter": "搜索录音，按回车…",
   "Clear search": "清除搜索",
   "No archived recordings.": "暂无已归档录音。",
   "Recordings archived in Speakr appear here.": "在 Speakr 中归档的录音会显示在这里。",
-  "Use {0}R or the New recording button at the top to make your first recording.": "按 {0}R 或点击顶部的新建录音，开始录音。",
-  "Use the New recording button at the top to make your first recording.": "点击顶部的新建录音，开始录音。",
+  "Use {0}R or the New recording button at the top to make your first recording.":
+      "按 {0}R 或点击顶部的新建录音，开始录音。",
+  "Use the New recording button at the top to make your first recording.":
+      "点击顶部的新建录音，开始录音。",
   "Archived": "已归档",
   "Notes": "笔记",
   "Saving…": "正在保存…",
