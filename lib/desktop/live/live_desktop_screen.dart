@@ -117,7 +117,7 @@ class _LiveDesktopScreenState extends ConsumerState<LiveDesktopScreen> {
               Column(
                 children: [
                   _TopBar(
-                    started: state.started,
+                    state: state,
                     onMinimize: _minimize,
                     onShowMini: canOpenMini ? controller.openMini : null,
                   ),
@@ -127,7 +127,7 @@ class _LiveDesktopScreenState extends ConsumerState<LiveDesktopScreen> {
                         return SingleChildScrollView(
                           child: Center(
                             child: ConstrainedBox(
-                              constraints: const BoxConstraints(maxWidth: 820),
+                              constraints: const BoxConstraints(maxWidth: 730),
                               child: Column(
                                 children: [
                                   _RecordingIdentity(
@@ -135,7 +135,7 @@ class _LiveDesktopScreenState extends ConsumerState<LiveDesktopScreen> {
                                     controller: controller,
                                   ),
                                   SizedBox(
-                                    height: 420,
+                                    height: 430,
                                     child: _LeftPane(
                                       state: state,
                                       controller: controller,
@@ -175,11 +175,11 @@ class _LiveDesktopScreenState extends ConsumerState<LiveDesktopScreen> {
 
 class _TopBar extends StatelessWidget {
   const _TopBar({
-    required this.started,
+    required this.state,
     required this.onMinimize,
     this.onShowMini,
   });
-  final bool started;
+  final RecordingState state;
   final VoidCallback onMinimize;
   final VoidCallback? onShowMini;
   @override
@@ -196,8 +196,20 @@ class _TopBar extends StatelessWidget {
           icon: const Icon(Icons.arrow_back_rounded),
         ),
         const SizedBox(width: 8),
+        Icon(
+          Icons.circle,
+          size: 9,
+          color: state.started ? SpeakrColors.recordRed : SpeakrColors.muted,
+        ),
+        const SizedBox(width: 10),
         Text(
-          tr(started ? 'Recording' : 'Start recording'),
+          tr(
+            state.uploading
+                ? 'Uploading'
+                : state.started
+                ? (state.paused ? 'Paused' : 'Recording')
+                : 'Prepare recording',
+          ),
           style: SpeakrText.sans(size: 14, weight: FontWeight.w500),
         ),
         const Spacer(),
@@ -238,43 +250,18 @@ class _LeftPane extends StatelessWidget {
     final uploading = state.uploading;
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(32, 22, 32, 18),
+      padding: const EdgeInsets.fromLTRB(24, 30, 24, 24),
       child: Column(
         children: [
-          Text(
-            tr(
-              uploading
-                  ? 'Uploading'
-                  : started
-                  ? (paused ? 'Paused' : 'Recording')
-                  : 'Prepare recording',
-            ),
-            style: SpeakrText.sans(
-              size: 14,
-              color: started ? SpeakrColors.recordRed : SpeakrColors.ink2,
-            ),
-          ),
-          const SizedBox(height: 14),
           _BigTimer(elapsedSeconds: state.elapsedSeconds),
-          const SizedBox(height: 24),
+          const SizedBox(height: 34),
           SizedBox(
-            height: 76,
+            height: 84,
             child: _BreathingDot(
               paused: !started || paused || uploading,
               level: state.audioLevel,
             ),
           ),
-          if (!started)
-            Padding(
-              padding: const EdgeInsets.only(top: 8),
-              child: Text(
-                tr(
-                  'Choose your audio sources and speakers below, then start recording.',
-                ),
-                textAlign: TextAlign.center,
-                style: SpeakrText.sans(size: 12, color: SpeakrColors.muted),
-              ),
-            ),
           if (state.error != null)
             Text(
               state.error!,
@@ -294,13 +281,13 @@ class _LeftPane extends StatelessWidget {
               style: FilledButton.styleFrom(
                 backgroundColor: SpeakrColors.recordRed,
                 foregroundColor: Colors.white,
-                fixedSize: const Size(84, 84),
+                fixedSize: const Size(108, 108),
                 shape: const CircleBorder(),
                 padding: EdgeInsets.zero,
               ),
               child: Semantics(
                 label: tr(starting ? 'Starting recording' : 'Start recording'),
-                child: const Icon(Icons.fiber_manual_record, size: 34),
+                child: const Icon(Icons.fiber_manual_record, size: 38),
               ),
             )
           else
@@ -314,12 +301,12 @@ class _LeftPane extends StatelessWidget {
                   leading: const Icon(Icons.delete_outline, size: 16),
                   onTap: uploading ? null : onDiscard,
                 ),
-                const SizedBox(width: 16),
+                const SizedBox(width: 28),
                 _BigPauseButton(
                   paused: paused,
                   onTap: uploading ? null : controller.togglePause,
                 ),
-                const SizedBox(width: 16),
+                const SizedBox(width: 28),
                 _PillBtn(
                   label: tr('Stop & save'),
                   leading: const Icon(
@@ -348,40 +335,31 @@ class _BigTimer extends StatelessWidget {
     final m = (elapsedSeconds ~/ 60) % 60;
     final s = elapsedSeconds % 60;
     final ss = s.toString().padLeft(2, '0');
-    final leading = h > 0 ? '$h' : '$m';
-    final trailing = h > 0 ? '${m.toString().padLeft(2, '0')}:$ss' : ss;
-    // For h>0 we render the inner ':' between mm and ss in the trailing
-    // segment as the dimmed separator. We split it ourselves so both
-    // colons are dimmed consistently.
-    final List<InlineSpan> spans;
-    final style = SpeakrText.serif(
-      size: 72,
+    final leading = '$h';
+    final style = SpeakrText.sans(
+      size: 88,
       weight: FontWeight.w300,
       height: 1,
-      letterSpacing: -3,
+      letterSpacing: -2,
     ).copyWith(fontFeatures: const [FontFeature.tabularFigures()]);
     final dimColon = style.copyWith(
       color: SpeakrColors.ink.withValues(alpha: 0.35),
     );
-    if (h > 0) {
-      // h:mm:ss — dim both colons.
-      spans = [
-        TextSpan(text: leading, style: style),
-        TextSpan(text: ':', style: dimColon),
-        TextSpan(text: m.toString().padLeft(2, '0'), style: style),
-        TextSpan(text: ':', style: dimColon),
-        TextSpan(text: ss, style: style),
-      ];
-    } else {
-      // m:ss — single dimmed colon.
-      spans = [
-        TextSpan(text: leading, style: style),
-        TextSpan(text: ':', style: dimColon),
-        TextSpan(text: trailing, style: style),
-      ];
-    }
+    final spans = <InlineSpan>[
+      TextSpan(text: leading, style: style),
+      TextSpan(text: ':', style: dimColon),
+      TextSpan(text: m.toString().padLeft(2, '0'), style: style),
+      TextSpan(text: ':', style: dimColon),
+      TextSpan(text: ss, style: style),
+    ];
     return Center(
-      child: Text.rich(TextSpan(children: spans), textAlign: TextAlign.center),
+      child: FittedBox(
+        fit: BoxFit.scaleDown,
+        child: Text.rich(
+          TextSpan(children: spans),
+          textAlign: TextAlign.center,
+        ),
+      ),
     );
   }
 }
@@ -430,13 +408,13 @@ class _LiveLevelPainter extends CustomPainter {
     final step = size.width / levels.length;
     final p = Paint();
     for (var i = 0; i < levels.length; i++) {
-      final h = 3 + levels[i] * (size.height - 6);
+      final h = 7 + levels[i] * (size.height - 10);
       p.color = !paused && i > levels.length * .65 && levels[i] > .02
           ? SpeakrColors.accent
           : SpeakrColors.muted.withValues(alpha: .45);
       canvas.drawRRect(
         RRect.fromRectAndRadius(
-          Rect.fromLTWH(i * step, (size.height - h) / 2, step * .48, h),
+          Rect.fromLTWH(i * step, (size.height - h) / 2, 2.5, h),
           const Radius.circular(2),
         ),
         p,
@@ -464,7 +442,7 @@ class _PillBtn extends StatelessWidget {
         customBorder: const StadiumBorder(),
         onTap: onTap,
         child: Container(
-          height: 44,
+          height: 54,
           padding: const EdgeInsets.symmetric(horizontal: 18),
           child: Row(
             mainAxisSize: MainAxisSize.min,
@@ -490,8 +468,8 @@ class _BigPauseButton extends StatelessWidget {
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
     return SizedBox(
-      width: 84,
-      height: 84,
+      width: 108,
+      height: 108,
       child: Material(
         color: SpeakrColors.ink,
         shape: const CircleBorder(),
@@ -503,7 +481,7 @@ class _BigPauseButton extends StatelessWidget {
           child: Center(
             child: SpeakrIconView(
               paused ? SpeakrIcon.play : SpeakrIcon.pause,
-              size: 34,
+              size: 38,
               color: SpeakrColors.bg,
             ),
           ),
@@ -527,18 +505,19 @@ class _RecordingIdentity extends ConsumerWidget {
     final tags = ref.watch(tagsProvider).value ?? const <Tag>[];
     final selected = folders.where((f) => f.id == state.folderId).firstOrNull;
     return Padding(
-      padding: const EdgeInsets.fromLTRB(24, 32, 24, 0),
+      padding: const EdgeInsets.fromLTRB(24, 44, 24, 0),
       child: Column(
         children: [
           Text(
             tr('Untitled recording'),
-            style: SpeakrText.sans(size: 24, weight: FontWeight.w600),
+            style: SpeakrText.sans(size: 26, weight: FontWeight.w500),
           ),
           const SizedBox(height: 14),
           Wrap(
             alignment: WrapAlignment.center,
             spacing: 10,
             runSpacing: 8,
+            crossAxisAlignment: WrapCrossAlignment.center,
             children: [
               PopupMenuButton<int>(
                 tooltip: tr('Folder'),
@@ -600,11 +579,12 @@ class _IdentityChip extends StatelessWidget {
   final Color color;
   @override
   Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
     decoration: BoxDecoration(
-      color: SpeakrColors.surface,
-      borderRadius: BorderRadius.circular(12),
-      border: Border.all(color: SpeakrColors.line),
+      color: icon == Icons.folder_outlined
+          ? Colors.transparent
+          : color.withValues(alpha: .10),
+      borderRadius: BorderRadius.circular(10),
     ),
     child: Row(
       mainAxisSize: MainAxisSize.min,
@@ -623,7 +603,7 @@ class _CapturePanel extends StatelessWidget {
   final RecordingController controller;
   @override
   Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
+    padding: const EdgeInsets.fromLTRB(24, 32, 24, 28),
     child: LayoutBuilder(
       builder: (context, constraints) {
         final width = constraints.maxWidth >= 620
@@ -632,10 +612,14 @@ class _CapturePanel extends StatelessWidget {
         Widget card(IconData icon, String label, String sub, Widget control) =>
             Container(
               width: width,
-              height: 108,
-              padding: const EdgeInsets.all(14),
+              height: 88,
+              padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: SpeakrColors.surface,
+                gradient: const LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [Color(0xFF1C2024), Color(0xFF171B1E)],
+                ),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(color: SpeakrColors.line),
               ),
@@ -649,7 +633,7 @@ class _CapturePanel extends StatelessWidget {
                       Expanded(
                         child: Text(label, style: SpeakrText.sans(size: 13)),
                       ),
-                      control,
+                      SizedBox(height: 32, child: control),
                     ],
                   ),
                   const SizedBox(height: 8),
@@ -672,29 +656,47 @@ class _CapturePanel extends StatelessWidget {
                   Icons.mic_none_rounded,
                   tr('Microphone'),
                   tr('Default device'),
-                  Switch(
-                    value: state.micEnabled,
-                    activeThumbColor: SpeakrColors.accent,
-                    onChanged: state.micPending || state.uploading
-                        ? null
-                        : controller.setMicEnabled,
+                  SizedBox(
+                    width: 42,
+                    child: Transform.scale(
+                      scale: .72,
+                      child: Switch(
+                        value: state.micEnabled,
+                        activeThumbColor: Colors.white,
+                        activeTrackColor: const Color(0xFF00BA94),
+                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        onChanged: state.micPending || state.uploading
+                            ? null
+                            : controller.setMicEnabled,
+                      ),
+                    ),
                   ),
                 ),
                 card(
                   Icons.volume_up_outlined,
                   tr('System audio'),
                   _desktopSystemSub(state.systemMode, state.processSourceName),
-                  Switch(
-                    value: state.systemMode != SystemAudioMode.off,
-                    activeThumbColor: SpeakrColors.accent,
-                    onChanged:
-                        !state.systemAudioSupported ||
-                            state.systemPending ||
-                            state.uploading
-                        ? null
-                        : (v) => controller.setSystemMode(
-                            v ? SystemAudioMode.allSystem : SystemAudioMode.off,
-                          ),
+                  SizedBox(
+                    width: 42,
+                    child: Transform.scale(
+                      scale: .72,
+                      child: Switch(
+                        value: state.systemMode != SystemAudioMode.off,
+                        activeThumbColor: Colors.white,
+                        activeTrackColor: const Color(0xFF00BA94),
+                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        onChanged:
+                            !state.systemAudioSupported ||
+                                state.systemPending ||
+                                state.uploading
+                            ? null
+                            : (v) => controller.setSystemMode(
+                                v
+                                    ? SystemAudioMode.allSystem
+                                    : SystemAudioMode.off,
+                              ),
+                      ),
+                    ),
                   ),
                 ),
                 card(
@@ -721,6 +723,17 @@ class _CapturePanel extends StatelessWidget {
                 ),
               ],
             ),
+            if (!state.started)
+              Padding(
+                padding: const EdgeInsets.only(top: 18),
+                child: Text(
+                  tr(
+                    'Choose your audio sources and speakers below, then start recording.',
+                  ),
+                  textAlign: TextAlign.center,
+                  style: SpeakrText.sans(size: 11, color: SpeakrColors.muted),
+                ),
+              ),
             if (state.videoSupported && state.videoRecording)
               Padding(
                 padding: const EdgeInsets.only(top: 12),
