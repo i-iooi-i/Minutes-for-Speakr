@@ -31,20 +31,14 @@ class DesktopSidebar extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     LanguageScope.watch(context);
     final filter = ref.watch(libraryFilterProvider);
-    final asyncItems = ref.watch(libraryItemsProvider);
     final folders = ref.watch(foldersProvider).value ?? const <Folder>[];
     final tags = ref.watch(tagsProvider).value ?? const <Tag>[];
-    final items = asyncItems.value ?? const <LibraryItem>[];
-
-    final recs = <Recording>[
-      for (final it in items)
-        if (it is RemoteLibraryItem) it.recording,
-    ];
-    final totalCount = items.length;
-    final highlightedCount = recs.where((r) => r.isHighlighted).length;
-    final processingCount = recs.where((r) => r.status.isInProgress).length;
-
-    int countForFolder(int id) => recs.where((r) => r.folderId == id).length;
+    final recs = ref.watch(libraryCountsRecordingsProvider).value;
+    final totalCount = recs?.length;
+    final highlightedCount = recs?.where((r) => r.isHighlighted).length;
+    final processingCount =
+        recs?.where((r) => r.status.isInProgress).length ?? 0;
+    int? countForFolder(int id) => recs?.where((r) => r.folderId == id).length;
 
     final onLibrary = active == DesktopShellRoute.library;
     final noFilters =
@@ -71,13 +65,13 @@ class DesktopSidebar extends ConsumerWidget {
                   children: [
                     _NavItem(
                       label: tr("All recordings"),
-                      count: filter.statusKey == 'archived' ? null : totalCount,
+                      count: totalCount,
                       active: onLibrary && noFilters,
                       onTap: () => _selectAll(ref, context),
                     ),
                     _NavItem(
                       label: tr("Highlighted"),
-                      count: filter.statusKey == 'archived' ? null : highlightedCount,
+                      count: highlightedCount,
                       active: onLibrary && filter.statusKey == 'highlighted',
                       onTap: () => _selectStatus(ref, context, 'highlighted'),
                     ),
@@ -107,7 +101,7 @@ class DesktopSidebar extends ConsumerWidget {
                       for (final f in folders)
                         _NavItem(
                           label: f.name,
-                          count: filter.statusKey == 'archived' ? null : countForFolder(f.id),
+                          count: countForFolder(f.id),
                           icon: Icons.folder_outlined,
                           active: onLibrary && filter.folderId == f.id,
                           onTap: () => _selectFolder(ref, context, f.id),
@@ -146,6 +140,7 @@ class DesktopSidebar extends ConsumerWidget {
     n.setStatus('all');
     n.setFolder(null);
     n.setTag(null);
+    n.setQuery(null);
     _goLibrary(context);
   }
 
@@ -154,6 +149,7 @@ class DesktopSidebar extends ConsumerWidget {
     n.setStatus(key);
     n.setFolder(null);
     n.setTag(null);
+    n.setQuery(null);
     _goLibrary(context);
   }
 
@@ -196,6 +192,12 @@ class _SidebarSearchState extends ConsumerState<_SidebarSearch> {
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    ref.listen(libraryFilterProvider.select((f) => f.query), (previous, next) {
+      if (previous != next && _ctrl.text != (next ?? '')) {
+        _ctrl.text = next ?? '';
+        setState(() {});
+      }
+    });
     final focus = ref.watch(sidebarSearchFocusProvider);
     return Container(
       height: 38,
@@ -225,24 +227,38 @@ class _SidebarSearchState extends ConsumerState<_SidebarSearch> {
                 border: InputBorder.none,
                 enabledBorder: InputBorder.none,
                 focusedBorder: InputBorder.none,
-                hintText: tr("Search…"),
+                hintText: tr("Search recordings, press Enter"),
                 hintStyle: SpeakrText.sans(size: 12, color: SpeakrColors.muted),
               ),
-              onChanged: (v) {
-                ref
-                    .read(libraryFilterProvider.notifier)
-                    .setQuery(v.trim().isEmpty ? null : v.trim());
-              },
+              onChanged: (_) => setState(() {}),
               onSubmitted: (v) {
-                final loc = GoRouterState.of(context).uri.path;
-                if (loc != '/library') context.go('/library');
-                ref
-                    .read(libraryFilterProvider.notifier)
-                    .setQuery(v.trim().isEmpty ? null : v.trim());
+                final n = ref.read(libraryFilterProvider.notifier);
+                n.setStatus('all');
+                n.setFolder(null);
+                n.setTag(null);
+                n.setQuery(v.trim());
+                if (GoRouterState.of(context).uri.path != '/library') {
+                  context.go('/library');
+                }
               },
             ),
           ),
-          if (supportsKeyboardShortcuts)
+          if (_ctrl.text.isNotEmpty)
+            SizedBox(
+              width: 24,
+              child: IconButton(
+                padding: EdgeInsets.zero,
+                iconSize: 14,
+                tooltip: tr('Clear search'),
+                icon: const Icon(Icons.close),
+                onPressed: () {
+                  _ctrl.clear();
+                  ref.read(libraryFilterProvider.notifier).setQuery(null);
+                  setState(() {});
+                },
+              ),
+            ),
+          if (supportsKeyboardShortcuts && _ctrl.text.isEmpty)
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
               decoration: BoxDecoration(

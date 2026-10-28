@@ -1,5 +1,7 @@
 // UI copy only. Keep API values, user content and diagnostic logs unchanged.
 const zhCN = <String, String>{
+  "Search recordings, press Enter": "搜索录音，按回车…",
+  "Clear search": "清除搜索",
   "No archived recordings.": "暂无已归档录音。",
   "Recordings archived in Speakr appear here.": "在 Speakr 中归档的录音会显示在这里。",
   "Use {0}R or the New recording button at the top to make your first recording.": "按 {0}R 或点击顶部的新建录音，开始录音。",

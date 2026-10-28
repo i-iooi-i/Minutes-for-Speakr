@@ -134,3 +134,22 @@ final libraryItemsProvider = FutureProvider.autoDispose<List<LibraryItem>>((
   out.sort((a, b) => b.when.compareTo(a.when));
   return out;
 });
+
+/// Unfiltered server library, paginated independently of the visible list.
+final libraryCountsRecordingsProvider = FutureProvider<List<Recording>>((
+  ref,
+) async {
+  ref.watch(uploadKickProvider);
+  final api = ref.watch(speakrApiProvider);
+  final records = <int, Recording>{};
+  var page = 1;
+  while (true) {
+    final result = await api.listRecordings(page: page, perPage: 100);
+    for (final recording in result.recordings) {
+      records[recording.id] = recording;
+    }
+    if (page >= result.totalPages || result.recordings.isEmpty) break;
+    page++;
+  }
+  return records.values.toList();
+});

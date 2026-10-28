@@ -615,16 +615,26 @@ class _PlayerBar extends StatelessWidget {
                     : (pos.inMilliseconds / dur.inMilliseconds)
                           .clamp(0.0, 1.0)
                           .toDouble();
-                return DesktopWave(
-                  progress: progress,
-                  seed: recording.id + 3,
-                  height: 48,
-                  onSeek: (f) {
-                    if (dur.inMilliseconds == 0 || !audioReady) return;
-                    player.seek(
-                      Duration(milliseconds: (dur.inMilliseconds * f).round()),
-                    );
-                  },
+                return StreamBuilder<PlayerState>(
+                  stream: player.playerStateStream,
+                  builder: (context, state) => DesktopWave(
+                    playing:
+                        (state.data?.playing ?? player.playing) &&
+                        (state.data?.processingState ??
+                                player.processingState) ==
+                            ProcessingState.ready,
+                    progress: progress,
+                    seed: recording.id + 3,
+                    height: 48,
+                    onSeek: (f) {
+                      if (dur.inMilliseconds == 0 || !audioReady) return;
+                      player.seek(
+                        Duration(
+                          milliseconds: (dur.inMilliseconds * f).round(),
+                        ),
+                      );
+                    },
+                  ),
                 );
               },
             ),
@@ -740,9 +750,9 @@ class _RightColumn extends StatelessWidget {
 
   static List<String> get _labels => [
     tr("Summary"),
-    tr("Chat"),
     tr("Notes"),
     tr("Statistics"),
+    tr("Chat"),
   ];
 
   @override
@@ -783,9 +793,9 @@ class _RightColumn extends StatelessWidget {
                             Icon(
                               [
                                 Icons.article_outlined,
-                                Icons.chat_bubble_outline_rounded,
                                 Icons.edit_note_rounded,
                                 Icons.bar_chart_rounded,
+                                Icons.chat_bubble_outline_rounded,
                               ][i],
                               size: 15,
                               color: selected
@@ -818,9 +828,9 @@ class _RightColumn extends StatelessWidget {
               index: tab,
               children: [
                 SummaryTab(recordingId: recordingId),
-                ChatTab(recordingId: recordingId),
                 NotesTab(recordingId: recordingId),
                 RecordingStatsTab(recordingId: recordingId),
+                ChatTab(recordingId: recordingId),
               ],
             ),
           ),

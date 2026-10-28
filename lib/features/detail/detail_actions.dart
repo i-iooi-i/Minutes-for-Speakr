@@ -26,6 +26,7 @@ Future<void> toggleRecordingField(
   final api = container.read(speakrApiProvider);
   try {
     await api.updateRecording(recordingId, patch);
+    container.read(uploadKickProvider.notifier).state++;
     container.invalidate(recordingDetailProvider(recordingId));
     messenger.showSnackBar(SnackBar(content: Text(successMessage)));
   } on SpeakrApiException catch (e) {

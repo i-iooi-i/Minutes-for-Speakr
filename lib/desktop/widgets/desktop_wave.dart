@@ -4,20 +4,22 @@ import 'package:flutter/material.dart';
 
 import '../../theme/colors.dart';
 
-/// Static horizontal waveform used in the desktop detail player. Bars are
+/// Illustrative horizontal waveform (not measured audio amplitude) used in the desktop detail player. Bars are
 /// pseudo-randomly tall (deterministic, seeded) with an envelope that swells
 /// in the middle. Bars before [progress] are drawn at full opacity, the rest
 /// muted. Tappable: passes a 0..1 fraction back to [onSeek].
-class DesktopWave extends StatelessWidget {
+class DesktopWave extends StatefulWidget {
   const DesktopWave({
     super.key,
     this.progress = 0,
+    this.playing = false,
     this.seed = 7,
     this.height = 48,
     this.color = SpeakrColors.ink,
     this.onSeek,
   });
 
+  final bool playing;
   final double progress;
   final int seed;
   final double height;
@@ -25,23 +27,66 @@ class DesktopWave extends StatelessWidget {
   final ValueChanged<double>? onSeek;
 
   @override
+  State<DesktopWave> createState() => _DesktopWaveState();
+}
+
+class _DesktopWaveState extends State<DesktopWave>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _motion = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 1500),
+  );
+  void _sync() {
+    if (widget.playing && !MediaQuery.disableAnimationsOf(context)) {
+      if (!_motion.isAnimating) _motion.repeat();
+    } else {
+      _motion.stop();
+    }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _sync();
+  }
+
+  @override
+  void didUpdateWidget(DesktopWave oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _sync();
+  }
+
+  @override
+  void dispose() {
+    _motion.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, c) {
-        final wave = SizedBox(
-          width: c.maxWidth,
-          height: height,
-          child: CustomPaint(
-            painter: _WavePainter(progress: progress, seed: seed, color: color),
+        final wave = RepaintBoundary(
+          child: SizedBox(
+            width: c.maxWidth,
+            height: widget.height,
+            child: CustomPaint(
+              painter: _WavePainter(
+                progress: widget.progress,
+                seed: widget.seed,
+                color: widget.color,
+                motion: _motion,
+              ),
+            ),
           ),
         );
-        if (onSeek == null) return wave;
+        if (widget.onSeek == null) return wave;
         return GestureDetector(
           behavior: HitTestBehavior.opaque,
           onTapDown: (d) =>
-              onSeek!((d.localPosition.dx / c.maxWidth).clamp(0.0, 1.0)),
+              widget.onSeek!((d.localPosition.dx / c.maxWidth).clamp(0.0, 1.0)),
           onHorizontalDragUpdate: (d) =>
-              onSeek!((d.localPosition.dx / c.maxWidth).clamp(0.0, 1.0)),
+              widget.onSeek!((d.localPosition.dx / c.maxWidth).clamp(0.0, 1.0)),
           child: wave,
         );
       },
@@ -54,7 +99,9 @@ class _WavePainter extends CustomPainter {
     required this.progress,
     required this.seed,
     required this.color,
-  });
+    required this.motion,
+  }) : super(repaint: motion);
+  final Animation<double> motion;
   final double progress;
   final int seed;
   final Color color;
@@ -72,7 +119,10 @@ class _WavePainter extends CustomPainter {
       final r = _seedRand(i + seed * 100);
       final env = 0.4 + 0.6 * math.sin((i / bars) * math.pi);
       final hRatio = (0.15 + r * 0.85) * env;
-      final bh = hRatio * h;
+      final pulse = motion.value == 0
+          ? 1.0
+          : 0.7 + 0.3 * math.sin(motion.value * math.pi * 2 + i * 1.7);
+      final bh = hRatio * h * pulse;
       final x = i * (bw + gap);
       final y = (h - bh) / 2;
       final past = (i / bars) < progress;

@@ -28,6 +28,7 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text('编辑'));
     await tester.pumpAndSettle();
+    expect(find.byType(AlertDialog), findsNothing);
     await tester.enterText(find.byType(TextField), '# 我的笔记');
     await tester.tap(find.text('保存'));
     await tester.pumpAndSettle();
@@ -36,6 +37,13 @@ void main() {
     await tester.tap(find.text('保存'));
     await tester.pumpAndSettle();
     expect(find.byType(AlertDialog), findsNothing);
+    expect(saved, '# 我的笔记');
+    expect(find.text('我的笔记'), findsOneWidget);
+    await tester.tap(find.text('编辑'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextField), 'discard me');
+    await tester.tap(find.text('取消'));
+    await tester.pumpAndSettle();
     expect(saved, '# 我的笔记');
     expect(find.text('我的笔记'), findsOneWidget);
     dio.close();
