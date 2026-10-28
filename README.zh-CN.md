@@ -13,7 +13,7 @@
 
 ## Windows 构建
 
-本次开发使用 Flutter 3.47.8 / Dart 3.13.7 和 Visual Studio 2022 C++ Build Tools。版本号为 `0.3.0+6`。
+本次开发使用 Flutter 3.47.8 / Dart 3.13.7 和 Visual Studio 2022 C++ Build Tools（需包含 ATL 组件，凭据存储插件依赖它）。版本号为 `0.3.0+6`。
 
 ```powershell
 flutter pub get
