@@ -17,10 +17,9 @@ import '../../services/preferences/time_format_providers.dart';
 import '../../theme/colors.dart';
 import '../../theme/typography.dart';
 import '../../utils/formatters.dart';
-import '../../widgets/speakr_icons.dart';
 import '../../widgets/tag_chip.dart';
 import '../widgets/recording_action_menu.dart';
-import '../widgets/desktop_controls.dart';
+import '../widgets/participant_avatars.dart';
 import '../widgets/desktop_wave.dart';
 import '../widgets/desktop_record_button.dart';
 
@@ -244,32 +243,22 @@ class _Header extends ConsumerWidget {
             crossAxisAlignment: WrapCrossAlignment.center,
             children: [
               DesktopRecordButton(onTap: () => context.push('/live')),
-              DesktopToolButton(
-                icon: SpeakrIcon.refresh,
-                tooltip: tr("Refresh"),
-                onTap: onRefresh,
-              ),
-              const DesktopDivider(),
-              DesktopDropdown<_SortMode>(
-                value: sort,
-                onChanged: onSort,
-                options: [
-                  DropdownOption(value: _SortMode.newest, label: tr("Newest")),
-                  DropdownOption(value: _SortMode.oldest, label: tr("Oldest")),
-                  DropdownOption(
-                    value: _SortMode.longest,
-                    label: tr("Longest"),
-                  ),
-                  DropdownOption(value: _SortMode.title, label: tr("Title")),
-                ],
-              ),
-              const DesktopDivider(),
-              DesktopSegment<_ViewMode>(
-                value: view,
-                onChanged: onView,
-                options: [
-                  SegmentOption(value: _ViewMode.list, icon: const _ListIcon()),
-                  SegmentOption(value: _ViewMode.grid, icon: const _GridIcon()),
+              PopupMenuButton<String>(
+                tooltip: tr('More'), color: SpeakrColors.bgAlt,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                icon: const Icon(Icons.more_horiz_rounded),
+                onSelected: (value) {
+                  if (value == 'refresh') { onRefresh(); }
+                  else if (value == 'list') { onView(_ViewMode.list); }
+                  else if (value == 'grid') { onView(_ViewMode.grid); }
+                  else { onSort(_SortMode.values.byName(value)); }
+                },
+                itemBuilder: (_) => [
+                  PopupMenuItem(value: 'refresh', child: Text(tr('Refresh'))),
+                  for (final option in [(_SortMode.newest, 'Newest'), (_SortMode.oldest, 'Oldest'), (_SortMode.longest, 'Longest'), (_SortMode.title, 'Title')])
+                    CheckedPopupMenuItem(value: option.$1.name, checked: sort == option.$1, child: Text(tr(option.$2))),
+                  CheckedPopupMenuItem(value: 'list', checked: view == _ViewMode.list, child: Text(tr('List view'))),
+                  CheckedPopupMenuItem(value: 'grid', checked: view == _ViewMode.grid, child: Text(tr('Grid view'))),
                 ],
               ),
             ],
@@ -291,78 +280,6 @@ class _Header extends ConsumerWidget {
       ),
     );
   }
-}
-
-class _ListIcon extends StatelessWidget {
-  const _ListIcon();
-  @override
-  Widget build(BuildContext context) {
-    LanguageScope.watch(context);
-    return CustomPaint(
-      size: const Size(14, 14),
-      painter: _StrokeIconPainter((c) {
-        c.drawLine(
-          const Offset(2, 3.5),
-          const Offset(12, 3.5),
-          _stroke(SpeakrColors.ink2),
-        );
-        c.drawLine(
-          const Offset(2, 7),
-          const Offset(12, 7),
-          _stroke(SpeakrColors.ink2),
-        );
-        c.drawLine(
-          const Offset(2, 10.5),
-          const Offset(12, 10.5),
-          _stroke(SpeakrColors.ink2),
-        );
-      }),
-    );
-  }
-}
-
-class _GridIcon extends StatelessWidget {
-  const _GridIcon();
-  @override
-  Widget build(BuildContext context) {
-    LanguageScope.watch(context);
-    return CustomPaint(
-      size: const Size(14, 14),
-      painter: _StrokeIconPainter((c) {
-        final p = _stroke(SpeakrColors.ink2);
-        for (final r in const [
-          Rect.fromLTWH(2, 2, 4, 4),
-          Rect.fromLTWH(8, 2, 4, 4),
-          Rect.fromLTWH(2, 8, 4, 4),
-          Rect.fromLTWH(8, 8, 4, 4),
-        ]) {
-          c.drawRRect(
-            RRect.fromRectAndRadius(r, const Radius.circular(0.5)),
-            p,
-          );
-        }
-      }),
-    );
-  }
-}
-
-Paint _stroke(Color c) => Paint()
-  ..color = c
-  ..style = PaintingStyle.stroke
-  ..strokeWidth = 1.3
-  ..strokeCap = StrokeCap.round;
-
-class _StrokeIconPainter extends CustomPainter {
-  _StrokeIconPainter(this.draw);
-  final void Function(Canvas) draw;
-  @override
-  void paint(Canvas canvas, Size size) {
-    canvas.scale(size.width / 14.0);
-    draw(canvas);
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
 // ─────────────────────────────────────────────────────────
@@ -548,6 +465,10 @@ class _ListRowState extends ConsumerState<_ListRow> {
                           ],
                         ),
                       ),
+                    ],
+                    if (wide && (r.participants ?? '').trim().isNotEmpty) ...[
+                      const SizedBox(width: 12),
+                      ParticipantAvatars(participants: r.participants!),
                     ],
                     const SizedBox(width: 18),
                     SizedBox(

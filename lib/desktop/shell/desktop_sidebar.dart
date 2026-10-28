@@ -176,6 +176,7 @@ class DesktopSidebar extends ConsumerWidget {
                           label: f.name,
                           count: countForFolder(f.id),
                           icon: Icons.folder_outlined,
+                          iconColor: parseHexColor(f.color),
                           active: onLibrary && filter.folderId == f.id,
                           onTap: () => _selectFolder(ref, context, f.id),
                         ),
@@ -359,6 +360,7 @@ class _NavItem extends StatelessWidget {
     this.count,
     this.dot,
     this.icon,
+    this.iconColor,
     required this.active,
     required this.onTap,
   });
@@ -367,6 +369,7 @@ class _NavItem extends StatelessWidget {
   final int? count;
   final Color? dot;
   final IconData? icon;
+  final Color? iconColor;
   final bool active;
   final VoidCallback onTap;
 
@@ -399,7 +402,7 @@ class _NavItem extends StatelessWidget {
                             ? Icons.star_border_rounded
                             : Icons.graphic_eq_rounded),
                     size: 17,
-                    color: SpeakrColors.ink2,
+                    color: iconColor ?? SpeakrColors.ink2,
                   ),
                   const SizedBox(width: 10),
                 ],

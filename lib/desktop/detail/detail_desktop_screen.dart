@@ -13,6 +13,7 @@ import '../../api/models.dart';
 import '../../features/detail/detail_actions.dart';
 import '../../features/detail/detail_controller.dart';
 import '../widgets/recording_action_menu.dart';
+import '../widgets/recording_title_editor.dart';
 import '../../features/detail/tabs/chat_tab.dart';
 import '../../features/detail/tabs/notes_tab.dart';
 import '../../features/detail/tabs/recording_stats_tab.dart';
@@ -377,19 +378,7 @@ class _TitleBlock extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(
-            width: double.infinity,
-            child: Text(
-              recording.title?.isNotEmpty == true
-                  ? recording.title!
-                  : tr("Untitled recording"),
-              style: SpeakrText.serif(
-                size: 25,
-                height: 1.2,
-                weight: FontWeight.w400,
-              ),
-            ),
-          ),
+          RecordingTitleEditor(recording: recording),
           const SizedBox(height: 10),
           Wrap(
             spacing: 16,

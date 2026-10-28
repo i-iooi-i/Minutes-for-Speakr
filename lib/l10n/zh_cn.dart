@@ -1,5 +1,12 @@
 // UI copy only. Keep API values, user content and diagnostic logs unchanged.
 const zhCN = <String, String>{
+  'List view': '列表视图',
+  'Grid view': '网格视图',
+  'Edit title': '编辑标题',
+  'Regenerate AI title': '重新生成 AI 标题',
+  'Regenerate title?': '重新生成标题？',
+  'The current title will be replaced using the existing transcript.': '将根据现有转录重新生成并替换当前标题。',
+
   'Expand sidebar': '展开侧边栏',
   'Collapse sidebar': '收起侧边栏',
   'Mark as read': '标记为已读',

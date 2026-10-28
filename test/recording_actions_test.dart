@@ -31,6 +31,9 @@ void main() {
       ),
     );
     final api = SpeakrApi(dio);
+    await api.regenerateRecordingTitle(7);
+    expect(requests.last.path, '/recordings/7/regenerate_title');
+    expect(requests.last.method, 'POST');
     await api.deleteRecordingAudio(7);
     expect(requests.last.path, '/recordings/7/delete-audio');
     expect(requests.last.method, 'POST');

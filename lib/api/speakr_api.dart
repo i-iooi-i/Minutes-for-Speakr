@@ -80,6 +80,10 @@ class SpeakrApi {
     return RecordingStatusResponse.fromJson(res);
   }
 
+  Future<void> regenerateRecordingTitle(int id) async {
+    await _post<Map<String, dynamic>>('/recordings/$id/regenerate_title', {});
+  }
+
   Future<Recording> updateRecording(int id, Map<String, dynamic> patch) async {
     final res = await _patch<Map<String, dynamic>>('/recordings/$id', patch);
     return Recording.fromJson(_unwrap(res, 'recording'));
