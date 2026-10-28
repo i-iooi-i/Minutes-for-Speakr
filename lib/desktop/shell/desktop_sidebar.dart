@@ -71,15 +71,21 @@ class DesktopSidebar extends ConsumerWidget {
                   children: [
                     _NavItem(
                       label: tr("All recordings"),
-                      count: totalCount,
+                      count: filter.statusKey == 'archived' ? null : totalCount,
                       active: onLibrary && noFilters,
                       onTap: () => _selectAll(ref, context),
                     ),
                     _NavItem(
                       label: tr("Highlighted"),
-                      count: highlightedCount,
+                      count: filter.statusKey == 'archived' ? null : highlightedCount,
                       active: onLibrary && filter.statusKey == 'highlighted',
                       onTap: () => _selectStatus(ref, context, 'highlighted'),
+                    ),
+                    _NavItem(
+                      label: tr("Archived"),
+                      icon: Icons.archive_outlined,
+                      active: onLibrary && filter.statusKey == 'archived',
+                      onTap: () => _selectStatus(ref, context, 'archived'),
                     ),
                     if (processingCount > 0)
                       _NavItem(
@@ -90,12 +96,18 @@ class DesktopSidebar extends ConsumerWidget {
                         onTap: () => _selectStatus(ref, context, 'processing'),
                       ),
                     if (folders.isNotEmpty) ...[
-                      const SizedBox(height: 14),
+                      const Padding(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
+                        ),
+                        child: Divider(height: 1, color: SpeakrColors.line),
+                      ),
                       _SectionLabel(tr("Folders")),
                       for (final f in folders)
                         _NavItem(
                           label: f.name,
-                          count: countForFolder(f.id),
+                          count: filter.statusKey == 'archived' ? null : countForFolder(f.id),
                           icon: Icons.folder_outlined,
                           active: onLibrary && filter.folderId == f.id,
                           onTap: () => _selectFolder(ref, context, f.id),
@@ -140,6 +152,8 @@ class DesktopSidebar extends ConsumerWidget {
   void _selectStatus(WidgetRef ref, BuildContext context, String key) {
     final n = ref.read(libraryFilterProvider.notifier);
     n.setStatus(key);
+    n.setFolder(null);
+    n.setTag(null);
     _goLibrary(context);
   }
 
@@ -291,7 +305,7 @@ class _NavItem extends StatelessWidget {
                   Icon(
                     icon ??
                         (label == tr("All recordings")
-                            ? Icons.library_music_outlined
+                            ? Icons.graphic_eq_rounded
                             : label == tr("Highlighted")
                             ? Icons.star_border_rounded
                             : Icons.graphic_eq_rounded),

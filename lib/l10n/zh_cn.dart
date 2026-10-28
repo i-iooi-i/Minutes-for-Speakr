@@ -1,5 +1,10 @@
 // UI copy only. Keep API values, user content and diagnostic logs unchanged.
 const zhCN = <String, String>{
+  "No archived recordings.": "暂无已归档录音。",
+  "Recordings archived in Speakr appear here.": "在 Speakr 中归档的录音会显示在这里。",
+  "Use {0}R or the New recording button at the top to make your first recording.": "按 {0}R 或点击顶部的新建录音，开始录音。",
+  "Use the New recording button at the top to make your first recording.": "点击顶部的新建录音，开始录音。",
+  "Archived": "已归档",
   "Notes": "笔记",
   "Saving…": "正在保存…",
   "Unknown speaker": "未识别发言人",

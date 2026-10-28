@@ -156,7 +156,7 @@ List<LibraryItem> _applySort(List<LibraryItem> items, _SortMode mode) {
 // Header
 // ─────────────────────────────────────────────────────────
 
-class _Header extends StatelessWidget {
+class _Header extends ConsumerWidget {
   const _Header({
     required this.activeFolder,
     required this.items,
@@ -176,7 +176,7 @@ class _Header extends StatelessWidget {
   final Future<void> Function() onRefresh;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     LanguageScope.watch(context);
     final totalSecs = items.fold<double>(0, (acc, it) {
       if (it is RemoteLibraryItem) {
@@ -225,7 +225,9 @@ class _Header extends StatelessWidget {
                 const SizedBox(height: 8),
               ],
               Text(
-                folder?.name ?? tr("Recordings"),
+                ref.watch(libraryFilterProvider).statusKey == 'archived'
+                    ? tr("Archived")
+                    : folder?.name ?? tr("Recordings"),
                 style: SpeakrText.serif(
                   size: 28,
                   height: 1,
@@ -1301,10 +1303,10 @@ class _Loading extends StatelessWidget {
   }
 }
 
-class _Empty extends StatelessWidget {
+class _Empty extends ConsumerWidget {
   const _Empty();
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     LanguageScope.watch(context);
     return Padding(
       padding: const EdgeInsets.all(40),
@@ -1321,18 +1323,20 @@ class _Empty extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           Text(
-            tr("Nothing to show yet."),
+            tr(ref.watch(libraryFilterProvider).statusKey == 'archived' ? "No archived recordings." : "Nothing to show yet."),
             style: SpeakrText.serif(size: 26, height: 1.15),
           ),
           const SizedBox(height: 14),
           Text(
-            supportsKeyboardShortcuts
+            ref.watch(libraryFilterProvider).statusKey == 'archived'
+                ? tr("Recordings archived in Speakr appear here.")
+                : supportsKeyboardShortcuts
                 ? tr(
-                    "Use {0}R or the New recording button in the sidebar to make your first recording.",
+                    "Use {0}R or the New recording button at the top to make your first recording.",
                     [modLabel],
                   )
                 : tr(
-                    "Use the New recording button in the sidebar to make your first recording.",
+                    "Use the New recording button at the top to make your first recording.",
                   ),
             style: SpeakrText.sans(
               size: 15,

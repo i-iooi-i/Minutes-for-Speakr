@@ -271,24 +271,6 @@ class _BreadcrumbBar extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     LanguageScope.watch(context);
-    final date = recording.meetingDate ?? recording.createdAt;
-    final dayLabel = date == null ? '—' : formatRelativeDay(date).toUpperCase();
-    final pref =
-        ref.watch(timeFormatPreferenceProvider).asData?.value ??
-        TimeFormatPreference.system;
-    final use24 = resolveUse24Hour(pref, context);
-    final time = date == null
-        ? ''
-        : formatHourMinute(date.toLocal(), use24Hour: use24).toUpperCase();
-    final duration = recording.audioDuration == null
-        ? ''
-        : formatDuration(recording.audioDuration!);
-    final parts = [
-      dayLabel,
-      if (duration.isNotEmpty) duration,
-      time,
-    ].where((p) => p.isNotEmpty).join(' · ');
-
     final highlighted = recording.isHighlighted;
     final inInbox = recording.isInbox;
 
@@ -301,15 +283,6 @@ class _BreadcrumbBar extends ConsumerWidget {
       child: Row(
         children: [
           _BackChip(onTap: () => context.pop()),
-          const SizedBox(width: 14),
-          Text(
-            parts,
-            style: SpeakrText.mono(
-              size: 10,
-              color: SpeakrColors.muted,
-              letterSpacing: 1.5,
-            ),
-          ),
           const Spacer(),
           DesktopRecordButton(onTap: () => context.push('/live')),
           const SizedBox(width: 12),
@@ -466,99 +439,86 @@ class _TitleBlock extends ConsumerWidget {
     final folder =
         folders.firstWhereOrNull((f) => f.id == recording.folderId) ??
         recording.folder;
-    final folderColor = folder?.color == null
-        ? null
-        : parseHexColor(folder!.color);
-
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(28, 18, 28, 14),
+    final date = recording.meetingDate ?? recording.createdAt;
+    final pref =
+        ref.watch(timeFormatPreferenceProvider).asData?.value ??
+        TimeFormatPreference.system;
+    final dateLabel = date == null
+        ? '—'
+        : '${date.toLocal().year}/${date.toLocal().month}/${date.toLocal().day}  ${formatHourMinute(date.toLocal(), use24Hour: resolveUse24Hour(pref, context))}';
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(28, 18, 28, 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            crossAxisAlignment: WrapCrossAlignment.center,
-            children: [
-              if (folder != null && folderColor != null)
-                Container(
-                  padding: const EdgeInsets.fromLTRB(9, 3, 9, 3),
-                  decoration: BoxDecoration(
-                    color: folderColor.withValues(alpha: 0.05),
-                    border: Border.all(
-                      color: folderColor.withValues(alpha: 0.2),
-                    ),
-                    borderRadius: BorderRadius.circular(3),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Container(
-                        width: 7,
-                        height: 7,
-                        decoration: BoxDecoration(
-                          color: folderColor,
-                          borderRadius: BorderRadius.circular(2),
-                        ),
-                      ),
-                      const SizedBox(width: 6),
-                      Text(
-                        folder.name.toUpperCase(),
-                        style: SpeakrText.mono(
-                          size: 10,
-                          color: folderColor,
-                          letterSpacing: 1,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              for (final t in recording.tags)
-                Container(
-                  padding: const EdgeInsets.fromLTRB(8, 3, 8, 3),
-                  decoration: BoxDecoration(
-                    border: Border.all(
-                      color: parseHexColor(t.color).withValues(alpha: 0.2),
-                    ),
-                    borderRadius: BorderRadius.circular(3),
-                  ),
-                  child: Text(
-                    t.name.toUpperCase(),
-                    style: SpeakrText.mono(
-                      size: 10,
-                      color: parseHexColor(t.color),
-                      letterSpacing: 1,
-                    ),
-                  ),
-                ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 760),
+          SizedBox(
+            width: double.infinity,
             child: Text(
               recording.title?.isNotEmpty == true
                   ? recording.title!
                   : tr("Untitled recording"),
               style: SpeakrText.serif(
                 size: 25,
-                height: 1.1,
+                height: 1.2,
                 weight: FontWeight.w400,
               ),
             ),
           ),
-          if ((recording.participants ?? '').isNotEmpty) ...[
-            const SizedBox(height: 10),
-            Text(
-              recording.participants!,
-              style: SpeakrText.sans(size: 13, color: SpeakrColors.muted),
-            ),
-          ],
+          const SizedBox(height: 10),
+          Wrap(
+            spacing: 16,
+            runSpacing: 8,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: [
+              _MetadataItem(
+                icon: Icons.calendar_today_outlined,
+                label: dateLabel,
+              ),
+              if (recording.audioDuration != null)
+                _MetadataItem(
+                  icon: Icons.schedule_outlined,
+                  label: formatDuration(recording.audioDuration!),
+                ),
+              if (folder != null)
+                _MetadataItem(icon: Icons.folder_outlined, label: folder.name),
+              for (final t in recording.tags)
+                _MetadataItem(
+                  icon: Icons.sell_outlined,
+                  label: t.name,
+                  color: parseHexColor(t.color),
+                ),
+              if ((recording.participants ?? '').isNotEmpty)
+                _MetadataItem(
+                  icon: Icons.people_outline,
+                  label: recording.participants!,
+                ),
+            ],
+          ),
         ],
       ),
     );
   }
+}
+
+class _MetadataItem extends StatelessWidget {
+  const _MetadataItem({required this.icon, required this.label, this.color});
+  final IconData icon;
+  final String label;
+  final Color? color;
+  @override
+  Widget build(BuildContext context) => Row(
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      Icon(icon, size: 14, color: color ?? SpeakrColors.muted),
+      const SizedBox(width: 6),
+      Flexible(
+        child: Text(
+          label,
+          style: SpeakrText.sans(size: 12, color: color ?? SpeakrColors.muted),
+        ),
+      ),
+    ],
+  );
 }
 
 class _PlayerBar extends StatelessWidget {
@@ -734,15 +694,22 @@ class _TranscriptColumn extends ConsumerWidget {
           decoration: const BoxDecoration(
             border: Border(bottom: BorderSide(color: SpeakrColors.line)),
           ),
-          padding: const EdgeInsets.fromLTRB(28, 14, 28, 14),
+          height: 48,
+          padding: const EdgeInsets.symmetric(horizontal: 18),
           child: Row(
             children: [
+              const Icon(
+                Icons.subject_rounded,
+                size: 16,
+                color: SpeakrColors.ink2,
+              ),
+              const SizedBox(width: 7),
               Text(
                 tr("TRANSCRIPT"),
-                style: SpeakrText.mono(
-                  size: 10,
-                  color: SpeakrColors.muted,
-                  letterSpacing: 1.5,
+                style: SpeakrText.sans(
+                  size: 12.5,
+                  weight: FontWeight.w500,
+                  letterSpacing: 0.3,
                 ),
               ),
               const Spacer(),
@@ -786,10 +753,12 @@ class _RightColumn extends StatelessWidget {
       child: Column(
         children: [
           Container(
+            height: 48,
             decoration: const BoxDecoration(
               border: Border(bottom: BorderSide(color: SpeakrColors.line)),
             ),
             child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: List.generate(_labels.length, (i) {
                 final selected = i == tab;
                 return Expanded(
@@ -808,18 +777,34 @@ class _RightColumn extends StatelessWidget {
                       ),
                       child: Padding(
                         padding: const EdgeInsets.symmetric(vertical: 14),
-                        child: Center(
-                          child: Text(
-                            _labels[i],
-                            style: SpeakrText.sans(
-                              size: 12.5,
-                              weight: FontWeight.w500,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              [
+                                Icons.article_outlined,
+                                Icons.chat_bubble_outline_rounded,
+                                Icons.edit_note_rounded,
+                                Icons.bar_chart_rounded,
+                              ][i],
+                              size: 15,
                               color: selected
                                   ? SpeakrColors.ink
                                   : SpeakrColors.muted,
-                              letterSpacing: 0.3,
                             ),
-                          ),
+                            const SizedBox(width: 5),
+                            Text(
+                              _labels[i],
+                              style: SpeakrText.sans(
+                                size: 12.5,
+                                weight: FontWeight.w500,
+                                color: selected
+                                    ? SpeakrColors.ink
+                                    : SpeakrColors.muted,
+                                letterSpacing: 0.3,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ),

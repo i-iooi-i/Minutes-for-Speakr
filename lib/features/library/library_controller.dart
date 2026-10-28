@@ -6,9 +6,14 @@ import '../../api/providers.dart';
 import '../auto_upload/auto_upload_controller.dart';
 
 class LibraryFilter {
-  const LibraryFilter(
-      {this.statusKey = 'all', this.tagId, this.folderId, this.query});
-  final String statusKey; // all | pending | processing | completed | failed | highlighted
+  const LibraryFilter({
+    this.statusKey = 'all',
+    this.tagId,
+    this.folderId,
+    this.query,
+  });
+  final String
+  statusKey; // all | pending | processing | completed | failed | highlighted
   final int? tagId;
   final int? folderId;
   final String? query;
@@ -18,13 +23,12 @@ class LibraryFilter {
     int? Function()? tagId,
     int? Function()? folderId,
     String? Function()? query,
-  }) =>
-      LibraryFilter(
-        statusKey: statusKey ?? this.statusKey,
-        tagId: tagId == null ? this.tagId : tagId(),
-        folderId: folderId == null ? this.folderId : folderId(),
-        query: query == null ? this.query : query(),
-      );
+  }) => LibraryFilter(
+    statusKey: statusKey ?? this.statusKey,
+    tagId: tagId == null ? this.tagId : tagId(),
+    folderId: folderId == null ? this.folderId : folderId(),
+    query: query == null ? this.query : query(),
+  );
 }
 
 class LibraryFilterNotifier extends StateNotifier<LibraryFilter> {
@@ -41,8 +45,8 @@ class LibraryFilterNotifier extends StateNotifier<LibraryFilter> {
 
 final libraryFilterProvider =
     StateNotifierProvider<LibraryFilterNotifier, LibraryFilter>(
-  (_) => LibraryFilterNotifier(),
-);
+      (_) => LibraryFilterNotifier(),
+    );
 
 /// Bumped by any code path that mutates the server-side recording set
 /// (uploads, deletions, scans). [libraryRecordingsProvider] watches this
@@ -50,18 +54,23 @@ final libraryFilterProvider =
 /// Monotonic counter — concurrent bumps cannot collapse.
 final uploadKickProvider = StateProvider<int>((_) => 0);
 
-final libraryRecordingsProvider =
-    FutureProvider.autoDispose<RecordingPage>((ref) async {
+final libraryRecordingsProvider = FutureProvider.autoDispose<RecordingPage>((
+  ref,
+) async {
   ref.watch(uploadKickProvider);
   final api = ref.watch(speakrApiProvider);
   final f = ref.watch(libraryFilterProvider);
-  final statusParam = (f.statusKey == 'all' || f.statusKey == 'highlighted')
+  final statusParam =
+      (f.statusKey == 'all' ||
+          f.statusKey == 'highlighted' ||
+          f.statusKey == 'archived')
       ? null
       : f.statusKey;
   final page = await api.listRecordings(
     page: 1,
     perPage: 50,
     status: statusParam,
+    archived: f.statusKey == 'archived' ? true : null,
     tagId: f.tagId,
     folderId: f.folderId,
     query: f.query,
@@ -112,12 +121,14 @@ class PendingLibraryItem extends LibraryItem {
 /// The merged list shown on the Library screen. Pending local files take
 /// precedence over their (eventual) remote counterparts and bubble to the
 /// top of their respective day group.
-final libraryItemsProvider =
-    FutureProvider.autoDispose<List<LibraryItem>>((ref) async {
+final libraryItemsProvider = FutureProvider.autoDispose<List<LibraryItem>>((
+  ref,
+) async {
   final remote = await ref.watch(libraryRecordingsProvider.future);
   final pending = await ref.watch(pendingFilesProvider.future);
   final out = <LibraryItem>[
-    ...pending.map((p) => PendingLibraryItem(p)),
+    if (ref.watch(libraryFilterProvider).statusKey != 'archived')
+      ...pending.map((p) => PendingLibraryItem(p)),
     ...remote.recordings.map((r) => RemoteLibraryItem(r)),
   ];
   out.sort((a, b) => b.when.compareTo(a.when));
