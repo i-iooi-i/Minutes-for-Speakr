@@ -6,12 +6,13 @@ import 'package:go_router/go_router.dart';
 import '../../theme/colors.dart';
 import 'desktop_shortcuts.dart';
 import 'desktop_sidebar.dart';
+import 'package:speakr_app/l10n/strings.dart';
 
 /// Which top-level area the sidebar should highlight.
 enum DesktopShellRoute { library }
 
 /// Persistent left-sidebar shell used by the Library and Detail screens at
-/// desktop widths. The sidebar is 240 px wide and always visible.
+/// desktop widths, with an expandable navigation rail.
 class DesktopShell extends ConsumerWidget {
   const DesktopShell({super.key, required this.child, required this.active});
 
@@ -20,11 +21,15 @@ class DesktopShell extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    LanguageScope.watch(context);
     return CallbackShortcuts(
       bindings: <ShortcutActivator, VoidCallback>{
         modActivator(LogicalKeyboardKey.keyR): () => context.push('/live'),
         modActivator(LogicalKeyboardKey.keyK): () {
-          ref.read(sidebarSearchFocusProvider).requestFocus();
+          ref.read(sidebarCollapsedProvider.notifier).state = false;
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            ref.read(sidebarSearchFocusProvider).requestFocus();
+          });
         },
         modActivator(LogicalKeyboardKey.comma): () => context.push('/settings'),
       },
@@ -34,8 +39,16 @@ class DesktopShell extends ConsumerWidget {
           backgroundColor: SpeakrColors.bg,
           body: Row(
             children: [
-              DesktopSidebar(active: active),
-              const VerticalDivider(width: 1, color: SpeakrColors.line),
+              Container(
+                margin: const EdgeInsets.fromLTRB(8, 8, 0, 8),
+                decoration: BoxDecoration(
+                  color: SpeakrColors.surface,
+                  borderRadius: BorderRadius.circular(18),
+                  border: Border.all(color: SpeakrColors.line),
+                ),
+                clipBehavior: Clip.antiAlias,
+                child: DesktopSidebar(active: active),
+              ),
               Expanded(child: child),
             ],
           ),

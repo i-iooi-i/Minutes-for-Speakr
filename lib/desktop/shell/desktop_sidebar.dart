@@ -1,6 +1,7 @@
 import 'package:speakr_app/l10n/strings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/legacy.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../api/models.dart';
@@ -10,6 +11,8 @@ import '../../theme/typography.dart';
 import '../../widgets/speakr_icons.dart';
 import 'desktop_shell.dart';
 import 'desktop_shortcuts.dart';
+
+final sidebarCollapsedProvider = StateProvider<bool>((ref) => false);
 
 /// FocusNode for the sidebar search field. Hoisted to a provider so the
 /// desktop shell can request focus from a global Ctrl/⌘+K shortcut.
@@ -46,15 +49,86 @@ class DesktopSidebar extends ConsumerWidget {
         filter.folderId == null &&
         filter.tagId == null;
 
+    final collapsed = ref.watch(sidebarCollapsedProvider);
+    Widget toggle() => IconButton(
+      tooltip: tr(collapsed ? 'Expand sidebar' : 'Collapse sidebar'),
+      icon: Icon(
+        collapsed
+            ? Icons.keyboard_double_arrow_right_rounded
+            : Icons.keyboard_double_arrow_left_rounded,
+        size: 19,
+      ),
+      onPressed: () =>
+          ref.read(sidebarCollapsedProvider.notifier).state = !collapsed,
+    );
+    if (collapsed) {
+      return SizedBox(
+        width: 56,
+        child: Column(
+          children: [
+            const SizedBox(height: 8),
+            toggle(),
+            const SizedBox(height: 12),
+            for (final entry in [
+              ('all', 'All recordings', Icons.graphic_eq_rounded),
+              ('highlighted', 'Highlighted', Icons.star_border_rounded),
+              ('processing', 'Processing', Icons.hourglass_top_rounded),
+              ('archived', 'Archived', Icons.archive_outlined),
+            ])
+              Padding(
+                padding: const EdgeInsets.only(bottom: 6),
+                child: IconButton(
+                  tooltip: tr(entry.$2),
+                  style: IconButton.styleFrom(
+                    backgroundColor: filter.statusKey == entry.$1
+                        ? SpeakrColors.bgAlt
+                        : Colors.transparent,
+                  ),
+                  icon: Icon(entry.$3, size: 19),
+                  onPressed: () => entry.$1 == 'all'
+                      ? _selectAll(ref, context)
+                      : _selectStatus(ref, context, entry.$1),
+                ),
+              ),
+            const Spacer(),
+            IconButton(
+              tooltip: tr('Settings'),
+              icon: const Icon(Icons.settings_outlined, size: 19),
+              onPressed: () => context.push('/settings'),
+            ),
+            const SizedBox(height: 8),
+          ],
+        ),
+      );
+    }
     return SizedBox(
       width: 232,
       child: Material(
-        color: SpeakrColors.bg,
+        color: Colors.transparent,
         child: Column(
           children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 4, 6, 0),
+              child: Row(
+                children: [
+                  const Icon(
+                    Icons.graphic_eq_rounded,
+                    size: 18,
+                    color: SpeakrColors.accent,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Minutes',
+                    style: SpeakrText.sans(size: 13, weight: FontWeight.w600),
+                  ),
+                  const Spacer(),
+                  toggle(),
+                ],
+              ),
+            ),
             // Search field — pushes back to the library filter provider
             const Padding(
-              padding: EdgeInsets.fromLTRB(14, 20, 14, 12),
+              padding: EdgeInsets.fromLTRB(10, 4, 10, 12),
               child: _SidebarSearch(),
             ),
             Expanded(
@@ -76,19 +150,18 @@ class DesktopSidebar extends ConsumerWidget {
                       onTap: () => _selectStatus(ref, context, 'highlighted'),
                     ),
                     _NavItem(
+                      label: tr("Processing"),
+                      count: processingCount,
+                      icon: Icons.hourglass_top_rounded,
+                      active: onLibrary && filter.statusKey == 'processing',
+                      onTap: () => _selectStatus(ref, context, 'processing'),
+                    ),
+                    _NavItem(
                       label: tr("Archived"),
                       icon: Icons.archive_outlined,
                       active: onLibrary && filter.statusKey == 'archived',
                       onTap: () => _selectStatus(ref, context, 'archived'),
                     ),
-                    if (processingCount > 0)
-                      _NavItem(
-                        label: tr("Processing"),
-                        count: processingCount,
-                        dot: SpeakrColors.recordingDot,
-                        active: onLibrary && filter.statusKey == 'processing',
-                        onTap: () => _selectStatus(ref, context, 'processing'),
-                      ),
                     if (folders.isNotEmpty) ...[
                       const Padding(
                         padding: EdgeInsets.symmetric(

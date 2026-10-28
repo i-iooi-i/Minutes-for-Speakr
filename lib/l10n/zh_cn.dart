@@ -1,5 +1,7 @@
 // UI copy only. Keep API values, user content and diagnostic logs unchanged.
 const zhCN = <String, String>{
+  'Expand sidebar': '展开侧边栏',
+  'Collapse sidebar': '收起侧边栏',
   'Mark as read': '标记为已读',
   'Mark as unread': '标记为未读',
   'Archive recording': '归档录音',

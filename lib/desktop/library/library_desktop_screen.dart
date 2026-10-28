@@ -479,6 +479,7 @@ class _ListRowState extends ConsumerState<_ListRow> {
                     ),
                     const SizedBox(width: 18),
                     Expanded(
+                      flex: 5,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -530,12 +531,9 @@ class _ListRowState extends ConsumerState<_ListRow> {
                     ),
                     if (wide) ...[
                       const SizedBox(width: 24),
-                      ExcludeSemantics(
-                        child: SizedBox(
-                          width: (constraints.maxWidth * .22).clamp(
-                            140.0,
-                            300.0,
-                          ),
+                      Expanded(
+                        flex: 6,
+                        child: ExcludeSemantics(
                           child: DesktopWave(seed: r.id, height: 34),
                         ),
                       ),

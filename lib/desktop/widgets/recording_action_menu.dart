@@ -170,6 +170,7 @@ class _RecordingActionMenuState extends ConsumerState<RecordingActionMenu> {
       IconData icon, {
       bool danger = false,
     }) => PopupMenuItem(
+      height: 40,
       value: value,
       child: Row(
         children: [
@@ -190,6 +191,16 @@ class _RecordingActionMenuState extends ConsumerState<RecordingActionMenu> {
       ),
     );
     return PopupMenuButton<String>(
+      color: SpeakrColors.bgAlt,
+      surfaceTintColor: Colors.transparent,
+      elevation: 12,
+      shadowColor: Colors.black54,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(14),
+        side: const BorderSide(color: Color(0xFF41494E)),
+      ),
+      position: PopupMenuPosition.under,
+      offset: const Offset(0, 6),
       tooltip: tr('More'),
       enabled: !_busy,
       onSelected: _run,
@@ -210,14 +221,20 @@ class _RecordingActionMenuState extends ConsumerState<RecordingActionMenu> {
           r.isArchived ? 'Unarchive recording' : 'Archive recording',
           Icons.archive_outlined,
         ),
-        const PopupMenuDivider(),
+        const PopupMenuItem<String>(
+          enabled: false, height: 12,
+          child: Divider(height: 1, color: SpeakrColors.line),
+        ),
         item('organize', 'Folder and tags', Icons.folder_outlined),
         item('speakers', 'Edit speakers', Icons.people_outline),
         if (r.audioAvailable != false && !r.status.isInProgress)
           item('transcribe', 'Reprocess transcription', Icons.mic_none),
         item('summary', 'Reprocess summary', Icons.refresh),
         item('share', 'Share recording', Icons.share_outlined),
-        const PopupMenuDivider(),
+        const PopupMenuItem<String>(
+          enabled: false, height: 12,
+          child: Divider(height: 1, color: SpeakrColors.line),
+        ),
         if (r.audioAvailable != false && !r.status.isInProgress)
           item(
             'audio',
