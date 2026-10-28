@@ -1,5 +1,11 @@
 // UI copy only. Keep API values, user content and diagnostic logs unchanged.
 const zhCN = <String, String>{
+  'Start recording': '开始录音',
+  'Prepare recording': '准备录音',
+  'Choose your audio sources and speakers below, then start recording.':
+      '先调整下方音源和说话人设置，准备好后再开始录音。',
+  'Starting recording': '正在启动录音',
+
   'Paused': '已暂停',
   'Uploading': '上传中',
   'Capture active': '录音中',
@@ -14,7 +20,8 @@ const zhCN = <String, String>{
   'Edit title': '编辑标题',
   'Regenerate AI title': '重新生成 AI 标题',
   'Regenerate title?': '重新生成标题？',
-  'The current title will be replaced using the existing transcript.': '将根据现有转录重新生成并替换当前标题。',
+  'The current title will be replaced using the existing transcript.':
+      '将根据现有转录重新生成并替换当前标题。',
 
   'Expand sidebar': '展开侧边栏',
   'Collapse sidebar': '收起侧边栏',

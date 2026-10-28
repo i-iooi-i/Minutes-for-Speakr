@@ -16,10 +16,12 @@ class DesktopAudioToolbar extends ConsumerWidget {
     this.leading,
     this.trailing,
     this.livePage = false,
+    this.embedded = false,
   });
   final Widget? leading;
   final Widget? trailing;
   final bool livePage;
+  final bool embedded;
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     LanguageScope.watch(context);
@@ -29,10 +31,14 @@ class DesktopAudioToolbar extends ConsumerWidget {
     final selected = folders.where((f) => f.id == state.folderId).firstOrNull;
     return Container(
       constraints: const BoxConstraints(minHeight: 68),
-      padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 10),
-      decoration: const BoxDecoration(
-        border: Border(bottom: BorderSide(color: SpeakrColors.line)),
-      ),
+      padding: embedded
+          ? EdgeInsets.zero
+          : const EdgeInsets.symmetric(horizontal: 22, vertical: 10),
+      decoration: embedded
+          ? null
+          : const BoxDecoration(
+              border: Border(bottom: BorderSide(color: SpeakrColors.line)),
+            ),
       child: LayoutBuilder(
         builder: (context, c) => Row(
           children: [
@@ -43,11 +49,17 @@ class DesktopAudioToolbar extends ConsumerWidget {
                 runSpacing: 8,
                 crossAxisAlignment: WrapCrossAlignment.center,
                 children: [
-                  AudioSessionReadout(
-                    state: state,
-                    showSources: c.maxWidth > 760,
-                  ),
-                  if (c.maxWidth > 610)
+                  if (state.started || state.uploading)
+                    AudioSessionReadout(state: state, showSources: false)
+                  else if (c.maxWidth > 480)
+                    Text(
+                      tr('Ready to record'),
+                      style: SpeakrText.sans(
+                        size: 12,
+                        color: SpeakrColors.muted,
+                      ),
+                    ),
+                  if (c.maxWidth > 350)
                     Tooltip(
                       message: tr('Folder for the new recording'),
                       child: Container(
@@ -139,12 +151,12 @@ class DesktopAudioToolbar extends ConsumerWidget {
               TextButton.icon(
                 onPressed: state.uploading ? null : () => context.push('/live'),
                 icon: Container(
-                  width: 32,
-                  height: 32,
+                  width: 38,
+                  height: 38,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     border: Border.all(
-                      color: SpeakrColors.recordingDot.withValues(alpha: .45),
+                      color: SpeakrColors.recordRed.withValues(alpha: .45),
                       width: 2,
                     ),
                   ),
@@ -152,7 +164,7 @@ class DesktopAudioToolbar extends ConsumerWidget {
                   child: const DecoratedBox(
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: SpeakrColors.recordingDot,
+                      color: SpeakrColors.recordRed,
                     ),
                   ),
                 ),
@@ -184,7 +196,7 @@ class AudioSessionReadout extends StatelessWidget {
     final color = state.uploading
         ? SpeakrColors.tagDesign
         : state.started
-        ? SpeakrColors.recordingDot
+        ? SpeakrColors.recordRed
         : SpeakrColors.muted;
     final label = state.uploading
         ? 'Uploading'

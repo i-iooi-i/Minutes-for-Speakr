@@ -91,7 +91,6 @@ class _LibraryDesktopScreenState extends ConsumerState<LibraryDesktopScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const DesktopAudioToolbar(),
           _Header(
             activeFolder: activeFolder,
             items: asyncItems.value ?? const [],
@@ -186,6 +185,11 @@ class _Header extends ConsumerWidget {
     });
     final hrs = totalSecs ~/ 3600;
     final mins = (totalSecs % 3600) ~/ 60;
+    final filter = ref.watch(libraryFilterProvider);
+    final primary =
+        filter.statusKey == 'all' &&
+        filter.folderId == null &&
+        filter.tagId == null;
     final folder = activeFolder;
     final folderColor = folder == null ? null : parseHexColor(folder.color);
 
@@ -211,9 +215,14 @@ class _Header extends ConsumerWidget {
                     const SizedBox(width: 10),
                   ],
                   Text(
-                    ref.watch(libraryFilterProvider).statusKey == 'archived'
-                        ? tr("Archived")
-                        : folder?.name ?? tr("Recordings"),
+                    folder?.name ??
+                        (filter.statusKey == 'archived'
+                            ? tr('Archived')
+                            : filter.statusKey == 'highlighted'
+                            ? tr('Highlighted')
+                            : filter.statusKey == 'processing'
+                            ? tr('Transcribing')
+                            : tr('Recordings')),
                     style: SpeakrText.serif(
                       size: 28,
                       height: 1,
@@ -288,19 +297,23 @@ class _Header extends ConsumerWidget {
               ),
             ],
           );
-          return constraints.maxWidth >= 800
-              ? Row(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Expanded(child: title),
-                    const SizedBox(width: 20),
-                    controls,
-                  ],
-                )
-              : Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [title, const SizedBox(height: 20), controls],
-                );
+          return Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Expanded(flex: 3, child: title),
+              if (primary) ...[
+                const SizedBox(width: 20),
+                Expanded(
+                  flex: 5,
+                  child: DesktopAudioToolbar(
+                    embedded: true,
+                    trailing: controls,
+                  ),
+                ),
+              ] else
+                controls,
+            ],
+          );
         },
       ),
     );

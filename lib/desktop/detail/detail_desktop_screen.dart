@@ -10,7 +10,6 @@ import 'package:go_router/go_router.dart';
 import 'package:just_audio/just_audio.dart';
 
 import '../../api/models.dart';
-import '../../features/detail/detail_actions.dart';
 import '../../features/detail/detail_controller.dart';
 import '../widgets/recording_action_menu.dart';
 import '../widgets/recording_title_editor.dart';
@@ -27,7 +26,6 @@ import '../../theme/typography.dart';
 import '../../utils/formatters.dart';
 import '../../widgets/speakr_icons.dart';
 import '../widgets/desktop_controls.dart';
-import '../widgets/desktop_audio_toolbar.dart';
 import '../widgets/desktop_wave.dart';
 import 'desktop_transcript_pane.dart';
 
@@ -209,7 +207,6 @@ class _Body extends StatelessWidget {
       color: SpeakrColors.bg,
       child: Column(
         children: [
-          _BreadcrumbBar(recording: recording),
           _TitleBlock(recording: recording),
           _PlayerBar(
             recording: recording,
@@ -271,79 +268,6 @@ class _DetailPanel extends StatelessWidget {
   );
 }
 
-class _BreadcrumbBar extends ConsumerWidget {
-  const _BreadcrumbBar({required this.recording});
-  final Recording recording;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    LanguageScope.watch(context);
-    final highlighted = recording.isHighlighted;
-
-    return DesktopAudioToolbar(
-      leading: _BackChip(onTap: () => context.pop()),
-      trailing: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          DesktopToolButton(
-            icon: SpeakrIcon.star,
-            tooltip: highlighted ? tr("Highlighted") : tr("Highlight"),
-            selected: highlighted,
-            onTap: () => toggleRecordingField(
-              context,
-              ref,
-              recordingId: recording.id,
-              patch: {'is_highlighted': !highlighted},
-              successMessage: highlighted
-                  ? tr("Highlight removed")
-                  : tr("Highlighted"),
-            ),
-          ),
-          RecordingActionMenu(recording: recording),
-        ],
-      ),
-    );
-  }
-}
-
-class _BackChip extends StatelessWidget {
-  const _BackChip({required this.onTap});
-  final VoidCallback onTap;
-  @override
-  Widget build(BuildContext context) {
-    LanguageScope.watch(context);
-    return Material(
-      color: SpeakrColors.surface,
-      shape: RoundedRectangleBorder(
-        side: const BorderSide(color: SpeakrColors.line),
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(10),
-        onTap: onTap,
-        child: Container(
-          height: 34,
-          padding: const EdgeInsets.fromLTRB(6, 0, 10, 0),
-          child: Row(
-            children: [
-              const SpeakrIconView(
-                SpeakrIcon.back,
-                size: 16,
-                color: SpeakrColors.ink2,
-              ),
-              const SizedBox(width: 2),
-              Text(
-                tr("Recordings"),
-                style: SpeakrText.sans(size: 12, color: SpeakrColors.ink2),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 class _TitleBlock extends ConsumerWidget {
   const _TitleBlock({required this.recording});
   final Recording recording;
@@ -370,7 +294,19 @@ class _TitleBlock extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          RecordingTitleEditor(recording: recording),
+          Row(
+            children: [
+              IconButton(
+                tooltip: tr('Recordings'),
+                onPressed: () =>
+                    context.canPop() ? context.pop() : context.go('/library'),
+                icon: const Icon(Icons.arrow_back_rounded, size: 22),
+              ),
+              const SizedBox(width: 8),
+              Expanded(child: RecordingTitleEditor(recording: recording)),
+              RecordingActionMenu(recording: recording),
+            ],
+          ),
           const SizedBox(height: 10),
           Wrap(
             spacing: 16,

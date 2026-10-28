@@ -17,14 +17,10 @@ import '../../features/live/widgets/discard_sheet.dart';
 import '../../features/live/widgets/recording_widgets.dart'
     show PillSourceCard, PillSourceOption;
 import '../../services/audio/live_audio_recorder.dart' show CaptureWindow;
-import '../../services/preferences/time_format_preference.dart';
-import '../../services/preferences/time_format_providers.dart';
 import '../../theme/colors.dart';
 import '../../theme/typography.dart';
-import '../../utils/formatters.dart';
 import '../../widgets/speakr_icons.dart';
 import '../shell/desktop_shortcuts.dart';
-import '../widgets/desktop_audio_toolbar.dart';
 
 class LiveDesktopScreen extends ConsumerStatefulWidget {
   const LiveDesktopScreen({super.key});
@@ -35,18 +31,31 @@ class LiveDesktopScreen extends ConsumerStatefulWidget {
 
 class _LiveDesktopScreenState extends ConsumerState<LiveDesktopScreen> {
   StreamSubscription<RecordingNav>? _navSub;
+  bool _starting = false;
+
+  Future<void> _start() async {
+    if (_starting) return;
+    final state = ref.read(recordingControllerProvider);
+    if (state.started ||
+        state.uploading ||
+        (!state.micEnabled && state.systemMode == SystemAudioMode.off)) {
+      return;
+    }
+    setState(() => _starting = true);
+    try {
+      await ref
+          .read(recordingControllerProvider.notifier)
+          .start(micEnabled: state.micEnabled, systemMode: state.systemMode);
+    } finally {
+      if (mounted) setState(() => _starting = false);
+    }
+  }
 
   @override
   void initState() {
     super.initState();
     final controller = ref.read(recordingControllerProvider.notifier);
     _navSub = controller.navStream.listen(_onNav);
-    final state = ref.read(recordingControllerProvider);
-    if (!state.started && !state.uploading) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        controller.start();
-      });
-    }
   }
 
   void _onNav(RecordingNav event) {
@@ -85,7 +94,7 @@ class _LiveDesktopScreenState extends ConsumerState<LiveDesktopScreen> {
     final canOpenMini =
         !kIsWeb && Platform.isWindows && state.started && !state.miniOpen;
 
-    final canPause = state.started;
+    final canPause = state.started && !state.uploading;
     final canStop = state.started && !state.uploading;
 
     return CallbackShortcuts(
@@ -110,7 +119,7 @@ class _LiveDesktopScreenState extends ConsumerState<LiveDesktopScreen> {
               Column(
                 children: [
                   _TopBar(
-                    paused: state.paused,
+                    started: state.started,
                     onMinimize: _minimize,
                     onShowMini: canOpenMini ? controller.openMini : null,
                   ),
@@ -124,13 +133,12 @@ class _LiveDesktopScreenState extends ConsumerState<LiveDesktopScreen> {
                               child: Column(
                                 children: [
                                   SizedBox(
-                                    height: (constraints.maxHeight - 240).clamp(
-                                      440.0,
-                                      680.0,
-                                    ),
+                                    height: 300,
                                     child: _LeftPane(
                                       state: state,
                                       controller: controller,
+                                      starting: _starting,
+                                      onStart: _start,
                                       onDiscard: () =>
                                           ref
                                                   .read(
@@ -165,70 +173,41 @@ class _LiveDesktopScreenState extends ConsumerState<LiveDesktopScreen> {
 
 class _TopBar extends StatelessWidget {
   const _TopBar({
-    required this.paused,
+    required this.started,
     required this.onMinimize,
     this.onShowMini,
   });
-  final bool paused;
+  final bool started;
   final VoidCallback onMinimize;
   final VoidCallback? onShowMini;
-
   @override
-  Widget build(BuildContext context) {
-    LanguageScope.watch(context);
-    return DesktopAudioToolbar(
-      livePage: true,
-      leading: _BorderButton(
-        label: tr('Minimize'),
-        onTap: onMinimize,
-        leading: const Icon(Icons.keyboard_arrow_down, size: 16),
-      ),
-      trailing: onShowMini == null
-          ? null
-          : IconButton(
-              tooltip: tr('Mini window'),
-              onPressed: onShowMini,
-              icon: const Icon(Icons.picture_in_picture_alt_outlined, size: 19),
-            ),
-    );
-  }
-}
-
-class _BorderButton extends StatelessWidget {
-  const _BorderButton({required this.label, required this.onTap, this.leading});
-  final String label;
-  final VoidCallback onTap;
-  final Widget? leading;
-
-  @override
-  Widget build(BuildContext context) {
-    LanguageScope.watch(context);
-    return Material(
-      color: SpeakrColors.surface,
-      shape: RoundedRectangleBorder(
-        side: const BorderSide(color: SpeakrColors.line),
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(10),
-        onTap: onTap,
-        child: Container(
-          height: 28,
-          padding: const EdgeInsets.symmetric(horizontal: 12),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (leading != null) ...[leading!, const SizedBox(width: 6)],
-              Text(
-                label,
-                style: SpeakrText.sans(size: 12, color: SpeakrColors.ink2),
-              ),
-            ],
-          ),
+  Widget build(BuildContext context) => Container(
+    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+    decoration: const BoxDecoration(
+      border: Border(bottom: BorderSide(color: SpeakrColors.line)),
+    ),
+    child: Row(
+      children: [
+        IconButton(
+          tooltip: tr('Recordings'),
+          onPressed: onMinimize,
+          icon: const Icon(Icons.arrow_back_rounded),
         ),
-      ),
-    );
-  }
+        const SizedBox(width: 8),
+        Text(
+          tr(started ? 'Recording' : 'New recording'),
+          style: SpeakrText.sans(size: 20, weight: FontWeight.w600),
+        ),
+        const Spacer(),
+        if (onShowMini != null)
+          IconButton(
+            tooltip: tr('Mini window'),
+            onPressed: onShowMini,
+            icon: const Icon(Icons.picture_in_picture_alt_outlined, size: 20),
+          ),
+      ],
+    ),
+  );
 }
 
 // ─────────────────────────────────────────────────────────
@@ -240,10 +219,14 @@ class _LeftPane extends StatelessWidget {
     required this.state,
     required this.controller,
     required this.onDiscard,
+    required this.onStart,
+    required this.starting,
   });
   final RecordingState state;
   final RecordingController controller;
   final VoidCallback onDiscard;
+  final VoidCallback onStart;
+  final bool starting;
 
   @override
   Widget build(BuildContext context) {
@@ -253,101 +236,99 @@ class _LeftPane extends StatelessWidget {
     final uploading = state.uploading;
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(40, 28, 40, 24),
+      padding: const EdgeInsets.fromLTRB(32, 22, 32, 18),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const _TitleBlock(),
-          Expanded(
-            child: Column(
+          Text(
+            tr(
+              uploading
+                  ? 'Uploading'
+                  : started
+                  ? (paused ? 'Paused' : 'Recording')
+                  : 'Prepare recording',
+            ),
+            style: SpeakrText.sans(
+              size: 14,
+              color: started ? SpeakrColors.recordRed : SpeakrColors.ink2,
+            ),
+          ),
+          const SizedBox(height: 14),
+          _BigTimer(elapsedSeconds: state.elapsedSeconds),
+          if (started)
+            SizedBox(
+              height: 76,
+              child: _BreathingDot(
+                paused: paused || uploading,
+                level: state.audioLevel,
+              ),
+            )
+          else
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 22),
+              child: Text(
+                tr(
+                  'Choose your audio sources and speakers below, then start recording.',
+                ),
+                textAlign: TextAlign.center,
+                style: SpeakrText.sans(size: 13, color: SpeakrColors.muted),
+              ),
+            ),
+          if (state.error != null)
+            Text(
+              state.error!,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: SpeakrText.sans(size: 12, color: SpeakrColors.danger),
+            ),
+          const Spacer(),
+          if (!started && !uploading)
+            FilledButton.icon(
+              onPressed:
+                  starting ||
+                      (!state.micEnabled &&
+                          state.systemMode == SystemAudioMode.off)
+                  ? null
+                  : onStart,
+              style: FilledButton.styleFrom(
+                backgroundColor: SpeakrColors.recordRed,
+                foregroundColor: Colors.white,
+                minimumSize: const Size(160, 46),
+              ),
+              icon: const Icon(Icons.fiber_manual_record, size: 20),
+              label: Text(
+                tr(starting ? 'Starting recording' : 'Start recording'),
+              ),
+            )
+          else
+            Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                _BigTimer(elapsedSeconds: state.elapsedSeconds),
-                const SizedBox(height: 18),
-                _StartedLine(
-                  elapsedSeconds: state.elapsedSeconds,
-                  mic: state.micEnabled,
-                  systemMode: state.systemMode,
-                  processSourceName: state.processSourceName,
+                _PillBtn(
+                  label: tr('Discard'),
+                  leading: const Icon(Icons.delete_outline, size: 16),
+                  onTap: uploading ? null : onDiscard,
                 ),
-                const SizedBox(height: 12),
-                _BreathingDot(
-                  paused: paused || !started,
-                  level: state.audioLevel,
+                const SizedBox(width: 16),
+                _BigPauseButton(
+                  paused: paused,
+                  onTap: uploading ? null : controller.togglePause,
+                ),
+                const SizedBox(width: 16),
+                _PillBtn(
+                  label: tr('Stop & save'),
+                  leading: const Icon(
+                    Icons.stop_rounded,
+                    size: 18,
+                    color: SpeakrColors.recordRed,
+                  ),
+                  onTap: uploading ? null : controller.stopAndUpload,
                 ),
               ],
             ),
-          ),
-          if (state.error != null) ...[
-            Text(
-              state.error!,
-              style: SpeakrText.sans(size: 13, color: SpeakrColors.danger),
-            ),
-            const SizedBox(height: 12),
-          ],
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              _PillBtn(
-                label: tr("Discard"),
-                leading: const Icon(
-                  Icons.delete_outline,
-                  size: 14,
-                  color: SpeakrColors.ink,
-                ),
-                onTap: started && !uploading ? onDiscard : null,
-              ),
-              const SizedBox(width: 18),
-              _BigPauseButton(
-                paused: paused,
-                onTap: started ? controller.togglePause : null,
-              ),
-              const SizedBox(width: 18),
-              _PillBtn(
-                label: tr("Stop & save"),
-                leading: Container(
-                  width: 10,
-                  height: 10,
-                  decoration: BoxDecoration(
-                    color: SpeakrColors.recordingDot,
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-                onTap: started && !uploading ? controller.stopAndUpload : null,
-              ),
-            ],
-          ),
         ],
       ),
     );
   }
-}
-
-/// Header above the timer: small uppercase eyebrow + serif placeholder
-/// title + italic hint. Mirrors the design's "TITLE / Untitled recording /
-/// A title will be generated…" block. The title isn't editable from here;
-/// it's generated after the recording is summarized.
-class _TitleBlock extends StatelessWidget {
-  const _TitleBlock();
-  @override
-  Widget build(BuildContext context) => Center(
-    child: Column(
-      children: [
-        Text(
-          tr("Untitled recording"),
-          style: SpeakrText.sans(size: 24, weight: FontWeight.w600),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          tr(
-            "A title will be generated automatically after the recording is summarized.",
-          ),
-          textAlign: TextAlign.center,
-          style: SpeakrText.sans(size: 12, color: SpeakrColors.muted),
-        ),
-      ],
-    ),
-  );
 }
 
 class _BigTimer extends StatelessWidget {
@@ -368,7 +349,7 @@ class _BigTimer extends StatelessWidget {
     // colons are dimmed consistently.
     final List<InlineSpan> spans;
     final style = SpeakrText.serif(
-      size: 88,
+      size: 58,
       weight: FontWeight.w300,
       height: 1,
       letterSpacing: -3,
@@ -399,59 +380,6 @@ class _BigTimer extends StatelessWidget {
   }
 }
 
-class _StartedLine extends ConsumerWidget {
-  const _StartedLine({
-    required this.elapsedSeconds,
-    required this.mic,
-    required this.systemMode,
-    this.processSourceName,
-  });
-  final int elapsedSeconds;
-  final bool mic;
-  final SystemAudioMode systemMode;
-  final String? processSourceName;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    LanguageScope.watch(context);
-    final String sysLabel;
-    switch (systemMode) {
-      case SystemAudioMode.off:
-        sysLabel = '';
-      case SystemAudioMode.allSystem:
-        sysLabel = tr("System audio");
-      case SystemAudioMode.processOnly:
-        sysLabel = processSourceName ?? tr("Process audio");
-    }
-    final src = mic && sysLabel.isNotEmpty
-        ? tr("Mic + {0}", [sysLabel])
-        : mic
-        ? tr("Mic only")
-        : sysLabel.isNotEmpty
-        ? tr("{0} only", [sysLabel])
-        : tr("No source");
-    final startedAt = DateTime.now().subtract(
-      Duration(seconds: elapsedSeconds),
-    );
-    final pref =
-        ref.watch(timeFormatPreferenceProvider).asData?.value ??
-        TimeFormatPreference.system;
-    final timeStr = formatHourMinute(
-      startedAt,
-      use24Hour: resolveUse24Hour(pref, context),
-    ).toUpperCase();
-    return Text(
-      tr("STARTED {0}   ·   {1}", [timeStr, src.toUpperCase()]),
-      style: SpeakrText.mono(
-        size: 11,
-        color: SpeakrColors.muted,
-        letterSpacing: 1.5,
-      ),
-    );
-  }
-}
-
-/// Recent measured input levels; never synthesizes sound when the input is silent.
 class _BreathingDot extends StatefulWidget {
   const _BreathingDot({required this.paused, required this.level});
   final bool paused;
@@ -473,7 +401,7 @@ class _BreathingDotState extends State<_BreathingDot> {
 
   @override
   Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.symmetric(vertical: 24),
+    padding: const EdgeInsets.symmetric(vertical: 8),
     child: Semantics(
       label: tr('AUDIO LEVEL'),
       child: SizedBox(
@@ -560,8 +488,8 @@ class _BigPauseButton extends StatelessWidget {
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
     return SizedBox(
-      width: 84,
-      height: 84,
+      width: 54,
+      height: 54,
       child: Material(
         color: SpeakrColors.ink,
         shape: const CircleBorder(),
@@ -573,7 +501,7 @@ class _BigPauseButton extends StatelessWidget {
           child: Center(
             child: SpeakrIconView(
               paused ? SpeakrIcon.play : SpeakrIcon.pause,
-              size: 38,
+              size: 28,
               color: SpeakrColors.bg,
             ),
           ),

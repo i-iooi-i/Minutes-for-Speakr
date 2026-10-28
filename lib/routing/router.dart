@@ -1,5 +1,6 @@
 import 'package:speakr_app/l10n/strings.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -86,7 +87,9 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/live',
         builder: (_, __) => LayoutBuilder(
-          builder: (_, c) => isDesktopConstraints(c)
+          builder: (_, c) =>
+              (!kIsWeb && defaultTargetPlatform == TargetPlatform.windows) ||
+                  isDesktopConstraints(c)
               ? const LiveDesktopScreen()
               : const LiveScreen(),
         ),

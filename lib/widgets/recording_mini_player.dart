@@ -1,5 +1,6 @@
 import 'package:speakr_app/l10n/strings.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -53,7 +54,14 @@ class RecordingMiniPlayer extends ConsumerWidget {
                 ? '/'
                 : config.matches.last.matchedLocation;
             final onLive = topPath == '/live';
-            if (!isRecording || onLive) return const SizedBox.shrink();
+            if (!isRecording ||
+                onLive ||
+                (!kIsWeb &&
+                    (defaultTargetPlatform == TargetPlatform.windows ||
+                        defaultTargetPlatform == TargetPlatform.macOS ||
+                        defaultTargetPlatform == TargetPlatform.linux))) {
+              return const SizedBox.shrink();
+            }
             return Positioned(
               left: 0,
               right: 0,
@@ -120,7 +128,8 @@ class _Bar extends ConsumerWidget {
     return Container(
       margin: const EdgeInsets.fromLTRB(24, 0, 24, 16),
       decoration: BoxDecoration(
-        color: SpeakrColors.ink,
+        color: SpeakrColors.surface,
+        border: Border.all(color: SpeakrColors.line),
         borderRadius: BorderRadius.circular(28),
         boxShadow: const [
           BoxShadow(
@@ -165,10 +174,10 @@ class _Bar extends ConsumerWidget {
                                       SpeakrText.mono(
                                         size: 14,
                                         color: paused
-                                            ? SpeakrColors.bg.withValues(
+                                            ? SpeakrColors.ink.withValues(
                                                 alpha: 0.55,
                                               )
-                                            : SpeakrColors.bg,
+                                            : SpeakrColors.ink,
                                         letterSpacing: 0.4,
                                       ).copyWith(
                                         fontFeatures: const [
@@ -194,7 +203,7 @@ class _Bar extends ConsumerWidget {
                 child: SpeakrIconView(
                   SpeakrIcon.trash,
                   size: 14,
-                  color: SpeakrColors.bg.withValues(alpha: 0.7),
+                  color: SpeakrColors.ink.withValues(alpha: 0.7),
                 ),
               ),
               const SizedBox(width: 9),
@@ -204,7 +213,7 @@ class _Bar extends ConsumerWidget {
                 child: SpeakrIconView(
                   paused ? SpeakrIcon.play : SpeakrIcon.pause,
                   size: 12,
-                  color: SpeakrColors.bg,
+                  color: SpeakrColors.ink,
                 ),
               ),
               const SizedBox(width: 9),
@@ -217,14 +226,14 @@ class _Bar extends ConsumerWidget {
                         height: 12,
                         child: CircularProgressIndicator(
                           strokeWidth: 1.6,
-                          color: SpeakrColors.bg,
+                          color: SpeakrColors.ink,
                         ),
                       )
                     : Container(
                         width: 8,
                         height: 8,
                         decoration: BoxDecoration(
-                          color: SpeakrColors.bg,
+                          color: SpeakrColors.ink,
                           borderRadius: BorderRadius.circular(1.5),
                         ),
                       ),
@@ -238,7 +247,7 @@ class _Bar extends ConsumerWidget {
                 child: SpeakrIconView(
                   SpeakrIcon.expand,
                   size: 13,
-                  color: SpeakrColors.bg.withValues(alpha: 0.85),
+                  color: SpeakrColors.ink.withValues(alpha: 0.85),
                 ),
               ),
             ],

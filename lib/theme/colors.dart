@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 /// Neutral audio workspace. Color is reserved for signal and status.
 class SpeakrColors {
+  static const recordRed = Color(0xFFFF453A);
   static const surface = Color(0xFF191D20);
   static const accent = Color(0xFF70C9AC);
   static const bg = Color(0xFF111416);
