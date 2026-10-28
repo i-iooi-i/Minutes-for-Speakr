@@ -2,15 +2,8 @@ import 'package:flutter/material.dart';
 
 import 'colors.dart';
 
-/// Typography helpers matching Direction A.
-/// Three families, all bundled as assets under `assets/fonts/` and declared in
-/// `pubspec.yaml` — nothing is fetched at runtime:
-///  - Source Serif 4 — display, headlines, transcript bubbles
-///  - Inter Tight — UI body / buttons
-///  - JetBrains Mono — eyebrows, timestamps, server URL fields
-///
-/// The family strings below must match the `family:` keys in `pubspec.yaml`
-/// exactly; a typo silently falls back to the platform default font.
+/// Bundled Latin faces with native Chinese sans fallbacks. The legacy `serif`
+/// helper is retained for callers, but uses the same readable sans family.
 const String kSerifFamily = 'Source Serif 4';
 const String kSansFamily = 'Inter Tight';
 const String kMonoFamily = 'JetBrains Mono';
@@ -24,11 +17,15 @@ class SpeakrText {
     double height = 1.2,
     double letterSpacing = 0,
   }) => TextStyle(
-    fontFamily: kSerifFamily,
-    fontFamilyFallback: const ['Noto Serif SC', 'SimSun', 'Microsoft YaHei'],
+    fontFamily: kSansFamily,
+    fontFamilyFallback: const [
+      'Microsoft YaHei',
+      'PingFang SC',
+      'Noto Sans CJK SC',
+    ],
     fontSize: size,
     fontWeight: weight,
-    fontStyle: style,
+    fontStyle: FontStyle.normal,
     color: color,
     height: height,
     letterSpacing: letterSpacing,
@@ -58,7 +55,7 @@ class SpeakrText {
     double size = 11,
     FontWeight weight = FontWeight.w500,
     Color color = SpeakrColors.muted,
-    double letterSpacing = 1.5,
+    double letterSpacing = 0.3,
   }) => TextStyle(
     fontFamily: kMonoFamily,
     fontFamilyFallback: const [
@@ -76,9 +73,9 @@ class SpeakrText {
 ThemeData buildSpeakrTheme() {
   final base = ThemeData(
     useMaterial3: true,
-    brightness: Brightness.light,
+    brightness: Brightness.dark,
     scaffoldBackgroundColor: SpeakrColors.bg,
-    colorScheme: const ColorScheme.light(
+    colorScheme: const ColorScheme.dark(
       surface: SpeakrColors.bg,
       surfaceContainerHighest: SpeakrColors.bgAlt,
       onSurface: SpeakrColors.ink,
@@ -135,18 +132,18 @@ ThemeData buildSpeakrTheme() {
     ),
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
-      fillColor: Colors.white,
+      fillColor: SpeakrColors.surface,
       hintStyle: SpeakrText.sans(size: 14, color: SpeakrColors.muted),
       border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(4),
+        borderRadius: BorderRadius.circular(10),
         borderSide: const BorderSide(color: SpeakrColors.line),
       ),
       enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(4),
+        borderRadius: BorderRadius.circular(10),
         borderSide: const BorderSide(color: SpeakrColors.line),
       ),
       focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(4),
+        borderRadius: BorderRadius.circular(10),
         borderSide: const BorderSide(color: SpeakrColors.ink, width: 1.2),
       ),
     ),

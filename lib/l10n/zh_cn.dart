@@ -1,5 +1,7 @@
 // UI copy only. Keep API values, user content and diagnostic logs unchanged.
 const zhCN = <String, String>{
+  "Play": "播放",
+  "Pause": "暂停",
   "Pending": "等待处理",
   "Queued": "排队中",
   "Processing": "转录中",

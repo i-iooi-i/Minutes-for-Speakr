@@ -17,11 +17,11 @@ import '../../services/preferences/time_format_providers.dart';
 import '../../theme/colors.dart';
 import '../../theme/typography.dart';
 import '../../utils/formatters.dart';
-import '../../widgets/folder_chip.dart';
 import '../../widgets/speakr_icons.dart';
 import '../../widgets/tag_chip.dart';
 import '../shell/desktop_shortcuts.dart';
 import '../widgets/desktop_controls.dart';
+import '../widgets/desktop_wave.dart';
 
 enum _SortMode { newest, oldest, longest, title }
 
@@ -228,7 +228,7 @@ class _Header extends StatelessWidget {
                 Text(
                   folder?.name ?? tr("Recordings"),
                   style: SpeakrText.serif(
-                    size: 44,
+                    size: 32,
                     height: 1,
                     weight: FontWeight.w400,
                   ),
@@ -390,7 +390,6 @@ class _ListView extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const _ColumnHeader(),
           for (final entry in entries) ...[
             Padding(
               padding: const EdgeInsets.fromLTRB(40, 18, 40, 8),
@@ -421,57 +420,6 @@ class _ListView extends StatelessWidget {
   }
 }
 
-class _ColumnHeader extends StatelessWidget {
-  const _ColumnHeader();
-  @override
-  Widget build(BuildContext context) {
-    LanguageScope.watch(context);
-    return Container(
-      decoration: const BoxDecoration(
-        color: SpeakrColors.bg,
-        border: Border(bottom: BorderSide(color: SpeakrColors.line)),
-      ),
-      padding: const EdgeInsets.fromLTRB(40, 12, 40, 12),
-      child: Row(
-        children: [
-          const SizedBox(width: 32),
-          const SizedBox(width: 16),
-          Expanded(child: _ColH(tr("Title"))),
-          const SizedBox(width: 16),
-          SizedBox(width: 160, child: _ColH(tr("Folder"))),
-          const SizedBox(width: 16),
-          SizedBox(width: 220, child: _ColH(tr("Tags"))),
-          const SizedBox(width: 16),
-          SizedBox(width: 90, child: _ColH(tr("Duration"), alignRight: true)),
-          const SizedBox(width: 16),
-          SizedBox(width: 90, child: _ColH(tr("Date"), alignRight: true)),
-        ],
-      ),
-    );
-  }
-}
-
-class _ColH extends StatelessWidget {
-  const _ColH(this.text, {this.alignRight = false});
-  final String text;
-  final bool alignRight;
-  @override
-  Widget build(BuildContext context) {
-    LanguageScope.watch(context);
-    return Align(
-      alignment: alignRight ? Alignment.centerRight : Alignment.centerLeft,
-      child: Text(
-        text.toUpperCase(),
-        style: SpeakrText.mono(
-          size: 9.5,
-          color: SpeakrColors.muted,
-          letterSpacing: 1.5,
-        ),
-      ),
-    );
-  }
-}
-
 class _ListRow extends ConsumerStatefulWidget {
   const _ListRow({required this.recording, required this.folders});
   final Recording recording;
@@ -482,8 +430,6 @@ class _ListRow extends ConsumerStatefulWidget {
 }
 
 class _ListRowState extends ConsumerState<_ListRow> {
-  bool _hovered = false;
-
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
@@ -491,138 +437,145 @@ class _ListRowState extends ConsumerState<_ListRow> {
     final completed = r.status == RecordingStatus.completed;
     final enterable = completed || r.status == RecordingStatus.failed;
     final folder = widget.folders.firstWhereOrNull((f) => f.id == r.folderId);
-    final folderColor = folder == null ? null : parseHexColor(folder.color);
     final date = r.meetingDate ?? r.createdAt ?? DateTime.now();
     final pref =
         ref.watch(timeFormatPreferenceProvider).asData?.value ??
         TimeFormatPreference.system;
     final use24 = resolveUse24Hour(pref, context);
-
-    return MouseRegion(
-      cursor: enterable ? SystemMouseCursors.click : SystemMouseCursors.basic,
-      onEnter: (_) => setState(() => _hovered = true),
-      onExit: (_) => setState(() => _hovered = false),
-      child: GestureDetector(
-        onTap: enterable ? () => context.push('/recording/${r.id}') : null,
-        child: Container(
-          decoration: BoxDecoration(
-            color: _hovered ? SpeakrColors.bgAlt : Colors.transparent,
-            border: const Border(top: BorderSide(color: SpeakrColors.line)),
-          ),
-          padding: const EdgeInsets.fromLTRB(40, 14, 40, 14),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              SizedBox(
-                width: 32,
-                child: Center(
-                  child: r.isHighlighted
-                      ? const SpeakrIconView(
-                          SpeakrIcon.star,
-                          size: 14,
-                          color: SpeakrColors.ink,
-                        )
-                      : const SizedBox(width: 14, height: 14),
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 4),
+      child: Material(
+        color: SpeakrColors.surface,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+          side: const BorderSide(color: SpeakrColors.line),
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: enterable ? () => context.push('/recording/${r.id}') : null,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final wide = constraints.maxWidth > 700;
+                return Row(
                   children: [
-                    Text(
-                      r.title?.isNotEmpty == true
-                          ? r.title!
-                          : tr("Untitled recording"),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: SpeakrText.serif(size: 17, height: 1.2),
+                    SizedBox(
+                      width: 44,
+                      height: 44,
+                      child: IconButton.outlined(
+                        tooltip: tr('Play'),
+                        onPressed: completed
+                            ? () => context.push('/recording/${r.id}?play=1')
+                            : null,
+                        icon: Icon(
+                          completed
+                              ? Icons.play_arrow_rounded
+                              : Icons.graphic_eq_rounded,
+                          size: 24,
+                        ),
+                        style: IconButton.styleFrom(
+                          foregroundColor: SpeakrColors.ink,
+                          side: const BorderSide(color: SpeakrColors.muted),
+                        ),
+                      ),
                     ),
-                    if ((r.participants ?? '').isNotEmpty) ...[
-                      const SizedBox(height: 4),
-                      Text(
-                        r.participants!,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: SpeakrText.sans(
-                          size: 12,
-                          color: SpeakrColors.muted,
+                    const SizedBox(width: 18),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              if (r.isHighlighted) ...[
+                                const Icon(
+                                  Icons.star_rounded,
+                                  color: SpeakrColors.tagDesign,
+                                  size: 16,
+                                ),
+                                const SizedBox(width: 6),
+                              ],
+                              Expanded(
+                                child: Text(
+                                  r.title?.isNotEmpty == true
+                                      ? r.title!
+                                      : tr('Untitled recording'),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: SpeakrText.sans(
+                                    size: 16,
+                                    weight: FontWeight.w600,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 6),
+                          if (completed)
+                            Text(
+                              [
+                                formatDuration(r.audioDuration ?? 0),
+                                if ((r.participants ?? '').isNotEmpty)
+                                  r.participants!,
+                                if (folder != null) folder.name,
+                              ].join('  ·  '),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: SpeakrText.sans(
+                                size: 12,
+                                color: SpeakrColors.muted,
+                              ),
+                            )
+                          else
+                            _StatusChip(status: r.status),
+                        ],
+                      ),
+                    ),
+                    if (wide) ...[
+                      const SizedBox(width: 24),
+                      ExcludeSemantics(
+                        child: SizedBox(
+                          width: 112,
+                          child: DesktopWave(seed: r.id, height: 28),
+                        ),
+                      ),
+                      const SizedBox(width: 24),
+                      SizedBox(
+                        width: 120,
+                        child: Wrap(
+                          spacing: 4,
+                          runSpacing: 4,
+                          children: [
+                            for (final t in r.tags.take(2)) TagChip(tag: t),
+                          ],
                         ),
                       ),
                     ],
-                  ],
-                ),
-              ),
-              const SizedBox(width: 16),
-              SizedBox(
-                width: 160,
-                child: folder == null || folderColor == null
-                    ? const SizedBox.shrink()
-                    : Align(
-                        alignment: Alignment.centerLeft,
-                        child: FolderChip(
-                          label: folder.name,
-                          color: folderColor,
-                        ),
-                      ),
-              ),
-              const SizedBox(width: 16),
-              SizedBox(
-                width: 220,
-                child: Wrap(
-                  spacing: 4,
-                  runSpacing: 4,
-                  children: [for (final t in r.tags) TagChip(tag: t)],
-                ),
-              ),
-              const SizedBox(width: 16),
-              SizedBox(
-                width: 90,
-                child: Align(
-                  alignment: Alignment.centerRight,
-                  child: completed
-                      ? Text(
-                          formatDuration(r.audioDuration ?? 0),
-                          style: SpeakrText.mono(
-                            size: 12,
-                            color: SpeakrColors.ink2,
-                            letterSpacing: 0,
+                    const SizedBox(width: 18),
+                    SizedBox(
+                      width: 70,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Text(
+                            _shortDate(date),
+                            style: SpeakrText.sans(
+                              size: 12,
+                              color: SpeakrColors.muted,
+                            ),
                           ),
-                        )
-                      : _StatusChip(status: r.status),
-                ),
-              ),
-              const SizedBox(width: 16),
-              SizedBox(
-                width: 90,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      _shortDate(date),
-                      style: SpeakrText.mono(
-                        size: 11,
-                        color: SpeakrColors.muted,
-                        letterSpacing: 0,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Opacity(
-                      opacity: 0.75,
-                      child: Text(
-                        formatHourMinute(date, use24Hour: use24),
-                        style: SpeakrText.mono(
-                          size: 10,
-                          color: SpeakrColors.muted,
-                          letterSpacing: 0,
-                        ),
+                          const SizedBox(height: 5),
+                          Text(
+                            formatHourMinute(date, use24Hour: use24),
+                            style: SpeakrText.mono(size: 11),
+                          ),
+                        ],
                       ),
                     ),
                   ],
-                ),
-              ),
-            ],
+                );
+              },
+            ),
           ),
         ),
       ),
@@ -1116,11 +1069,11 @@ class _GridCardState extends ConsumerState<_GridCard> {
           padding: const EdgeInsets.fromLTRB(18, 16, 18, 18),
           constraints: const BoxConstraints.tightFor(height: 180),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: SpeakrColors.surface,
             border: Border.all(
               color: _hovered ? SpeakrColors.ink : SpeakrColors.line,
             ),
-            borderRadius: BorderRadius.circular(6),
+            borderRadius: BorderRadius.circular(10),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -1259,7 +1212,7 @@ class _PendingGridCardState extends ConsumerState<_PendingGridCard>
           padding: const EdgeInsets.fromLTRB(18, 16, 18, 18),
           constraints: const BoxConstraints.tightFor(height: 180),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: SpeakrColors.surface,
             border: Border.all(
               color: _hovered && tappable
                   ? SpeakrColors.ink
@@ -1267,7 +1220,7 @@ class _PendingGridCardState extends ConsumerState<_PendingGridCard>
                   ? SpeakrColors.danger
                   : SpeakrColors.line,
             ),
-            borderRadius: BorderRadius.circular(6),
+            borderRadius: BorderRadius.circular(10),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,

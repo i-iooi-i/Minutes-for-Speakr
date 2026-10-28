@@ -181,7 +181,7 @@ class _Bubble extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
               decoration: BoxDecoration(
-                color: isMe ? SpeakrColors.ink : Colors.white,
+                color: isMe ? SpeakrColors.ink : SpeakrColors.surface,
                 border: isMe ? null : Border.all(color: SpeakrColors.line),
                 borderRadius: BorderRadius.only(
                   topLeft: const Radius.circular(16),

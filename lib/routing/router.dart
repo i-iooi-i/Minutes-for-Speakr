@@ -74,7 +74,10 @@ final routerProvider = Provider<GoRouter>((ref) {
             builder: (_, c) => isDesktopConstraints(c)
                 ? DesktopShell(
                     active: DesktopShellRoute.library,
-                    child: DetailDesktopScreen(recordingId: id),
+                    child: DetailDesktopScreen(
+                      recordingId: id,
+                      autoplay: state.uri.queryParameters['play'] == '1',
+                    ),
                   )
                 : DetailScreen(recordingId: id),
           );

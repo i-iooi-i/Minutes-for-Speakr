@@ -3,7 +3,6 @@ import 'package:speakr_app/l10n/strings.dart';
 import 'dart:async';
 import 'dart:io' show Platform;
 
-import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -115,33 +114,42 @@ class _LiveDesktopScreenState extends ConsumerState<LiveDesktopScreen> {
                     onShowMini: canOpenMini ? controller.openMini : null,
                   ),
                   Expanded(
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Expanded(
-                          flex: 14,
-                          child: _LeftPane(
-                            state: state,
-                            controller: controller,
-                            onDiscard: () =>
-                                ref.read(discardArmedProvider.notifier).state =
-                                    true,
-                          ),
-                        ),
-                        Container(
-                          width: 340,
-                          decoration: const BoxDecoration(
-                            color: Color(0xFFF3F1EC),
-                            border: Border(
-                              left: BorderSide(color: SpeakrColors.line),
+                    child: LayoutBuilder(
+                      builder: (context, constraints) {
+                        return SingleChildScrollView(
+                          child: Center(
+                            child: ConstrainedBox(
+                              constraints: const BoxConstraints(maxWidth: 1100),
+                              child: Column(
+                                children: [
+                                  SizedBox(
+                                    height: (constraints.maxHeight - 240).clamp(
+                                      440.0,
+                                      680.0,
+                                    ),
+                                    child: _LeftPane(
+                                      state: state,
+                                      controller: controller,
+                                      onDiscard: () =>
+                                          ref
+                                                  .read(
+                                                    discardArmedProvider
+                                                        .notifier,
+                                                  )
+                                                  .state =
+                                              true,
+                                    ),
+                                  ),
+                                  _CapturePanel(
+                                    state: state,
+                                    controller: controller,
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
-                          child: _CapturePanel(
-                            state: state,
-                            controller: controller,
-                          ),
-                        ),
-                      ],
+                        );
+                      },
                     ),
                   ),
                 ],
@@ -229,13 +237,13 @@ class _BorderButton extends StatelessWidget {
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
     return Material(
-      color: Colors.white,
+      color: SpeakrColors.surface,
       shape: RoundedRectangleBorder(
         side: const BorderSide(color: SpeakrColors.line),
-        borderRadius: BorderRadius.circular(5),
+        borderRadius: BorderRadius.circular(10),
       ),
       child: InkWell(
-        borderRadius: BorderRadius.circular(5),
+        borderRadius: BorderRadius.circular(10),
         onTap: onTap,
         child: Container(
           height: 28,
@@ -323,7 +331,7 @@ class _LeftPane extends StatelessWidget {
     final uploading = state.uploading;
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(60, 50, 60, 30),
+      padding: const EdgeInsets.fromLTRB(40, 28, 40, 24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -399,49 +407,25 @@ class _LeftPane extends StatelessWidget {
 /// it's generated after the recording is summarized.
 class _TitleBlock extends StatelessWidget {
   const _TitleBlock();
-
   @override
-  Widget build(BuildContext context) {
-    LanguageScope.watch(context);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+  Widget build(BuildContext context) => Center(
+    child: Column(
       children: [
         Text(
-          tr("TITLE"),
-          style: SpeakrText.mono(
-            size: 10,
-            color: SpeakrColors.muted,
-            letterSpacing: 1.5,
-          ),
-        ),
-        const SizedBox(height: 8),
-        Container(
-          width: double.infinity,
-          padding: const EdgeInsets.only(top: 6, bottom: 10),
-          decoration: const BoxDecoration(
-            border: Border(bottom: BorderSide(color: SpeakrColors.line)),
-          ),
-          child: Text(
-            tr("Untitled recording"),
-            style: SpeakrText.serif(
-              size: 32,
-              color: SpeakrColors.muted,
-            ).copyWith(fontStyle: FontStyle.italic),
-          ),
+          tr("Untitled recording"),
+          style: SpeakrText.sans(size: 24, weight: FontWeight.w600),
         ),
         const SizedBox(height: 8),
         Text(
           tr(
             "A title will be generated automatically after the recording is summarized.",
           ),
-          style: SpeakrText.sans(
-            size: 12,
-            color: SpeakrColors.muted,
-          ).copyWith(fontStyle: FontStyle.italic),
+          textAlign: TextAlign.center,
+          style: SpeakrText.sans(size: 12, color: SpeakrColors.muted),
         ),
       ],
-    );
-  }
+    ),
+  );
 }
 
 class _BigTimer extends StatelessWidget {
@@ -462,7 +446,7 @@ class _BigTimer extends StatelessWidget {
     // colons are dimmed consistently.
     final List<InlineSpan> spans;
     final style = SpeakrText.serif(
-      size: 128,
+      size: 88,
       weight: FontWeight.w300,
       height: 1,
       letterSpacing: -3,
@@ -545,84 +529,67 @@ class _StartedLine extends ConsumerWidget {
   }
 }
 
-/// Single calm dot that breathes with the captured audio level. Floor
-/// is 0.18 (per design) so the dot never collapses to nothing while
-/// active. When paused or before recording starts, the dot/mid ring
-/// soften to the line colour and the caption flips to "NO SIGNAL".
-class _BreathingDot extends StatelessWidget {
+/// Recent measured input levels; never synthesizes sound when the input is silent.
+class _BreathingDot extends StatefulWidget {
   const _BreathingDot({required this.paused, required this.level});
   final bool paused;
   final double level;
+  @override
+  State<_BreathingDot> createState() => _BreathingDotState();
+}
+
+class _BreathingDotState extends State<_BreathingDot> {
+  final List<double> _levels = List.filled(96, 0, growable: true);
+  @override
+  void didUpdateWidget(covariant _BreathingDot oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!widget.paused) {
+      _levels.removeAt(0);
+      _levels.add(widget.level.isFinite ? widget.level.clamp(0.0, 1.0) : 0);
+    }
+  }
 
   @override
-  Widget build(BuildContext context) {
-    LanguageScope.watch(context);
-    final clamped = paused
-        ? 0.05
-        : (level.isFinite ? level.clamp(0.18, 1.0) : 0.18);
-    final coreSize = 28.0 + clamped * 36.0; // 28 → 64 px
-    final ringSize = coreSize + 26.0;
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 12),
-      child: Column(
-        children: [
-          SizedBox(
-            width: 120,
-            height: 120,
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                // Static outer ring — fixed max bound.
-                Container(
-                  width: 110,
-                  height: 110,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: Border.all(color: SpeakrColors.line),
-                  ),
-                ),
-                // Mid breathing ring — tracks the level, ink-tinted while
-                // recording and line-tinted while paused.
-                AnimatedContainer(
-                  duration: const Duration(milliseconds: 120),
-                  curve: Curves.linear,
-                  width: ringSize,
-                  height: ringSize,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: (paused ? SpeakrColors.line : SpeakrColors.ink)
-                          .withValues(alpha: paused ? 0.25 : 0.18),
-                    ),
-                  ),
-                ),
-                // Core dot.
-                AnimatedContainer(
-                  duration: const Duration(milliseconds: 120),
-                  curve: Curves.linear,
-                  width: coreSize,
-                  height: coreSize,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: paused ? SpeakrColors.line : SpeakrColors.ink,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            paused ? tr("NO SIGNAL") : tr("AUDIO LEVEL"),
-            style: SpeakrText.mono(
-              size: 10,
-              color: SpeakrColors.muted,
-              letterSpacing: 1.5,
-            ),
-          ),
-        ],
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.symmetric(vertical: 24),
+    child: Semantics(
+      label: tr('AUDIO LEVEL'),
+      child: SizedBox(
+        width: double.infinity,
+        height: 88,
+        child: CustomPaint(
+          painter: _LiveLevelPainter(List.of(_levels), widget.paused),
+        ),
       ),
-    );
+    ),
+  );
+}
+
+class _LiveLevelPainter extends CustomPainter {
+  _LiveLevelPainter(this.levels, this.paused);
+  final List<double> levels;
+  final bool paused;
+  @override
+  void paint(Canvas canvas, Size size) {
+    final step = size.width / levels.length;
+    final p = Paint();
+    for (var i = 0; i < levels.length; i++) {
+      final h = 3 + levels[i] * (size.height - 6);
+      p.color = !paused && i > levels.length * .65 && levels[i] > .02
+          ? SpeakrColors.accent
+          : SpeakrColors.muted.withValues(alpha: .45);
+      canvas.drawRRect(
+        RRect.fromRectAndRadius(
+          Rect.fromLTWH(i * step, (size.height - h) / 2, step * .48, h),
+          const Radius.circular(2),
+        ),
+        p,
+      );
+    }
   }
+
+  @override
+  bool shouldRepaint(covariant _LiveLevelPainter oldDelegate) => true;
 }
 
 class _PillBtn extends StatelessWidget {
@@ -635,7 +602,7 @@ class _PillBtn extends StatelessWidget {
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
     return Material(
-      color: Colors.white,
+      color: SpeakrColors.surface,
       shape: const StadiumBorder(side: BorderSide(color: SpeakrColors.line)),
       child: InkWell(
         customBorder: const StadiumBorder(),
@@ -717,135 +684,168 @@ class _CapturePanelState extends ConsumerState<_CapturePanel> {
     final folders = ref.watch(foldersProvider).value ?? const <Folder>[];
     final activeTagSet = {for (final n in state.activeTags) n.toLowerCase()};
 
-    return SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(22, 24, 22, 24),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _SectionHeading(tr("Capture")),
-          const SizedBox(height: 14),
-          PillSourceCard<bool>(
-            label: tr("Microphone"),
-            sub: state.micEnabled
-                ? tr("Default device")
-                : tr("Not capturing voice"),
-            value: state.micEnabled,
-            pending: state.micPending,
-            onChanged: controller.setMicEnabled,
-            options: [
-              PillSourceOption(id: false, label: tr("Off")),
-              PillSourceOption(
-                id: true,
-                label: tr("Mic"),
-                icon: SpeakrIcon.mic,
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          if (state.systemAudioSupported)
-            PillSourceCard<SystemAudioMode>(
-              label: tr("System audio"),
-              sub: _desktopSystemSub(state.systemMode, state.processSourceName),
-              value: state.systemMode,
-              pending: state.systemPending,
-              onChanged: controller.setSystemMode,
-              options: [
-                PillSourceOption(id: SystemAudioMode.off, label: tr("Off")),
-                PillSourceOption(
-                  id: SystemAudioMode.allSystem,
-                  label: tr("System"),
-                  icon: SpeakrIcon.speaker,
-                ),
-                if (state.processSourceName != null &&
-                    state.processSourcePid != null &&
-                    state.processLoopbackSupported)
-                  PillSourceOption(
-                    id: SystemAudioMode.processOnly,
-                    label: state.processSourceName!,
-                  ),
-              ],
-            )
-          else
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              child: Text(
-                tr("System audio not supported on this device."),
-                style: SpeakrText.sans(size: 11, color: SpeakrColors.muted),
-              ),
-            ),
-          if (state.videoSupported) ...[
-            const SizedBox(height: 8),
-            if (state.videoRecording)
-              _VideoSourceCard(state: state, controller: controller)
-            else
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-                child: Text(
-                  tr(
-                    "Video is off for this recording. Turn on \"Record video\" in Settings to record the meeting window.",
-                  ),
-                  style: SpeakrText.sans(size: 11, color: SpeakrColors.muted),
-                ),
-              ),
-          ],
-          const SizedBox(height: 22),
-          _SectionHeading(tr("Speakers")),
-          const SizedBox(height: 8),
-          _SpeakerStepper(
-            value: state.speakers,
-            onMinus: () => controller.setSpeakers(state.speakers - 1),
-            onPlus: () => controller.setSpeakers(state.speakers + 1),
-          ),
-          const SizedBox(height: 22),
-          _SectionHeading(tr("Folder")),
-          const SizedBox(height: 8),
-          Wrap(
-            spacing: 4,
-            runSpacing: 4,
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(32, 12, 32, 28),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final width = constraints.maxWidth > 700
+              ? (constraints.maxWidth - 20) / 2
+              : constraints.maxWidth;
+          return Wrap(
+            spacing: 20,
+            runSpacing: 20,
             children: [
-              _NoneFolderChip(
-                selected: state.folderId == null,
-                onTap: () => controller.setFolder(null),
-              ),
-              for (final f in folders)
-                _FolderChipBtn(
-                  folder: f,
-                  active: state.folderId == f.id,
-                  onTap: () => controller.setFolder(
-                    state.folderId == f.id ? null : f.id,
-                  ),
+              SizedBox(
+                width: width,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _SectionHeading(tr("Capture")),
+                    const SizedBox(height: 14),
+                    PillSourceCard<bool>(
+                      label: tr("Microphone"),
+                      sub: state.micEnabled
+                          ? tr("Default device")
+                          : tr("Not capturing voice"),
+                      value: state.micEnabled,
+                      pending: state.micPending,
+                      onChanged: controller.setMicEnabled,
+                      options: [
+                        PillSourceOption(id: false, label: tr("Off")),
+                        PillSourceOption(
+                          id: true,
+                          label: tr("Mic"),
+                          icon: SpeakrIcon.mic,
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    if (state.systemAudioSupported)
+                      PillSourceCard<SystemAudioMode>(
+                        label: tr("System audio"),
+                        sub: _desktopSystemSub(
+                          state.systemMode,
+                          state.processSourceName,
+                        ),
+                        value: state.systemMode,
+                        pending: state.systemPending,
+                        onChanged: controller.setSystemMode,
+                        options: [
+                          PillSourceOption(
+                            id: SystemAudioMode.off,
+                            label: tr("Off"),
+                          ),
+                          PillSourceOption(
+                            id: SystemAudioMode.allSystem,
+                            label: tr("System"),
+                            icon: SpeakrIcon.speaker,
+                          ),
+                          if (state.processSourceName != null &&
+                              state.processSourcePid != null &&
+                              state.processLoopbackSupported)
+                            PillSourceOption(
+                              id: SystemAudioMode.processOnly,
+                              label: state.processSourceName!,
+                            ),
+                        ],
+                      )
+                    else
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        child: Text(
+                          tr("System audio not supported on this device."),
+                          style: SpeakrText.sans(
+                            size: 11,
+                            color: SpeakrColors.muted,
+                          ),
+                        ),
+                      ),
+                    if (state.videoSupported) ...[
+                      const SizedBox(height: 8),
+                      if (state.videoRecording)
+                        _VideoSourceCard(state: state, controller: controller)
+                      else
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 12),
+                          child: Text(
+                            tr(
+                              "Video is off for this recording. Turn on \"Record video\" in Settings to record the meeting window.",
+                            ),
+                            style: SpeakrText.sans(
+                              size: 11,
+                              color: SpeakrColors.muted,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ],
                 ),
+              ),
+              SizedBox(
+                width: width,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _SectionHeading(tr("Speakers")),
+                    const SizedBox(height: 8),
+                    _SpeakerStepper(
+                      value: state.speakers,
+                      onMinus: () => controller.setSpeakers(state.speakers - 1),
+                      onPlus: () => controller.setSpeakers(state.speakers + 1),
+                    ),
+                    const SizedBox(height: 22),
+                    _SectionHeading(tr("Folder")),
+                    const SizedBox(height: 8),
+                    Wrap(
+                      spacing: 4,
+                      runSpacing: 4,
+                      children: [
+                        _NoneFolderChip(
+                          selected: state.folderId == null,
+                          onTap: () => controller.setFolder(null),
+                        ),
+                        for (final f in folders)
+                          _FolderChipBtn(
+                            folder: f,
+                            active: state.folderId == f.id,
+                            onTap: () => controller.setFolder(
+                              state.folderId == f.id ? null : f.id,
+                            ),
+                          ),
+                      ],
+                    ),
+                    const SizedBox(height: 22),
+                    _SectionHeading(tr("Tags")),
+                    const SizedBox(height: 8),
+                    if (tags.isEmpty)
+                      Text(
+                        tr("No tags yet"),
+                        style: SpeakrText.sans(
+                          size: 12,
+                          color: SpeakrColors.muted,
+                        ),
+                      )
+                    else
+                      Wrap(
+                        spacing: 4,
+                        runSpacing: 4,
+                        children: [
+                          for (final t in tags)
+                            _TagChipBtn(
+                              tag: t,
+                              active: activeTagSet.contains(
+                                t.name.toLowerCase(),
+                              ),
+                              onTap: () => controller.toggleTag(t.name),
+                            ),
+                        ],
+                      ),
+                  ],
+                ),
+              ),
             ],
-          ),
-          const SizedBox(height: 22),
-          _SectionHeading(tr("Tags")),
-          const SizedBox(height: 8),
-          if (tags.isEmpty)
-            Text(
-              tr("No tags yet"),
-              style: SpeakrText.sans(
-                size: 12,
-                color: SpeakrColors.muted,
-              ).copyWith(fontStyle: FontStyle.italic),
-            )
-          else
-            Wrap(
-              spacing: 4,
-              runSpacing: 4,
-              children: [
-                for (final t in tags)
-                  _TagChipBtn(
-                    tag: t,
-                    active: activeTagSet.contains(t.name.toLowerCase()),
-                    onTap: () => controller.toggleTag(t.name),
-                  ),
-              ],
-            ),
-          if (supportsKeyboardShortcuts) ...[
-            const SizedBox(height: 30),
-            _ShortcutsHint(),
-          ],
-        ],
+          );
+        },
       ),
     );
   }
@@ -866,9 +866,9 @@ class _VideoSourceCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.fromLTRB(12, 8, 4, 8),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: SpeakrColors.surface,
         border: Border.all(color: SpeakrColors.line),
-        borderRadius: BorderRadius.circular(5),
+        borderRadius: BorderRadius.circular(10),
       ),
       child: Row(
         children: [
@@ -999,19 +999,16 @@ class _SpeakerStepper extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: SpeakrColors.surface,
         border: Border.all(color: SpeakrColors.line),
-        borderRadius: BorderRadius.circular(5),
+        borderRadius: BorderRadius.circular(10),
       ),
       child: Row(
         children: [
           Expanded(
             child: Text(
               tr("How many voices?"),
-              style: SpeakrText.sans(
-                size: 12,
-                color: SpeakrColors.muted,
-              ).copyWith(fontStyle: FontStyle.italic),
+              style: SpeakrText.sans(size: 12, color: SpeakrColors.muted),
             ),
           ),
           _StepButton(label: '−', onTap: onMinus),
@@ -1170,55 +1167,6 @@ class _NoneFolderChip extends StatelessWidget {
             letterSpacing: 1,
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _ShortcutsHint extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    LanguageScope.watch(context);
-    final rows = [
-      [tr("Pause / resume"), '$modLabel.'],
-      [tr("Stop & save"), '$modLabel$returnKeyLabel'],
-    ];
-    return Container(
-      padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
-      decoration: BoxDecoration(
-        color: SpeakrColors.bg,
-        border: Border.all(color: SpeakrColors.line),
-        borderRadius: BorderRadius.circular(5),
-      ),
-      child: Column(
-        children: rows
-            .mapIndexed(
-              (i, row) => Padding(
-                padding: EdgeInsets.only(top: i == 0 ? 0 : 5),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      row[0],
-                      style: SpeakrText.sans(
-                        size: 11.5,
-                        color: SpeakrColors.muted,
-                        height: 1.5,
-                      ),
-                    ),
-                    Text(
-                      row[1],
-                      style: SpeakrText.mono(
-                        size: 10,
-                        color: SpeakrColors.muted,
-                        letterSpacing: 0,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            )
-            .toList(),
       ),
     );
   }

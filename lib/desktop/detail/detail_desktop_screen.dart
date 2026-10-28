@@ -28,8 +28,13 @@ import '../widgets/desktop_wave.dart';
 import 'desktop_transcript_pane.dart';
 
 class DetailDesktopScreen extends ConsumerStatefulWidget {
-  const DetailDesktopScreen({super.key, required this.recordingId});
+  const DetailDesktopScreen({
+    super.key,
+    required this.recordingId,
+    this.autoplay = false,
+  });
   final int recordingId;
+  final bool autoplay;
 
   @override
   ConsumerState<DetailDesktopScreen> createState() =>
@@ -64,6 +69,7 @@ class _DetailDesktopScreenState extends ConsumerState<DetailDesktopScreen> {
         '${creds.baseUrl}/api/v1/recordings/${widget.recordingId}/audio';
     try {
       await _audioPlayer.setUrl(url, headers: {'X-API-Token': creds.token});
+      if (mounted && widget.autoplay) unawaited(_audioPlayer.play());
     } catch (e, st) {
       debugPrint('Speakr desktop audio: setUrl failed: $e\n$st');
     }
@@ -203,35 +209,56 @@ class _Body extends StatelessWidget {
             onCycleSpeed: onCycleSpeed,
             onSkip: onSkip,
           ),
-          const Divider(height: 1, color: SpeakrColors.line),
           Expanded(
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Expanded(
-                  flex: 6,
-                  child: _TranscriptColumn(
-                    recordingId: recording.id,
-                    player: player,
-                    onCopy: onCopyTranscript,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(28, 0, 28, 20),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Expanded(
+                    flex: 7,
+                    child: _DetailPanel(
+                      child: _TranscriptColumn(
+                        recordingId: recording.id,
+                        player: player,
+                        onCopy: onCopyTranscript,
+                      ),
+                    ),
                   ),
-                ),
-                const VerticalDivider(width: 1, color: SpeakrColors.line),
-                Expanded(
-                  flex: 4,
-                  child: _RightColumn(
-                    recordingId: recording.id,
-                    tab: tab,
-                    onTab: onTab,
+                  const SizedBox(width: 16),
+                  Expanded(
+                    flex: 4,
+                    child: _DetailPanel(
+                      child: _RightColumn(
+                        recordingId: recording.id,
+                        tab: tab,
+                        onTab: onTab,
+                      ),
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ],
       ),
     );
   }
+}
+
+class _DetailPanel extends StatelessWidget {
+  const _DetailPanel({required this.child});
+  final Widget child;
+  @override
+  Widget build(BuildContext context) => Container(
+    clipBehavior: Clip.antiAlias,
+    decoration: BoxDecoration(
+      color: SpeakrColors.surface,
+      border: Border.all(color: SpeakrColors.line),
+      borderRadius: BorderRadius.circular(12),
+    ),
+    child: child,
+  );
 }
 
 class _BreadcrumbBar extends ConsumerWidget {
@@ -267,7 +294,7 @@ class _BreadcrumbBar extends ConsumerWidget {
         border: Border(bottom: BorderSide(color: SpeakrColors.line)),
       ),
       padding: const EdgeInsets.symmetric(horizontal: 24),
-      height: 44,
+      height: 56,
       child: Row(
         children: [
           _BackChip(onTap: () => context.pop()),
@@ -389,16 +416,16 @@ class _BackChip extends StatelessWidget {
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
     return Material(
-      color: Colors.white,
+      color: SpeakrColors.surface,
       shape: RoundedRectangleBorder(
         side: const BorderSide(color: SpeakrColors.line),
-        borderRadius: BorderRadius.circular(5),
+        borderRadius: BorderRadius.circular(10),
       ),
       child: InkWell(
-        borderRadius: BorderRadius.circular(5),
+        borderRadius: BorderRadius.circular(10),
         onTap: onTap,
         child: Container(
-          height: 28,
+          height: 34,
           padding: const EdgeInsets.fromLTRB(6, 0, 10, 0),
           child: Row(
             children: [
@@ -438,7 +465,8 @@ class _TitleBlock extends ConsumerWidget {
         ? null
         : parseHexColor(folder!.color);
 
-    return Padding(
+    return Container(
+      width: double.infinity,
       padding: const EdgeInsets.fromLTRB(32, 24, 32, 18),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -509,7 +537,7 @@ class _TitleBlock extends ConsumerWidget {
                   ? recording.title!
                   : tr("Untitled recording"),
               style: SpeakrText.serif(
-                size: 34,
+                size: 28,
                 height: 1.1,
                 weight: FontWeight.w400,
               ),
@@ -551,9 +579,9 @@ class _PlayerBar extends StatelessWidget {
       margin: const EdgeInsets.fromLTRB(32, 0, 32, 18),
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: SpeakrColors.surface,
         border: Border.all(color: SpeakrColors.line),
-        borderRadius: BorderRadius.circular(6),
+        borderRadius: BorderRadius.circular(10),
       ),
       child: Row(
         children: [
@@ -563,8 +591,8 @@ class _PlayerBar extends StatelessWidget {
             builder: (context, snap) {
               final playing = snap.data?.playing ?? false;
               return SizedBox(
-                width: 44,
-                height: 44,
+                width: 56,
+                height: 56,
                 child: Material(
                   color: audioReady
                       ? SpeakrColors.ink
@@ -575,11 +603,15 @@ class _PlayerBar extends StatelessWidget {
                     onTap: !audioReady
                         ? null
                         : () => playing ? player.pause() : player.play(),
-                    child: Center(
-                      child: SpeakrIconView(
-                        playing ? SpeakrIcon.pause : SpeakrIcon.play,
-                        size: 16,
-                        color: SpeakrColors.bg,
+                    child: Semantics(
+                      button: true,
+                      label: playing ? tr("Pause") : tr("Play"),
+                      child: Center(
+                        child: SpeakrIconView(
+                          playing ? SpeakrIcon.pause : SpeakrIcon.play,
+                          size: 20,
+                          color: SpeakrColors.bg,
+                        ),
                       ),
                     ),
                   ),
@@ -740,7 +772,7 @@ class _RightColumn extends StatelessWidget {
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
     return Container(
-      color: SpeakrColors.bg,
+      color: Colors.transparent,
       child: Column(
         children: [
           Container(

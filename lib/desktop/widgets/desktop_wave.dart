@@ -61,7 +61,7 @@ class _WavePainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    const bars = 180;
+    final bars = (size.width / 5).floor().clamp(12, 220);
     final w = size.width;
     final h = size.height;
     final bw = w / (bars * 1.7);
@@ -76,7 +76,7 @@ class _WavePainter extends CustomPainter {
       final x = i * (bw + gap);
       final y = (h - bh) / 2;
       final past = (i / bars) < progress;
-      p.color = color.withValues(alpha: past ? 0.9 : 0.22);
+      p.color = past ? SpeakrColors.accent : color.withValues(alpha: 0.32);
       canvas.drawRRect(
         RRect.fromRectAndRadius(
           Rect.fromLTWH(x, y, bw, bh),

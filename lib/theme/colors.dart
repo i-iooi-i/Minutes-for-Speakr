@@ -1,28 +1,29 @@
 import 'package:flutter/material.dart';
 
-/// Direction A — Calm Minimal palette, ported from the React mockup
-/// (`Speakr_extracted/direction-a-1.jsx` lines 5-16).
+/// Neutral audio workspace. Color is reserved for signal and status.
 class SpeakrColors {
-  static const bg = Color(0xFFFAFAF7);
-  static const bgAlt = Color(0xFFF3F1EC);
-  static const ink = Color(0xFF1A1A1A);
-  static const ink2 = Color(0xFF3A3A36);
-  static const muted = Color(0xFF8A8A83);
-  static const line = Color(0xFFE6E3DC);
+  static const surface = Color(0xFF191D20);
+  static const accent = Color(0xFF70C9AC);
+  static const bg = Color(0xFF111416);
+  static const bgAlt = Color(0xFF202529);
+  static const ink = Color(0xFFF1F2EF);
+  static const ink2 = Color(0xFFC4CACD);
+  static const muted = Color(0xFF969EA3);
+  static const line = Color(0xFF2C3236);
 
   // Accents pulled from the design's tag colors and indicators.
-  static const recordingDot = Color(0xFFC2562B);
-  static const ok = Color(0xFF3A8A5A);
-  static const danger = Color(0xFFC2562B);
+  static const recordingDot = Color(0xFFF0806E);
+  static const ok = Color(0xFF70C9AC);
+  static const danger = Color(0xFFF0806E);
 
   // Tag preset colors (tags from data.js / direction-a-3.jsx)
-  static const tagRoadmap = Color(0xFFC2562B);
-  static const tagEngineering = Color(0xFF3A6A5A);
-  static const tag1on1 = Color(0xFF6A4F8A);
-  static const tagCustomer = Color(0xFF1F6B8C);
-  static const tagDesign = Color(0xFF8A5A2A);
-  static const tagPersonal = Color(0xFF5A6A3A);
-  static const tagInternal = Color(0xFF3A6A5A);
+  static const tagRoadmap = Color(0xFFF0806E);
+  static const tagEngineering = Color(0xFF70C9AC);
+  static const tag1on1 = Color(0xFFBD9BCC);
+  static const tagCustomer = Color(0xFF8DB7D3);
+  static const tagDesign = Color(0xFFD3B779);
+  static const tagPersonal = Color(0xFFA8BD8C);
+  static const tagInternal = Color(0xFF70C9AC);
 }
 
 /// Convert a hex string from the API (`#c2562b`, `c2562b`, `#c2562bff`)

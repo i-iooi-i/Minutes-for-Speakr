@@ -106,9 +106,9 @@ class DesktopTranscriptPane extends ConsumerWidget {
             }
 
             return ListView.separated(
-              padding: const EdgeInsets.fromLTRB(28, 20, 28, 60),
+              padding: const EdgeInsets.fromLTRB(12, 12, 12, 40),
               itemCount: segments.length,
-              separatorBuilder: (_, __) => const SizedBox(height: 18),
+              separatorBuilder: (_, __) => const SizedBox(height: 6),
               itemBuilder: (context, i) {
                 final s = segments[i];
                 final speakerName = s.speaker;
@@ -140,19 +140,28 @@ class DesktopTranscriptPane extends ConsumerWidget {
                     onTap: seekAndPlay,
                     onSecondaryTapDown: (d) => showCopy(d.globalPosition),
                     onLongPressStart: (d) => showCopy(d.globalPosition),
-                    child: Opacity(
-                      opacity: active ? 1.0 : 0.85,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 12,
+                      ),
+                      decoration: BoxDecoration(
+                        color: active
+                            ? SpeakrColors.accent.withValues(alpha: .09)
+                            : Colors.transparent,
+                        borderRadius: BorderRadius.circular(9),
+                      ),
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           SizedBox(
                             width: 88,
                             child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.end,
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
                                   (speakerName ?? '—').toUpperCase(),
-                                  textAlign: TextAlign.right,
+                                  textAlign: TextAlign.left,
                                   style: SpeakrText.sans(
                                     size: 12,
                                     color: color,
@@ -175,11 +184,11 @@ class DesktopTranscriptPane extends ConsumerWidget {
                           const SizedBox(width: 18),
                           Expanded(
                             child: Container(
-                              padding: const EdgeInsets.fromLTRB(14, 1, 0, 1),
+                              padding: const EdgeInsets.fromLTRB(0, 1, 0, 1),
                               decoration: BoxDecoration(
                                 border: Border(
                                   left: BorderSide(
-                                    color: active ? color : Colors.transparent,
+                                    color: Colors.transparent,
                                     width: 2,
                                   ),
                                 ),
@@ -187,7 +196,7 @@ class DesktopTranscriptPane extends ConsumerWidget {
                               child: Text(
                                 s.sentence ?? '',
                                 style: SpeakrText.serif(
-                                  size: 16,
+                                  size: 15,
                                   height: 1.6,
                                   color: active
                                       ? SpeakrColors.ink

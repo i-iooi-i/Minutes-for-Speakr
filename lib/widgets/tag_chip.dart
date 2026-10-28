@@ -17,15 +17,11 @@ class TagChip extends StatelessWidget {
       decoration: BoxDecoration(
         color: filled ? c.withValues(alpha: 0.06) : null,
         border: Border.all(color: c.withValues(alpha: 0.33)),
-        borderRadius: BorderRadius.circular(3),
+        borderRadius: BorderRadius.circular(7),
       ),
       child: Text(
         tag.name.toUpperCase(),
-        style: SpeakrText.mono(
-          size: 10,
-          color: c,
-          letterSpacing: 1,
-        ),
+        style: SpeakrText.mono(size: 10, color: c, letterSpacing: 1),
       ),
     );
   }
@@ -49,17 +45,19 @@ class CustomColorTagChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final inner = Container(
-      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
       decoration: BoxDecoration(
         color: filled ? color.withValues(alpha: 0.06) : null,
         border: Border.all(color: color.withValues(alpha: 0.33)),
-        borderRadius: BorderRadius.circular(3),
+        borderRadius: BorderRadius.circular(7),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(label.toUpperCase(),
-              style: SpeakrText.mono(size: 10, color: color, letterSpacing: 1)),
+          Text(
+            label.toUpperCase(),
+            style: SpeakrText.sans(size: 11, color: color),
+          ),
           if (trailing != null) const SizedBox(width: 5),
           if (trailing != null) trailing!,
         ],
@@ -69,7 +67,7 @@ class CustomColorTagChip extends StatelessWidget {
         ? inner
         : InkWell(
             onTap: onTap,
-            borderRadius: BorderRadius.circular(3),
+            borderRadius: BorderRadius.circular(7),
             child: inner,
           );
   }
@@ -90,14 +88,15 @@ class DashedTagChip extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(3),
+      borderRadius: BorderRadius.circular(7),
       child: CustomPaint(
         painter: _DashedBorderPainter(color: color.withValues(alpha: 0.33)),
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
-          child: Text('+ ${label.toUpperCase()}',
-              style:
-                  SpeakrText.mono(size: 10, color: color, letterSpacing: 1)),
+          padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
+          child: Text(
+            '+ ${label.toUpperCase()}',
+            style: SpeakrText.sans(size: 11, color: color),
+          ),
         ),
       ),
     );

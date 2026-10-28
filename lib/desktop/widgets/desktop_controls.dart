@@ -23,19 +23,19 @@ class DesktopToolButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final btn = Material(
-      color: selected ? SpeakrColors.ink : Colors.white,
+      color: selected ? SpeakrColors.ink : SpeakrColors.surface,
       shape: RoundedRectangleBorder(
         side: BorderSide(
           color: selected ? SpeakrColors.ink : SpeakrColors.line,
         ),
-        borderRadius: BorderRadius.circular(5),
+        borderRadius: BorderRadius.circular(10),
       ),
       child: InkWell(
-        borderRadius: BorderRadius.circular(5),
+        borderRadius: BorderRadius.circular(10),
         onTap: onTap,
         child: SizedBox(
-          width: 30,
-          height: 30,
+          width: 36,
+          height: 36,
           child: Center(
             child: SpeakrIconView(
               icon,
@@ -119,9 +119,9 @@ class _DesktopDropdownState<T> extends State<DesktopDropdown<T>> {
               color: Colors.transparent,
               child: Container(
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: SpeakrColors.surface,
                   border: Border.all(color: SpeakrColors.line),
-                  borderRadius: BorderRadius.circular(6),
+                  borderRadius: BorderRadius.circular(10),
                   boxShadow: const [
                     BoxShadow(
                       color: Color(0x14000000),
@@ -139,7 +139,7 @@ class _DesktopDropdownState<T> extends State<DesktopDropdown<T>> {
                     children: [
                       for (final o in widget.options)
                         InkWell(
-                          borderRadius: BorderRadius.circular(4),
+                          borderRadius: BorderRadius.circular(10),
                           onTap: () {
                             widget.onChanged(o.value);
                             _close();
@@ -153,7 +153,7 @@ class _DesktopDropdownState<T> extends State<DesktopDropdown<T>> {
                               color: o.value == widget.value
                                   ? SpeakrColors.bgAlt
                                   : Colors.transparent,
-                              borderRadius: BorderRadius.circular(4),
+                              borderRadius: BorderRadius.circular(10),
                             ),
                             child: Text(
                               o.label,
@@ -191,20 +191,20 @@ class _DesktopDropdownState<T> extends State<DesktopDropdown<T>> {
   Widget build(BuildContext context) {
     return Material(
       key: _key,
-      color: Colors.white,
+      color: SpeakrColors.surface,
       shape: RoundedRectangleBorder(
         side: const BorderSide(color: SpeakrColors.line),
-        borderRadius: BorderRadius.circular(5),
+        borderRadius: BorderRadius.circular(10),
       ),
       child: InkWell(
-        borderRadius: BorderRadius.circular(5),
+        borderRadius: BorderRadius.circular(10),
         onTap: _toggle,
         child: ConstrainedBox(
           constraints: BoxConstraints(minWidth: widget.minWidth),
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 0),
             child: SizedBox(
-              height: 30,
+              height: 36,
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -271,9 +271,9 @@ class DesktopSegment<T> extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: SpeakrColors.surface,
         border: Border.all(color: SpeakrColors.line),
-        borderRadius: BorderRadius.circular(5),
+        borderRadius: BorderRadius.circular(10),
       ),
       clipBehavior: Clip.antiAlias,
       child: Row(
@@ -283,8 +283,8 @@ class DesktopSegment<T> extends StatelessWidget {
             InkWell(
               onTap: () => onChanged(o.value),
               child: Container(
-                width: 30,
-                height: 30,
+                width: 36,
+                height: 36,
                 color: o.value == value ? SpeakrColors.bgAlt : null,
                 alignment: Alignment.center,
                 child: IconTheme(
@@ -313,16 +313,16 @@ class DesktopSmallButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: Colors.white,
+      color: SpeakrColors.surface,
       shape: RoundedRectangleBorder(
         side: const BorderSide(color: SpeakrColors.line),
-        borderRadius: BorderRadius.circular(4),
+        borderRadius: BorderRadius.circular(10),
       ),
       child: InkWell(
-        borderRadius: BorderRadius.circular(4),
+        borderRadius: BorderRadius.circular(10),
         onTap: onTap,
         child: Container(
-          height: 26,
+          height: 32,
           padding: const EdgeInsets.symmetric(horizontal: 9),
           alignment: Alignment.center,
           child: Text(
@@ -360,7 +360,7 @@ class DesktopPillButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final fg = foreground ?? SpeakrColors.ink;
     return Material(
-      color: background ?? Colors.white,
+      color: background ?? SpeakrColors.surface,
       shape: const StadiumBorder(side: BorderSide(color: SpeakrColors.line)),
       child: InkWell(
         customBorder: const StadiumBorder(),
@@ -450,9 +450,9 @@ class _DesktopActionMenuState extends State<DesktopActionMenu> {
               color: Colors.transparent,
               child: Container(
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: SpeakrColors.surface,
                   border: Border.all(color: SpeakrColors.line),
-                  borderRadius: BorderRadius.circular(6),
+                  borderRadius: BorderRadius.circular(10),
                   boxShadow: const [
                     BoxShadow(
                       color: Color(0x14000000),
@@ -472,10 +472,7 @@ class _DesktopActionMenuState extends State<DesktopActionMenu> {
                         if (item.dividerAbove)
                           const Padding(
                             padding: EdgeInsets.symmetric(vertical: 4),
-                            child: Divider(
-                              height: 1,
-                              color: SpeakrColors.line,
-                            ),
+                            child: Divider(height: 1, color: SpeakrColors.line),
                           ),
                         _ActionRow(
                           item: item,
@@ -523,7 +520,7 @@ class _ActionRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final color = item.danger ? SpeakrColors.danger : SpeakrColors.ink;
     return InkWell(
-      borderRadius: BorderRadius.circular(4),
+      borderRadius: BorderRadius.circular(10),
       onTap: onTap,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),

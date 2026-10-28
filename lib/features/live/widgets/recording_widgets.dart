@@ -644,7 +644,7 @@ class PillSourceCard<T> extends StatelessWidget {
   final ValueChanged<T> onChanged;
   final bool pending;
 
-  static const _onPip = Color(0xFF3A8A5A);
+  static const _onPip = SpeakrColors.ok;
 
   bool get _on => options.isNotEmpty && value != options.first.id;
 
@@ -656,9 +656,9 @@ class PillSourceCard<T> extends StatelessWidget {
       duration: const Duration(milliseconds: 150),
       padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
       decoration: BoxDecoration(
-        color: on ? Colors.white : Colors.transparent,
+        color: on ? SpeakrColors.surface : Colors.transparent,
         border: Border.all(color: on ? SpeakrColors.line : Colors.transparent),
-        borderRadius: BorderRadius.circular(5),
+        borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,

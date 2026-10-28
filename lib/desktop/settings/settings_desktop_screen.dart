@@ -283,7 +283,7 @@ class _BackChip extends StatelessWidget {
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
     return Material(
-      color: Colors.white,
+      color: SpeakrColors.surface,
       shape: RoundedRectangleBorder(
         side: const BorderSide(color: SpeakrColors.line),
         borderRadius: BorderRadius.circular(5),
@@ -433,7 +433,7 @@ class _TextValue extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 12),
       alignment: Alignment.centerLeft,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: SpeakrColors.surface,
         border: Border.all(color: SpeakrColors.line),
         borderRadius: BorderRadius.circular(5),
       ),
@@ -503,7 +503,7 @@ class _DropdownStub extends StatelessWidget {
       height: 34,
       padding: const EdgeInsets.symmetric(horizontal: 12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: SpeakrColors.surface,
         border: Border.all(color: SpeakrColors.line),
         borderRadius: BorderRadius.circular(5),
       ),
@@ -691,7 +691,7 @@ class _ServerSection extends ConsumerWidget {
               ),
               const Spacer(),
               Material(
-                color: Colors.white,
+                color: SpeakrColors.surface,
                 shape: RoundedRectangleBorder(
                   side: const BorderSide(color: SpeakrColors.line),
                   borderRadius: BorderRadius.circular(5),
@@ -789,7 +789,7 @@ class _RecordingSection extends ConsumerWidget {
               child: Align(
                 alignment: Alignment.centerLeft,
                 child: Material(
-                  color: Colors.white,
+                  color: SpeakrColors.surface,
                   shape: RoundedRectangleBorder(
                     side: const BorderSide(color: SpeakrColors.line),
                     borderRadius: BorderRadius.circular(5),
@@ -859,7 +859,7 @@ class _RecordingSection extends ConsumerWidget {
             child: Align(
               alignment: Alignment.centerLeft,
               child: Material(
-                color: Colors.white,
+                color: SpeakrColors.surface,
                 shape: RoundedRectangleBorder(
                   side: const BorderSide(color: SpeakrColors.line),
                   borderRadius: BorderRadius.circular(5),
@@ -949,7 +949,7 @@ class _AutoUploadField extends StatelessWidget {
       child: Align(
         alignment: Alignment.centerLeft,
         child: Material(
-          color: Colors.white,
+          color: SpeakrColors.surface,
           shape: RoundedRectangleBorder(
             side: const BorderSide(color: SpeakrColors.line),
             borderRadius: BorderRadius.circular(5),
@@ -1098,7 +1098,7 @@ class _ThemeChip extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 14),
         alignment: Alignment.center,
         decoration: BoxDecoration(
-          color: selected ? SpeakrColors.bgAlt : Colors.white,
+          color: selected ? SpeakrColors.bgAlt : SpeakrColors.surface,
           border: Border.all(
             color: selected ? SpeakrColors.ink : SpeakrColors.line,
           ),
@@ -1199,7 +1199,7 @@ class _ShortcutsSection extends StatelessWidget {
                     vertical: 4,
                   ),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: SpeakrColors.surface,
                     border: Border.all(color: SpeakrColors.line),
                     borderRadius: BorderRadius.circular(4),
                   ),
