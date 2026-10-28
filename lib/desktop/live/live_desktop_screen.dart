@@ -24,6 +24,7 @@ import '../../theme/typography.dart';
 import '../../utils/formatters.dart';
 import '../../widgets/speakr_icons.dart';
 import '../shell/desktop_shortcuts.dart';
+import '../widgets/desktop_audio_toolbar.dart';
 
 class LiveDesktopScreen extends ConsumerStatefulWidget {
   const LiveDesktopScreen({super.key});
@@ -175,54 +176,20 @@ class _TopBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
-    return Container(
-      height: 44,
-      decoration: const BoxDecoration(
-        border: Border(bottom: BorderSide(color: SpeakrColors.line)),
+    return DesktopAudioToolbar(
+      livePage: true,
+      leading: _BorderButton(
+        label: tr('Minimize'),
+        onTap: onMinimize,
+        leading: const Icon(Icons.keyboard_arrow_down, size: 16),
       ),
-      padding: const EdgeInsets.symmetric(horizontal: 24),
-      child: Row(
-        children: [
-          _BorderButton(
-            label: tr("Minimize"),
-            leading: const SpeakrIconView(
-              SpeakrIcon.minimize,
-              size: 14,
-              color: SpeakrColors.ink2,
+      trailing: onShowMini == null
+          ? null
+          : IconButton(
+              tooltip: tr('Mini window'),
+              onPressed: onShowMini,
+              icon: const Icon(Icons.picture_in_picture_alt_outlined, size: 19),
             ),
-            onTap: onMinimize,
-          ),
-          const Spacer(),
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              _PulseDot(paused: paused),
-              const SizedBox(width: 8),
-              Text(
-                paused ? tr("PAUSED") : tr("RECORDING"),
-                style: SpeakrText.mono(
-                  size: 11,
-                  color: SpeakrColors.recordingDot,
-                  letterSpacing: 1.5,
-                ),
-              ),
-            ],
-          ),
-          const Spacer(),
-          if (onShowMini != null)
-            _BorderButton(
-              label: tr("Mini window"),
-              leading: const SpeakrIconView(
-                SpeakrIcon.pip,
-                size: 14,
-                color: SpeakrColors.ink2,
-              ),
-              onTap: onShowMini!,
-            )
-          else
-            const SizedBox(width: 110),
-        ],
-      ),
     );
   }
 }
@@ -257,51 +224,6 @@ class _BorderButton extends StatelessWidget {
                 style: SpeakrText.sans(size: 12, color: SpeakrColors.ink2),
               ),
             ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _PulseDot extends StatefulWidget {
-  const _PulseDot({required this.paused});
-  final bool paused;
-  @override
-  State<_PulseDot> createState() => _PulseDotState();
-}
-
-class _PulseDotState extends State<_PulseDot>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _c;
-  @override
-  void initState() {
-    super.initState();
-    _c = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 1500),
-    )..repeat(reverse: true);
-  }
-
-  @override
-  void dispose() {
-    _c.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    LanguageScope.watch(context);
-    return AnimatedBuilder(
-      animation: _c,
-      builder: (_, __) => Opacity(
-        opacity: widget.paused ? 0.5 : 0.3 + 0.7 * (1 - _c.value),
-        child: Container(
-          width: 8,
-          height: 8,
-          decoration: const BoxDecoration(
-            color: SpeakrColors.recordingDot,
-            shape: BoxShape.circle,
           ),
         ),
       ),

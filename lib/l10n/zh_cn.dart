@@ -1,5 +1,14 @@
 // UI copy only. Keep API values, user content and diagnostic logs unchanged.
 const zhCN = <String, String>{
+  'Paused': '已暂停',
+  'Uploading': '上传中',
+  'Capture active': '录音中',
+  'Ready to record': '待录音',
+  'Folder for the new recording': '新录音的保存文件夹',
+  'Combined input level': '综合输入音量',
+  'Audio is not being captured': '尚未采集音频',
+  'Open recording': '返回录音',
+
   'List view': '列表视图',
   'Grid view': '网格视图',
   'Edit title': '编辑标题',

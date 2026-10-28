@@ -9,6 +9,13 @@ import '../recording_statistics.dart';
 class RecordingStatsTab extends ConsumerWidget {
   const RecordingStatsTab({super.key, required this.recordingId});
   final int recordingId;
+  static const _colors = [
+    SpeakrColors.accent,
+    SpeakrColors.recordingDot,
+    SpeakrColors.tagDesign,
+    SpeakrColors.tagCustomer,
+    SpeakrColors.tagPersonal,
+  ];
   String _clock(double seconds) =>
       '${seconds ~/ 60}:${(seconds.toInt() % 60).toString().padLeft(2, '0')}';
   @override
@@ -71,6 +78,36 @@ class RecordingStatsTab extends ConsumerWidget {
                     padding: const EdgeInsets.only(top: 20),
                     child: Text(tr('Transcript not available yet.')),
                   ),
+                if (complete && total > 0)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 18, bottom: 4),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(6),
+                      child: SizedBox(
+                        height: 22,
+                        child: Row(
+                          children: [
+                            for (var i = 0; i < rows.length; i++)
+                              if (rows[i].seconds > 0)
+                                Expanded(
+                                  flex: (rows[i].seconds * 1000).round().clamp(
+                                    1,
+                                    1000000000,
+                                  ),
+                                  child: Tooltip(
+                                    message:
+                                        '${rows[i].name} · ${(rows[i].seconds / total * 100).round()}%',
+                                    child: Container(
+                                      margin: const EdgeInsets.only(right: 2),
+                                      color: _colors[i % _colors.length],
+                                    ),
+                                  ),
+                                ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
                 for (final row in rows)
                   Padding(
                     padding: const EdgeInsets.only(top: 20),
@@ -97,9 +134,10 @@ class RecordingStatsTab extends ConsumerWidget {
                             padding: const EdgeInsets.only(top: 8),
                             child: LinearProgressIndicator(
                               value: row.seconds / total,
-                              minHeight: 4,
+                              minHeight: 7,
                               borderRadius: BorderRadius.circular(4),
-                              color: SpeakrColors.accent,
+                              color:
+                                  _colors[rows.indexOf(row) % _colors.length],
                               backgroundColor: SpeakrColors.line,
                             ),
                           ),

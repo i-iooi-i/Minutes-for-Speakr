@@ -27,7 +27,7 @@ import '../../theme/typography.dart';
 import '../../utils/formatters.dart';
 import '../../widgets/speakr_icons.dart';
 import '../widgets/desktop_controls.dart';
-import '../widgets/desktop_record_button.dart';
+import '../widgets/desktop_audio_toolbar.dart';
 import '../widgets/desktop_wave.dart';
 import 'desktop_transcript_pane.dart';
 
@@ -280,18 +280,11 @@ class _BreadcrumbBar extends ConsumerWidget {
     LanguageScope.watch(context);
     final highlighted = recording.isHighlighted;
 
-    return Container(
-      decoration: const BoxDecoration(
-        border: Border(bottom: BorderSide(color: SpeakrColors.line)),
-      ),
-      padding: const EdgeInsets.symmetric(horizontal: 24),
-      height: 56,
-      child: Row(
+    return DesktopAudioToolbar(
+      leading: _BackChip(onTap: () => context.pop()),
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          _BackChip(onTap: () => context.pop()),
-          const Spacer(),
-          DesktopRecordButton(onTap: () => context.push('/live')),
-          const SizedBox(width: 12),
           DesktopToolButton(
             icon: SpeakrIcon.star,
             tooltip: highlighted ? tr("Highlighted") : tr("Highlight"),
@@ -306,7 +299,6 @@ class _BreadcrumbBar extends ConsumerWidget {
                   : tr("Highlighted"),
             ),
           ),
-          const SizedBox(width: 6),
           RecordingActionMenu(recording: recording),
         ],
       ),

@@ -21,7 +21,7 @@ import '../../widgets/tag_chip.dart';
 import '../widgets/recording_action_menu.dart';
 import '../widgets/participant_avatars.dart';
 import '../widgets/desktop_wave.dart';
-import '../widgets/desktop_record_button.dart';
+import '../widgets/desktop_audio_toolbar.dart';
 
 enum _SortMode { newest, oldest, longest, title }
 
@@ -91,6 +91,7 @@ class _LibraryDesktopScreenState extends ConsumerState<LibraryDesktopScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          const DesktopAudioToolbar(),
           _Header(
             activeFolder: activeFolder,
             items: asyncItems.value ?? const [],
@@ -242,23 +243,47 @@ class _Header extends ConsumerWidget {
             runSpacing: 8,
             crossAxisAlignment: WrapCrossAlignment.center,
             children: [
-              DesktopRecordButton(onTap: () => context.push('/live')),
               PopupMenuButton<String>(
-                tooltip: tr('More'), color: SpeakrColors.bgAlt,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                tooltip: tr('More'),
+                color: SpeakrColors.bgAlt,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
                 icon: const Icon(Icons.more_horiz_rounded),
                 onSelected: (value) {
-                  if (value == 'refresh') { onRefresh(); }
-                  else if (value == 'list') { onView(_ViewMode.list); }
-                  else if (value == 'grid') { onView(_ViewMode.grid); }
-                  else { onSort(_SortMode.values.byName(value)); }
+                  if (value == 'refresh') {
+                    onRefresh();
+                  } else if (value == 'list') {
+                    onView(_ViewMode.list);
+                  } else if (value == 'grid') {
+                    onView(_ViewMode.grid);
+                  } else {
+                    onSort(_SortMode.values.byName(value));
+                  }
                 },
                 itemBuilder: (_) => [
                   PopupMenuItem(value: 'refresh', child: Text(tr('Refresh'))),
-                  for (final option in [(_SortMode.newest, 'Newest'), (_SortMode.oldest, 'Oldest'), (_SortMode.longest, 'Longest'), (_SortMode.title, 'Title')])
-                    CheckedPopupMenuItem(value: option.$1.name, checked: sort == option.$1, child: Text(tr(option.$2))),
-                  CheckedPopupMenuItem(value: 'list', checked: view == _ViewMode.list, child: Text(tr('List view'))),
-                  CheckedPopupMenuItem(value: 'grid', checked: view == _ViewMode.grid, child: Text(tr('Grid view'))),
+                  for (final option in [
+                    (_SortMode.newest, 'Newest'),
+                    (_SortMode.oldest, 'Oldest'),
+                    (_SortMode.longest, 'Longest'),
+                    (_SortMode.title, 'Title'),
+                  ])
+                    CheckedPopupMenuItem(
+                      value: option.$1.name,
+                      checked: sort == option.$1,
+                      child: Text(tr(option.$2)),
+                    ),
+                  CheckedPopupMenuItem(
+                    value: 'list',
+                    checked: view == _ViewMode.list,
+                    child: Text(tr('List view')),
+                  ),
+                  CheckedPopupMenuItem(
+                    value: 'grid',
+                    checked: view == _ViewMode.grid,
+                    child: Text(tr('Grid view')),
+                  ),
                 ],
               ),
             ],
