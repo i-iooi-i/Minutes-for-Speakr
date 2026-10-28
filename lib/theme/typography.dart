@@ -116,6 +116,16 @@ ThemeData buildSpeakrTheme() {
       labelMedium: SpeakrText.sans(size: 12, color: SpeakrColors.muted),
       labelSmall: SpeakrText.mono(size: 10, letterSpacing: 1.5),
     ),
+    popupMenuTheme: PopupMenuThemeData(
+      color: SpeakrColors.bgAlt,
+      surfaceTintColor: Colors.transparent,
+      elevation: 12,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: const BorderSide(color: SpeakrColors.line),
+      ),
+      textStyle: const TextStyle(fontSize: 13, color: SpeakrColors.ink),
+    ),
     iconTheme: const IconThemeData(color: SpeakrColors.ink, size: 20),
     dividerColor: SpeakrColors.line,
     appBarTheme: const AppBarTheme(

@@ -21,7 +21,6 @@ import '../../widgets/tag_chip.dart';
 import '../widgets/recording_action_menu.dart';
 import '../widgets/participant_avatars.dart';
 import '../widgets/desktop_wave.dart';
-import '../widgets/desktop_audio_toolbar.dart';
 
 enum _SortMode { newest, oldest, longest, title }
 
@@ -186,10 +185,6 @@ class _Header extends ConsumerWidget {
     final hrs = totalSecs ~/ 3600;
     final mins = (totalSecs % 3600) ~/ 60;
     final filter = ref.watch(libraryFilterProvider);
-    final primary =
-        filter.statusKey == 'all' &&
-        filter.folderId == null &&
-        filter.tagId == null;
     final folder = activeFolder;
     final folderColor = folder == null ? null : parseHexColor(folder.color);
 
@@ -254,11 +249,14 @@ class _Header extends ConsumerWidget {
             children: [
               PopupMenuButton<String>(
                 tooltip: tr('More'),
+                surfaceTintColor: Colors.transparent,
+                position: PopupMenuPosition.under,
                 color: SpeakrColors.bgAlt,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
+                  side: const BorderSide(color: SpeakrColors.line),
                 ),
-                icon: const Icon(Icons.more_horiz_rounded),
+                icon: const Icon(Icons.more_vert_rounded),
                 onSelected: (value) {
                   if (value == 'refresh') {
                     onRefresh();
@@ -301,17 +299,7 @@ class _Header extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Expanded(flex: 3, child: title),
-              if (primary) ...[
-                const SizedBox(width: 20),
-                Expanded(
-                  flex: 5,
-                  child: DesktopAudioToolbar(
-                    embedded: true,
-                    trailing: controls,
-                  ),
-                ),
-              ] else
-                controls,
+              controls,
             ],
           );
         },

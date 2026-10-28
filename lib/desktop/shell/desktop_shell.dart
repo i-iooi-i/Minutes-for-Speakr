@@ -9,7 +9,7 @@ import 'desktop_sidebar.dart';
 import 'package:speakr_app/l10n/strings.dart';
 
 /// Which top-level area the sidebar should highlight.
-enum DesktopShellRoute { library }
+enum DesktopShellRoute { library, recording }
 
 /// Persistent left-sidebar shell used by the Library and Detail screens at
 /// desktop widths, with an expandable navigation rail.

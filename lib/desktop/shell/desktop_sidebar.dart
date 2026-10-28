@@ -69,6 +69,19 @@ class DesktopSidebar extends ConsumerWidget {
             const SizedBox(height: 8),
             toggle(),
             const SizedBox(height: 12),
+            IconButton(
+              tooltip: tr('Start recording'),
+              icon: const Icon(
+                Icons.mic_none_rounded,
+                color: SpeakrColors.recordRed,
+              ),
+              style: IconButton.styleFrom(
+                backgroundColor: !onLibrary
+                    ? SpeakrColors.bgAlt
+                    : Colors.transparent,
+              ),
+              onPressed: () => context.go('/live'),
+            ),
             for (final entry in [
               ('all', 'All recordings', Icons.graphic_eq_rounded),
               ('highlighted', 'Highlighted', Icons.star_border_rounded),
@@ -80,7 +93,7 @@ class DesktopSidebar extends ConsumerWidget {
                 child: IconButton(
                   tooltip: tr(entry.$2),
                   style: IconButton.styleFrom(
-                    backgroundColor: filter.statusKey == entry.$1
+                    backgroundColor: onLibrary && filter.statusKey == entry.$1
                         ? SpeakrColors.bgAlt
                         : Colors.transparent,
                   ),
@@ -138,6 +151,13 @@ class DesktopSidebar extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     _NavItem(
+                      label: tr('Start recording'),
+                      icon: Icons.mic_none_rounded,
+                      iconColor: SpeakrColors.recordRed,
+                      active: active == DesktopShellRoute.recording,
+                      onTap: () => context.go('/live'),
+                    ),
+                    _NavItem(
                       label: tr("All recordings"),
                       count: totalCount,
                       active: onLibrary && noFilters,
@@ -194,7 +214,7 @@ class DesktopSidebar extends ConsumerWidget {
                         _NavItem(
                           label: t.name,
                           dot: parseHexColor(t.color),
-                          active: filter.tagId == t.id,
+                          active: onLibrary && filter.tagId == t.id,
                           onTap: () => _selectTag(ref, context, t.id),
                         ),
                     ],

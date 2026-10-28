@@ -90,7 +90,10 @@ final routerProvider = Provider<GoRouter>((ref) {
           builder: (_, c) =>
               (!kIsWeb && defaultTargetPlatform == TargetPlatform.windows) ||
                   isDesktopConstraints(c)
-              ? const LiveDesktopScreen()
+              ? const DesktopShell(
+                  active: DesktopShellRoute.recording,
+                  child: LiveDesktopScreen(),
+                )
               : const LiveScreen(),
         ),
       ),

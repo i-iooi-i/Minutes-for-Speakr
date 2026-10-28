@@ -196,8 +196,8 @@ class _RecordingActionMenuState extends ConsumerState<RecordingActionMenu> {
       elevation: 12,
       shadowColor: Colors.black54,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(14),
-        side: const BorderSide(color: Color(0xFF41494E)),
+        borderRadius: BorderRadius.circular(12),
+        side: const BorderSide(color: SpeakrColors.line),
       ),
       position: PopupMenuPosition.under,
       offset: const Offset(0, 6),

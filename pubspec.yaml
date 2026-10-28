@@ -1,7 +1,7 @@
 name: speakr_app
 description: "Mobile and desktop client for self-hosted Speakr."
 publish_to: "none"
-version: 0.3.10+16
+version: 0.3.11+17
 
 environment:
   sdk: ^3.11.0
