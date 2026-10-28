@@ -19,7 +19,7 @@ final sidebarSearchFocusProvider = Provider<FocusNode>((ref) {
   return node;
 });
 
-/// 240 px persistent sidebar: record CTA, search, nav items, folders, tags,
+/// Persistent sidebar: search, nav items, folders, tags,
 /// user chip. Reads the same Library providers the main list uses and writes
 /// folder/tag/status selections back through [libraryFilterProvider].
 class DesktopSidebar extends ConsumerWidget {
@@ -96,30 +96,27 @@ class DesktopSidebar extends ConsumerWidget {
                         _NavItem(
                           label: f.name,
                           count: countForFolder(f.id),
-                          dot: parseHexColor(f.color),
+                          icon: Icons.folder_outlined,
                           active: onLibrary && filter.folderId == f.id,
                           onTap: () => _selectFolder(ref, context, f.id),
                         ),
                     ],
                     if (tags.isNotEmpty) ...[
-                      const SizedBox(height: 14),
-                      _SectionLabel(tr("Tags")),
-                      const SizedBox(height: 4),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 14),
-                        child: Wrap(
-                          spacing: 4,
-                          runSpacing: 4,
-                          children: [
-                            for (final t in tags)
-                              _TagPill(
-                                tag: t,
-                                active: filter.tagId == t.id,
-                                onTap: () => _selectTag(ref, context, t.id),
-                              ),
-                          ],
+                      const Padding(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
                         ),
+                        child: Divider(height: 1, color: SpeakrColors.line),
                       ),
+                      _SectionLabel(tr("Tags")),
+                      for (final t in tags)
+                        _NavItem(
+                          label: t.name,
+                          dot: parseHexColor(t.color),
+                          active: filter.tagId == t.id,
+                          onTap: () => _selectTag(ref, context, t.id),
+                        ),
                     ],
                   ],
                 ),
@@ -258,6 +255,7 @@ class _NavItem extends StatelessWidget {
     required this.label,
     this.count,
     this.dot,
+    this.icon,
     required this.active,
     required this.onTap,
   });
@@ -265,6 +263,7 @@ class _NavItem extends StatelessWidget {
   final String label;
   final int? count;
   final Color? dot;
+  final IconData? icon;
   final bool active;
   final VoidCallback onTap;
 
@@ -281,7 +280,7 @@ class _NavItem extends StatelessWidget {
           borderRadius: BorderRadius.circular(9),
           onTap: onTap,
           child: Container(
-            padding: const EdgeInsets.fromLTRB(12, 11, 12, 11),
+            padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
             decoration: BoxDecoration(
               color: active ? SpeakrColors.bgAlt : Colors.transparent,
               borderRadius: BorderRadius.circular(9),
@@ -290,11 +289,12 @@ class _NavItem extends StatelessWidget {
               children: [
                 if (dot == null) ...[
                   Icon(
-                    label == tr("All recordings")
-                        ? Icons.library_music_outlined
-                        : label == tr("Highlighted")
-                        ? Icons.star_border_rounded
-                        : Icons.graphic_eq_rounded,
+                    icon ??
+                        (label == tr("All recordings")
+                            ? Icons.library_music_outlined
+                            : label == tr("Highlighted")
+                            ? Icons.star_border_rounded
+                            : Icons.graphic_eq_rounded),
                     size: 17,
                     color: SpeakrColors.ink2,
                   ),
@@ -355,44 +355,6 @@ class _SectionLabel extends StatelessWidget {
           size: 9.5,
           color: SpeakrColors.muted,
           letterSpacing: 1.5,
-        ),
-      ),
-    );
-  }
-}
-
-class _TagPill extends StatelessWidget {
-  const _TagPill({
-    required this.tag,
-    required this.active,
-    required this.onTap,
-  });
-
-  final Tag tag;
-  final bool active;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    LanguageScope.watch(context);
-    final c = parseHexColor(tag.color);
-    return InkWell(
-      borderRadius: BorderRadius.circular(3),
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
-        decoration: BoxDecoration(
-          color: active ? c : Colors.transparent,
-          border: Border.all(color: active ? c : c.withValues(alpha: 0.2)),
-          borderRadius: BorderRadius.circular(3),
-        ),
-        child: Text(
-          tag.name.toUpperCase(),
-          style: SpeakrText.mono(
-            size: 10,
-            color: active ? SpeakrColors.bg : c,
-            letterSpacing: 1,
-          ),
         ),
       ),
     );

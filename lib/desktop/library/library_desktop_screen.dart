@@ -193,7 +193,7 @@ class _Header extends StatelessWidget {
       decoration: const BoxDecoration(
         border: Border(bottom: BorderSide(color: SpeakrColors.line)),
       ),
-      padding: const EdgeInsets.fromLTRB(40, 28, 40, 18),
+      padding: const EdgeInsets.fromLTRB(28, 22, 28, 18),
       child: LayoutBuilder(
         builder: (context, constraints) {
           final title = Column(
@@ -227,12 +227,12 @@ class _Header extends StatelessWidget {
               Text(
                 folder?.name ?? tr("Recordings"),
                 style: SpeakrText.serif(
-                  size: 32,
+                  size: 28,
                   height: 1,
                   weight: FontWeight.w400,
                 ),
               ),
-              const SizedBox(height: 10),
+              const SizedBox(height: 8),
               Text(
                 items.isEmpty
                     ? tr("No recordings yet")
@@ -1123,7 +1123,7 @@ class _GridCardState extends ConsumerState<_GridCard> {
                   ),
                 ],
               ),
-              const SizedBox(height: 10),
+              const SizedBox(height: 8),
               Text(
                 r.title?.isNotEmpty == true
                     ? r.title!
@@ -1132,7 +1132,7 @@ class _GridCardState extends ConsumerState<_GridCard> {
                 overflow: TextOverflow.ellipsis,
                 style: SpeakrText.serif(size: 17, height: 1.25),
               ),
-              const SizedBox(height: 10),
+              const SizedBox(height: 8),
               Expanded(
                 child: Text(
                   (r.summary?.isNotEmpty ?? false) ? r.summary! : '—',
@@ -1257,7 +1257,7 @@ class _PendingGridCardState extends ConsumerState<_PendingGridCard>
                   ),
                 ],
               ),
-              const SizedBox(height: 10),
+              const SizedBox(height: 8),
               Text(
                 name,
                 maxLines: 2,

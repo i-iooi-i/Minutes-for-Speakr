@@ -14,6 +14,8 @@ import '../../features/detail/detail_actions.dart';
 import '../../features/detail/detail_controller.dart';
 import '../../features/detail/speaker_review_screen.dart';
 import '../../features/detail/tabs/chat_tab.dart';
+import '../../features/detail/tabs/notes_tab.dart';
+import '../../features/detail/tabs/recording_stats_tab.dart';
 import '../../features/detail/tabs/summary_tab.dart';
 import '../../features/library/library_controller.dart';
 import '../../services/credentials_store.dart';
@@ -470,7 +472,7 @@ class _TitleBlock extends ConsumerWidget {
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(32, 24, 32, 18),
+      padding: const EdgeInsets.fromLTRB(28, 18, 28, 14),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -540,7 +542,7 @@ class _TitleBlock extends ConsumerWidget {
                   ? recording.title!
                   : tr("Untitled recording"),
               style: SpeakrText.serif(
-                size: 28,
+                size: 25,
                 height: 1.1,
                 weight: FontWeight.w400,
               ),
@@ -769,7 +771,12 @@ class _RightColumn extends StatelessWidget {
   final int tab;
   final ValueChanged<int> onTab;
 
-  static List<String> get _labels => [tr("Summary"), tr("Chat")];
+  static List<String> get _labels => [
+    tr("Summary"),
+    tr("Chat"),
+    tr("Notes"),
+    tr("Statistics"),
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -827,6 +834,8 @@ class _RightColumn extends StatelessWidget {
               children: [
                 SummaryTab(recordingId: recordingId),
                 ChatTab(recordingId: recordingId),
+                NotesTab(recordingId: recordingId),
+                RecordingStatsTab(recordingId: recordingId),
               ],
             ),
           ),

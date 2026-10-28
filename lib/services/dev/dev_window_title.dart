@@ -1,7 +1,6 @@
 import 'dart:io' show Platform, Process, ProcessException;
 
 import 'package:flutter/foundation.dart' show kDebugMode, kIsWeb;
-import 'package:package_info_plus/package_info_plus.dart';
 
 import '../../features/live/mini/mini_window_native.dart';
 
@@ -9,8 +8,7 @@ import '../../features/live/mini/mini_window_native.dart';
 ///
 /// In Flutter debug mode the title becomes `Speakr — <branch>` so
 /// simultaneously-running worktree instances are distinguishable in the
-/// taskbar. In release builds it becomes `Speakr v<version>` (from the build's
-/// [PackageInfo]). No-op on web and non-Windows platforms. Failure is silent —
+/// taskbar. In release builds it becomes `Minutes`. No-op on web and non-Windows platforms. Failure is silent —
 /// the title is cosmetic and must never break startup, so the default native
 /// title simply stays.
 Future<void> applyDevBranchTitleIfDebug() async {
@@ -28,10 +26,7 @@ Future<void> applyDevBranchTitleIfDebug() async {
       if (branch.isEmpty || branch == 'HEAD') return;
       await MiniWindowNative.setMainWindowTitle('Minutes — $branch');
     } else {
-      final info = await PackageInfo.fromPlatform();
-      await MiniWindowNative.setMainWindowTitle(
-        'Minutes v${info.version}+${info.buildNumber}',
-      );
+      await MiniWindowNative.setMainWindowTitle('Minutes');
     }
   } on ProcessException {
     // git not on PATH — leave default title.

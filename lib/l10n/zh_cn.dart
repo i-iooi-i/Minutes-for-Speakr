@@ -1,5 +1,21 @@
 // UI copy only. Keep API values, user content and diagnostic logs unchanged.
 const zhCN = <String, String>{
+  "Notes": "笔记",
+  "Saving…": "正在保存…",
+  "Unknown speaker": "未识别发言人",
+  "Some timestamps are missing. Durations and shares are unavailable.":
+      "部分片段缺少时间戳，暂不显示发言时长和占比。",
+  "Share of measured speech; simultaneous speakers may overlap.":
+      "占比基于已识别的发言时长；不同发言人的时间可能重叠。",
+  "Could not load statistics. Retry": "统计加载失败，点击重试",
+  "Could not save. Your edits are still here.": "保存失败，编辑内容已保留，请重试。",
+  "Add your meeting notes here.": "在这里记录想法、重点和待办。",
+  "Could not load notes. Retry": "笔记加载失败，点击重试",
+  "Markdown supported": "支持 Markdown",
+  "Transcript segments": "转录片段",
+  "Speaker activity": "发言分布",
+  "Recording overview": "录音概览",
+  "Statistics": "统计",
   "Play": "播放",
   "Pause": "暂停",
   "Pending": "等待处理",

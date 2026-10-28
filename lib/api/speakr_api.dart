@@ -64,6 +64,15 @@ class SpeakrApi {
     return Recording.fromJson(_unwrap(res, 'recording'));
   }
 
+  Future<String> getRecordingNotes(int id) async {
+    final res = await _get<Map<String, dynamic>>('/recordings/$id/notes');
+    return res['notes'] as String? ?? '';
+  }
+
+  Future<void> saveRecordingNotes(int id, String notes) async {
+    await _put<Map<String, dynamic>>('/recordings/$id/notes', {'notes': notes});
+  }
+
   Future<RecordingStatusResponse> getStatus(int id) async {
     final res = await _get<Map<String, dynamic>>('/recordings/$id/status');
     return RecordingStatusResponse.fromJson(res);
