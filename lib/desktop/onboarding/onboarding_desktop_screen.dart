@@ -1,3 +1,4 @@
+import 'package:speakr_app/l10n/strings.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -27,31 +28,35 @@ class _OnboardingDesktopScreenState
   bool _connecting = false;
   String? _error;
 
-  static const _slides = [
+  static List<_SlideCopy> get _slides => [
     _SlideCopy(
       eyebrow: 'Minutes for Speakr',
-      headLeading: 'The quiet way to ',
-      headEm: 'capture',
-      headTrailing: ' a meeting.',
-      sub:
-          "Hit record. We'll handle the transcript, the summary, and the search.",
+      headLeading: tr("The quiet way to "),
+      headEm: tr("capture"),
+      headTrailing: tr(" a meeting."),
+      sub: tr(
+        "Hit record. We'll handle the transcript, the summary, and the search.",
+      ),
       art: _Art.wave,
     ),
     _SlideCopy(
-      eyebrow: 'Self-hosted',
-      headLeading: 'Your audio. ',
-      headEm: 'Your server.',
+      eyebrow: tr("Self-hosted"),
+      headLeading: tr("Your audio. "),
+      headEm: tr("Your server."),
       headTrailing: '',
-      sub:
-          'Speakr runs on your own machine. Recordings never leave the box you point it at.',
+      sub: tr(
+        "Speakr runs on your own machine. Recordings never leave the box you point it at.",
+      ),
       art: _Art.server,
     ),
     _SlideCopy(
-      eyebrow: 'Get started',
-      headLeading: "Let's connect to ",
-      headEm: 'your Speakr.',
+      eyebrow: tr("Get started"),
+      headLeading: tr("Let's connect to "),
+      headEm: tr("your Speakr."),
       headTrailing: '',
-      sub: 'Paste your server URL and an API token from Settings → API Tokens.',
+      sub: tr(
+        "Paste your server URL and an API token from Settings → API Tokens.",
+      ),
       art: _Art.form,
     ),
   ];
@@ -67,7 +72,7 @@ class _OnboardingDesktopScreenState
     final url = _urlCtrl.text.trim();
     final token = _tokenCtrl.text.trim();
     if (url.isEmpty || token.isEmpty) {
-      setState(() => _error = 'Server URL and API token are required.');
+      setState(() => _error = tr("Server URL and API token are required."));
       return;
     }
     final normalizedUrl = url.endsWith('/')
@@ -101,17 +106,19 @@ class _OnboardingDesktopScreenState
       String msg;
       final code = e.response?.statusCode;
       if (code == 401 || code == 403) {
-        msg = 'Token rejected by the server (HTTP $code).';
+        msg = tr("Token rejected by the server (HTTP {0}).", [code]);
       } else if (code != null) {
-        msg = 'Server replied with HTTP $code.';
+        msg = tr("Server replied with HTTP {0}.", [code]);
       } else {
-        msg = 'Could not reach $normalizedUrl. Check the URL and network.';
+        msg = tr("Could not reach {0}. Check the URL and network.", [
+          normalizedUrl,
+        ]);
       }
       if (!mounted) return;
       setState(() => _error = msg);
     } catch (e) {
       if (!mounted) return;
-      setState(() => _error = 'Unexpected error: $e');
+      setState(() => _error = tr("Unexpected error: {0}", [e]));
     } finally {
       probeDio.close(force: true);
       if (mounted) setState(() => _connecting = false);
@@ -120,6 +127,7 @@ class _OnboardingDesktopScreenState
 
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     final slide = _slides[_step];
     return Scaffold(
       backgroundColor: SpeakrColors.bg,
@@ -175,6 +183,11 @@ class _OnboardingDesktopScreenState
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  const Align(
+                    alignment: Alignment.centerRight,
+                    child: LanguagePicker(),
+                  ),
+                  const SizedBox(height: 20),
                   Text(
                     slide.eyebrow.toUpperCase(),
                     style: SpeakrText.mono(
@@ -258,7 +271,9 @@ class _OnboardingDesktopScreenState
                       const SizedBox(width: 12),
                       _ContinueButton(
                         connecting: _connecting,
-                        label: _step < 2 ? 'Continue' : 'Connect to server',
+                        label: _step < 2
+                            ? tr("Continue")
+                            : tr("Connect to server"),
                         onTap: _connecting
                             ? null
                             : () {
@@ -327,7 +342,7 @@ class _OnboardingDesktopScreenState
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'SERVER URL',
+                tr("SERVER URL"),
                 style: SpeakrText.mono(
                   size: 11,
                   color: SpeakrColors.muted,
@@ -357,7 +372,7 @@ class _OnboardingDesktopScreenState
               ),
               const SizedBox(height: 14),
               Text(
-                'API TOKEN',
+                tr("API TOKEN"),
                 style: SpeakrText.mono(
                   size: 11,
                   color: SpeakrColors.muted,
@@ -422,13 +437,14 @@ class _ConnectForm extends StatelessWidget {
   final VoidCallback onSubmit;
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     return ConstrainedBox(
       constraints: const BoxConstraints(maxWidth: 440),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'SERVER URL',
+            tr("SERVER URL"),
             style: SpeakrText.mono(
               size: 11,
               color: SpeakrColors.muted,
@@ -457,7 +473,7 @@ class _ConnectForm extends StatelessWidget {
           ),
           const SizedBox(height: 14),
           Text(
-            'API TOKEN',
+            tr("API TOKEN"),
             style: SpeakrText.mono(
               size: 11,
               color: SpeakrColors.muted,
@@ -496,13 +512,14 @@ class _BackButton extends StatelessWidget {
   final VoidCallback? onTap;
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     return TextButton(
       onPressed: visible ? onTap : null,
       style: TextButton.styleFrom(
         foregroundColor: visible ? SpeakrColors.ink2 : Colors.transparent,
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       ),
-      child: const Text('Back'),
+      child: Text(tr("Back")),
     );
   }
 }
@@ -518,6 +535,7 @@ class _ContinueButton extends StatelessWidget {
   final VoidCallback? onTap;
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     return Material(
       color: SpeakrColors.ink,
       shape: const StadiumBorder(),

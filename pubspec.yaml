@@ -1,13 +1,16 @@
 name: speakr_app
 description: "Mobile and desktop client for self-hosted Speakr."
 publish_to: "none"
-version: 0.3.0+1
+version: 0.3.0+6
 
 environment:
   sdk: ^3.11.0
 
 dependencies:
   flutter:
+    sdk: flutter
+
+  flutter_localizations:
     sdk: flutter
 
   cupertino_icons: ^1.0.9

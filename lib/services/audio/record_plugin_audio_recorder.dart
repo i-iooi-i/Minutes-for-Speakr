@@ -1,3 +1,5 @@
+import 'package:speakr_app/l10n/strings.dart';
+
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
@@ -28,9 +30,8 @@ class RecordPluginAudioRecorder implements LiveAudioRecorder {
   bool get supportsLiveMicToggle => false;
 
   @override
-  Stream<double> get audioLevel => _recorder
-      .onAmplitudeChanged(const Duration(milliseconds: 50))
-      .map((a) {
+  Stream<double> get audioLevel =>
+      _recorder.onAmplitudeChanged(const Duration(milliseconds: 50)).map((a) {
         // record returns dBFS in `a.current` (≤0 dB, with −160 ≈ silence).
         // dB-linear VU mapping: −55 dBFS → 0, −12 dBFS → 1. Matches the
         // Windows / Android native sides so the breathing dot reads the
@@ -65,14 +66,12 @@ class RecordPluginAudioRecorder implements LiveAudioRecorder {
     String? exePath,
     required String matchKey,
     required AllowlistKind kind,
-  }) async =>
-      const <int>[];
+  }) async => const <int>[];
 
   @override
   Future<List<CaptureWindow>> findCaptureWindows({
     List<int> pids = const [],
-  }) async =>
-      const <CaptureWindow>[];
+  }) async => const <CaptureWindow>[];
 
   @override
   Future<void> start({
@@ -83,11 +82,14 @@ class RecordPluginAudioRecorder implements LiveAudioRecorder {
     int? videoHwnd,
   }) async {
     if (videoHwnd != null) {
-      throw UnsupportedError('Video capture is not supported on this platform.');
+      throw UnsupportedError(
+        tr("Video capture is not supported on this platform."),
+      );
     }
     if (systemMode != SystemAudioMode.off) {
       throw UnsupportedError(
-          'System audio capture is not supported on this platform.');
+        tr("System audio capture is not supported on this platform."),
+      );
     }
     await _recorder.start(
       const RecordConfig(
@@ -127,7 +129,8 @@ class RecordPluginAudioRecorder implements LiveAudioRecorder {
   }) async {
     if (mode != SystemAudioMode.off) {
       throw UnsupportedError(
-          'System audio capture is not supported on this platform.');
+        tr("System audio capture is not supported on this platform."),
+      );
     }
     // Disabling a never-enabled source is a no-op.
   }

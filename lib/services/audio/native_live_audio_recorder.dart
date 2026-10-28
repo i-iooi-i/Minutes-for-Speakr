@@ -1,3 +1,5 @@
+import 'package:speakr_app/l10n/strings.dart';
+
 import 'dart:async';
 
 import 'package:flutter/services.dart';
@@ -43,8 +45,7 @@ class NativeLiveAudioRecorder implements LiveAudioRecorder {
     }
     if (supportsSystem) {
       try {
-        final r =
-            await _channel.invokeMethod<bool>('supportsProcessLoopback');
+        final r = await _channel.invokeMethod<bool>('supportsProcessLoopback');
         supportsProcess = r ?? false;
       } on MissingPluginException {
         supportsProcess = false;
@@ -53,7 +54,10 @@ class NativeLiveAudioRecorder implements LiveAudioRecorder {
       }
     }
     return NativeLiveAudioRecorder._(
-        supportsSystem, supportsProcess, await probeVideoSupport());
+      supportsSystem,
+      supportsProcess,
+      await probeVideoSupport(),
+    );
   }
 
   /// Whether the native recorder can record a window as video. Safe to
@@ -156,14 +160,12 @@ class NativeLiveAudioRecorder implements LiveAudioRecorder {
   }) async {
     if (!_supportsProcessLoopback && !_supportsVideo) return const <int>[];
     try {
-      final r = await _channel.invokeListMethod<int>(
-        'findProcessPids',
-        <String, dynamic>{
-          if (exePath != null) 'exePath': exePath,
-          'matchKey': matchKey,
-          'kind': kind.name,
-        },
-      );
+      final r = await _channel
+          .invokeListMethod<int>('findProcessPids', <String, dynamic>{
+            if (exePath != null) 'exePath': exePath,
+            'matchKey': matchKey,
+            'kind': kind.name,
+          });
       return r ?? const <int>[];
     } on PlatformException {
       return const <int>[];
@@ -197,24 +199,28 @@ class NativeLiveAudioRecorder implements LiveAudioRecorder {
     int? videoHwnd,
   }) async {
     if (videoHwnd != null && !_supportsVideo) {
-      throw UnsupportedError('Video capture is not supported on this platform.');
+      throw UnsupportedError(
+        tr("Video capture is not supported on this platform."),
+      );
     }
     if (systemMode != SystemAudioMode.off && !_supportsSystemAudio) {
       throw UnsupportedError(
-          'System audio capture is not supported on this platform.');
+        tr("System audio capture is not supported on this platform."),
+      );
     }
     if (systemMode == SystemAudioMode.processOnly &&
         !_supportsProcessLoopback) {
       throw UnsupportedError(
-          'Per-process system audio capture is not supported on this Windows '
-          'build. Use systemMode allSystem instead.');
+        tr(
+          "Per-process system audio capture is not supported on this Windows build. Use systemMode allSystem instead.",
+        ),
+      );
     }
     await _channel.invokeMethod<void>('start', <String, dynamic>{
       'path': path,
       'micEnabled': micEnabled,
       'systemMode': _systemModeToChannel(systemMode),
-      if (processLoopbackPid != null)
-        'processLoopbackPid': processLoopbackPid,
+      if (processLoopbackPid != null) 'processLoopbackPid': processLoopbackPid,
       if (videoHwnd != null) 'videoHwnd': videoHwnd,
     });
   }
@@ -231,10 +237,9 @@ class NativeLiveAudioRecorder implements LiveAudioRecorder {
 
   @override
   Future<void> setMicEnabled(bool enabled) async {
-    await _channel.invokeMethod<void>(
-      'setMicEnabled',
-      <String, dynamic>{'enabled': enabled},
-    );
+    await _channel.invokeMethod<void>('setMicEnabled', <String, dynamic>{
+      'enabled': enabled,
+    });
   }
 
   @override
@@ -244,29 +249,27 @@ class NativeLiveAudioRecorder implements LiveAudioRecorder {
   }) async {
     if (mode != SystemAudioMode.off && !_supportsSystemAudio) {
       throw UnsupportedError(
-          'System audio capture is not supported on this platform.');
+        tr("System audio capture is not supported on this platform."),
+      );
     }
     if (mode == SystemAudioMode.processOnly && !_supportsProcessLoopback) {
       throw UnsupportedError(
-          'Per-process system audio capture is not supported on this Windows '
-          'build.');
+        tr(
+          "Per-process system audio capture is not supported on this Windows build.",
+        ),
+      );
     }
-    await _channel.invokeMethod<void>(
-      'setSystemMode',
-      <String, dynamic>{
-        'mode': _systemModeToChannel(mode),
-        if (processLoopbackPid != null)
-          'processLoopbackPid': processLoopbackPid,
-      },
-    );
+    await _channel.invokeMethod<void>('setSystemMode', <String, dynamic>{
+      'mode': _systemModeToChannel(mode),
+      if (processLoopbackPid != null) 'processLoopbackPid': processLoopbackPid,
+    });
   }
 
   @override
   Future<void> setVideoTarget(int? hwnd) async {
-    await _channel.invokeMethod<void>(
-      'setVideoTarget',
-      <String, dynamic>{'hwnd': hwnd ?? 0},
-    );
+    await _channel.invokeMethod<void>('setVideoTarget', <String, dynamic>{
+      'hwnd': hwnd ?? 0,
+    });
   }
 
   @override
@@ -274,7 +277,7 @@ class NativeLiveAudioRecorder implements LiveAudioRecorder {
     try {
       return await _channel.invokeMethod<String>('stop');
     } on PlatformException catch (e) {
-      throw Exception(e.message ?? 'Recorder failed to stop.');
+      throw Exception(e.message ?? tr("Recorder failed to stop."));
     }
   }
 

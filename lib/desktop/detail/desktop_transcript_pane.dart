@@ -1,3 +1,4 @@
+import 'package:speakr_app/l10n/strings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:just_audio/just_audio.dart';
@@ -31,6 +32,7 @@ class DesktopTranscriptPane extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    LanguageScope.watch(context);
     final async = ref.watch(transcriptProvider(recordingId));
     return async.when(
       loading: () => const Center(
@@ -45,7 +47,7 @@ class DesktopTranscriptPane extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              "COULDN'T LOAD TRANSCRIPT",
+              tr("COULDN'T LOAD TRANSCRIPT"),
               style: SpeakrText.mono(
                 size: 10,
                 color: SpeakrColors.danger,
@@ -62,7 +64,7 @@ class DesktopTranscriptPane extends ConsumerWidget {
           return Padding(
             padding: const EdgeInsets.all(28),
             child: Text(
-              'Transcript not available yet.',
+              tr("Transcript not available yet."),
               style: SpeakrText.serif(
                 size: 15,
                 color: SpeakrColors.ink2,

@@ -1,3 +1,5 @@
+import 'package:speakr_app/l10n/strings.dart';
+
 import 'dart:async';
 
 import 'package:collection/collection.dart';
@@ -113,12 +115,13 @@ class _DetailDesktopScreenState extends ConsumerState<DetailDesktopScreen> {
     await Clipboard.setData(ClipboardData(text: buf.toString()));
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Transcript copied to clipboard')),
+      SnackBar(content: Text(tr("Transcript copied to clipboard"))),
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     final asyncR = ref.watch(recordingDetailProvider(widget.recordingId));
     return asyncR.when(
       loading: () => const Center(
@@ -133,7 +136,7 @@ class _DetailDesktopScreenState extends ConsumerState<DetailDesktopScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              "COULDN'T LOAD RECORDING",
+              tr("COULDN'T LOAD RECORDING"),
               style: SpeakrText.mono(
                 size: 10,
                 color: SpeakrColors.danger,
@@ -185,6 +188,7 @@ class _Body extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     return Container(
       color: SpeakrColors.bg,
       child: Column(
@@ -236,10 +240,12 @@ class _BreadcrumbBar extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    LanguageScope.watch(context);
     final date = recording.meetingDate ?? recording.createdAt;
     final dayLabel = date == null ? '—' : formatRelativeDay(date).toUpperCase();
-    final pref = ref.watch(timeFormatPreferenceProvider).asData?.value
-        ?? TimeFormatPreference.system;
+    final pref =
+        ref.watch(timeFormatPreferenceProvider).asData?.value ??
+        TimeFormatPreference.system;
     final use24 = resolveUse24Hour(pref, context);
     final time = date == null
         ? ''
@@ -277,14 +283,16 @@ class _BreadcrumbBar extends ConsumerWidget {
           const Spacer(),
           DesktopToolButton(
             icon: SpeakrIcon.star,
-            tooltip: highlighted ? 'Highlighted' : 'Highlight',
+            tooltip: highlighted ? tr("Highlighted") : tr("Highlight"),
             selected: highlighted,
             onTap: () => toggleRecordingField(
               context,
               ref,
               recordingId: recording.id,
               patch: {'is_highlighted': !highlighted},
-              successMessage: highlighted ? 'Highlight removed' : 'Highlighted',
+              successMessage: highlighted
+                  ? tr("Highlight removed")
+                  : tr("Highlighted"),
             ),
           ),
           const SizedBox(width: 6),
@@ -292,35 +300,37 @@ class _BreadcrumbBar extends ConsumerWidget {
             items: [
               DesktopActionItem(
                 icon: SpeakrIcon.star,
-                label: highlighted ? 'Remove highlight' : 'Highlight recording',
+                label: highlighted
+                    ? tr("Remove highlight")
+                    : tr("Highlight recording"),
                 onTap: () => toggleRecordingField(
                   context,
                   ref,
                   recordingId: recording.id,
                   patch: {'is_highlighted': !highlighted},
                   successMessage: highlighted
-                      ? 'Highlight removed'
-                      : 'Highlighted',
+                      ? tr("Highlight removed")
+                      : tr("Highlighted"),
                 ),
               ),
               DesktopActionItem(
                 icon: SpeakrIcon.flag,
-                label: inInbox ? 'Remove from inbox' : 'Move to inbox',
+                label: inInbox ? tr("Remove from inbox") : tr("Move to inbox"),
                 onTap: () => toggleRecordingField(
                   context,
                   ref,
                   recordingId: recording.id,
                   patch: {'is_inbox': !inInbox},
                   successMessage: inInbox
-                      ? 'Removed from inbox'
-                      : 'Moved to inbox',
+                      ? tr("Removed from inbox")
+                      : tr("Moved to inbox"),
                 ),
               ),
               DesktopActionItem(
                 dividerAbove: true,
                 icon: SpeakrIcon.search,
-                label: 'Edit speakers',
-                subtitle: 'Rename detected speakers',
+                label: tr("Edit speakers"),
+                subtitle: tr("Rename detected speakers"),
                 onTap: () => Navigator.of(context).push(
                   MaterialPageRoute(
                     builder: (_) =>
@@ -330,8 +340,8 @@ class _BreadcrumbBar extends ConsumerWidget {
               ),
               DesktopActionItem(
                 icon: SpeakrIcon.mic,
-                label: 'Reprocess transcription',
-                subtitle: 'Replaces the current transcript',
+                label: tr("Reprocess transcription"),
+                subtitle: tr("Replaces the current transcript"),
                 onTap: () => reprocessRecording(
                   context,
                   ref,
@@ -341,8 +351,8 @@ class _BreadcrumbBar extends ConsumerWidget {
               ),
               DesktopActionItem(
                 icon: SpeakrIcon.flagBookmark,
-                label: 'Reprocess summary',
-                subtitle: 'Regenerates the summary from the transcript',
+                label: tr("Reprocess summary"),
+                subtitle: tr("Regenerates the summary from the transcript"),
                 onTap: () => reprocessRecording(
                   context,
                   ref,
@@ -353,19 +363,16 @@ class _BreadcrumbBar extends ConsumerWidget {
               DesktopActionItem(
                 dividerAbove: true,
                 icon: SpeakrIcon.trash,
-                label: 'Delete recording',
-                subtitle: 'Removes the recording, transcript, and audio',
+                label: tr("Delete recording"),
+                subtitle: tr("Removes the recording, transcript, and audio"),
                 danger: true,
-                onTap: () => deleteRecording(
-                  context,
-                  ref,
-                  recordingId: recording.id,
-                ),
+                onTap: () =>
+                    deleteRecording(context, ref, recordingId: recording.id),
               ),
             ],
             builder: (context, toggle) => DesktopToolButton(
               icon: SpeakrIcon.more,
-              tooltip: 'More',
+              tooltip: tr("More"),
               onTap: toggle,
             ),
           ),
@@ -380,6 +387,7 @@ class _BackChip extends StatelessWidget {
   final VoidCallback onTap;
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     return Material(
       color: Colors.white,
       shape: RoundedRectangleBorder(
@@ -401,7 +409,7 @@ class _BackChip extends StatelessWidget {
               ),
               const SizedBox(width: 2),
               Text(
-                'Recordings',
+                tr("Recordings"),
                 style: SpeakrText.sans(size: 12, color: SpeakrColors.ink2),
               ),
             ],
@@ -418,6 +426,7 @@ class _TitleBlock extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    LanguageScope.watch(context);
     // The recording's embedded folder is a stub without a color (and the
     // detail endpoint may omit it), so resolve against /folders like the
     // library does.
@@ -498,7 +507,7 @@ class _TitleBlock extends ConsumerWidget {
             child: Text(
               recording.title?.isNotEmpty == true
                   ? recording.title!
-                  : 'Untitled recording',
+                  : tr("Untitled recording"),
               style: SpeakrText.serif(
                 size: 34,
                 height: 1.1,
@@ -537,6 +546,7 @@ class _PlayerBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     return Container(
       margin: const EdgeInsets.fromLTRB(32, 0, 32, 18),
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
@@ -679,6 +689,7 @@ class _TranscriptColumn extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    LanguageScope.watch(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -690,7 +701,7 @@ class _TranscriptColumn extends ConsumerWidget {
           child: Row(
             children: [
               Text(
-                'TRANSCRIPT',
+                tr("TRANSCRIPT"),
                 style: SpeakrText.mono(
                   size: 10,
                   color: SpeakrColors.muted,
@@ -698,7 +709,7 @@ class _TranscriptColumn extends ConsumerWidget {
                 ),
               ),
               const Spacer(),
-              DesktopSmallButton(label: 'Copy', onTap: onCopy),
+              DesktopSmallButton(label: tr("Copy"), onTap: onCopy),
             ],
           ),
         ),
@@ -723,10 +734,11 @@ class _RightColumn extends StatelessWidget {
   final int tab;
   final ValueChanged<int> onTab;
 
-  static const _labels = ['Summary', 'Chat'];
+  static List<String> get _labels => [tr("Summary"), tr("Chat")];
 
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     return Container(
       color: SpeakrColors.bg,
       child: Column(

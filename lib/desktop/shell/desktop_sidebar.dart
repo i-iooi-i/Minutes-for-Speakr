@@ -1,3 +1,4 @@
+import 'package:speakr_app/l10n/strings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -29,6 +30,7 @@ class DesktopSidebar extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    LanguageScope.watch(context);
     final filter = ref.watch(libraryFilterProvider);
     final asyncItems = ref.watch(libraryItemsProvider);
     final folders = ref.watch(foldersProvider).value ?? const <Folder>[];
@@ -74,20 +76,20 @@ class DesktopSidebar extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     _NavItem(
-                      label: 'All recordings',
+                      label: tr("All recordings"),
                       count: totalCount,
                       active: onLibrary && noFilters,
                       onTap: () => _selectAll(ref, context),
                     ),
                     _NavItem(
-                      label: 'Highlighted',
+                      label: tr("Highlighted"),
                       count: highlightedCount,
                       active: onLibrary && filter.statusKey == 'highlighted',
                       onTap: () => _selectStatus(ref, context, 'highlighted'),
                     ),
                     if (processingCount > 0)
                       _NavItem(
-                        label: 'Processing',
+                        label: tr("Processing"),
                         count: processingCount,
                         dot: SpeakrColors.recordingDot,
                         active: onLibrary && filter.statusKey == 'processing',
@@ -95,7 +97,7 @@ class DesktopSidebar extends ConsumerWidget {
                       ),
                     if (folders.isNotEmpty) ...[
                       const SizedBox(height: 14),
-                      const _SectionLabel('Folders'),
+                      _SectionLabel(tr("Folders")),
                       for (final f in folders)
                         _NavItem(
                           label: f.name,
@@ -107,7 +109,7 @@ class DesktopSidebar extends ConsumerWidget {
                     ],
                     if (tags.isNotEmpty) ...[
                       const SizedBox(height: 14),
-                      const _SectionLabel('Tags'),
+                      _SectionLabel(tr("Tags")),
                       const SizedBox(height: 4),
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 14),
@@ -176,6 +178,7 @@ class _RecordButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     return InkWell(
       borderRadius: BorderRadius.circular(6),
       onTap: onTap,
@@ -198,7 +201,7 @@ class _RecordButton extends StatelessWidget {
             ),
             const SizedBox(width: 9),
             Text(
-              'New recording',
+              tr("New recording"),
               style: SpeakrText.sans(
                 size: 13,
                 weight: FontWeight.w500,
@@ -242,6 +245,7 @@ class _SidebarSearchState extends ConsumerState<_SidebarSearch> {
 
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     final focus = ref.watch(sidebarSearchFocusProvider);
     return Container(
       height: 32,
@@ -271,7 +275,7 @@ class _SidebarSearchState extends ConsumerState<_SidebarSearch> {
                 border: InputBorder.none,
                 enabledBorder: InputBorder.none,
                 focusedBorder: InputBorder.none,
-                hintText: 'Search…',
+                hintText: tr("Search…"),
                 hintStyle: SpeakrText.sans(size: 12, color: SpeakrColors.muted),
               ),
               onChanged: (v) {
@@ -327,6 +331,7 @@ class _NavItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     return InkWell(
       onTap: onTap,
       child: Container(
@@ -386,6 +391,7 @@ class _SectionLabel extends StatelessWidget {
   final String text;
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     return Padding(
       padding: const EdgeInsets.fromLTRB(14, 0, 14, 4),
       child: Text(
@@ -413,6 +419,7 @@ class _TagPill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     final c = parseHexColor(tag.color);
     return InkWell(
       borderRadius: BorderRadius.circular(3),
@@ -442,6 +449,7 @@ class _UserChip extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    LanguageScope.watch(context);
     final asyncCreds = ref.watch(currentCredentialsProvider);
     final baseUrl = asyncCreds.value?.baseUrl ?? '';
     final host = _hostOf(baseUrl);
@@ -465,7 +473,7 @@ class _UserChip extends ConsumerWidget {
                 ),
                 alignment: Alignment.center,
                 child: Text(
-                  'ME',
+                  tr("ME"),
                   style: SpeakrText.serif(
                     size: 11,
                     color: SpeakrColors.bg,

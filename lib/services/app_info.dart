@@ -12,5 +12,5 @@ final packageInfoProvider = FutureProvider<PackageInfo>((ref) async {
 /// build's versionName. Used by the Settings screens.
 final appVersionProvider = FutureProvider<String>((ref) async {
   final info = await ref.watch(packageInfoProvider.future);
-  return info.version;
+  return '${info.version}+${info.buildNumber}';
 });

@@ -1,3 +1,5 @@
+import 'package:speakr_app/l10n/strings.dart';
+
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -75,6 +77,7 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     final asyncR = ref.watch(recordingDetailProvider(widget.recordingId));
     return Scaffold(
       backgroundColor: SpeakrColors.bg,
@@ -94,7 +97,7 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
               children: [
                 _TopBar(date: '', onBack: () => context.pop(), recording: null),
                 const SizedBox(height: 12),
-                const MonoEyebrow('Couldn’t load recording'),
+                MonoEyebrow(tr("Couldn’t load recording")),
                 const SizedBox(height: 8),
                 Text(e.toString(), style: SpeakrText.sans(size: 14)),
               ],
@@ -129,6 +132,7 @@ class _DetailBody extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    LanguageScope.watch(context);
     return Column(
       children: [
         _TopBar(
@@ -150,7 +154,7 @@ class _DetailBody extends ConsumerWidget {
               Text(
                 recording.title?.isNotEmpty == true
                     ? recording.title!
-                    : 'Untitled recording',
+                    : tr("Untitled recording"),
                 style: SpeakrText.serif(size: 26, height: 1.15),
               ),
               if ((recording.participants ?? '').isNotEmpty) ...[
@@ -196,6 +200,7 @@ class _TopBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     final r = recording;
     return Padding(
       padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
@@ -227,6 +232,7 @@ class _MoreSheet extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    LanguageScope.watch(context);
     final inInbox = recording.isInbox;
     final highlighted = recording.isHighlighted;
     return SafeArea(
@@ -238,7 +244,9 @@ class _MoreSheet extends ConsumerWidget {
             ListTile(
               leading: const SpeakrIconView(SpeakrIcon.star),
               title: Text(
-                highlighted ? 'Remove highlight' : 'Highlight recording',
+                highlighted
+                    ? tr("Remove highlight")
+                    : tr("Highlight recording"),
                 style: SpeakrText.sans(size: 14),
               ),
               onTap: () {
@@ -249,15 +257,15 @@ class _MoreSheet extends ConsumerWidget {
                   recordingId: recording.id,
                   patch: {'is_highlighted': !highlighted},
                   successMessage: highlighted
-                      ? 'Highlight removed'
-                      : 'Highlighted',
+                      ? tr("Highlight removed")
+                      : tr("Highlighted"),
                 );
               },
             ),
             ListTile(
               leading: const SpeakrIconView(SpeakrIcon.flag),
               title: Text(
-                inInbox ? 'Remove from inbox' : 'Move to inbox',
+                inInbox ? tr("Remove from inbox") : tr("Move to inbox"),
                 style: SpeakrText.sans(size: 14),
               ),
               onTap: () {
@@ -268,17 +276,20 @@ class _MoreSheet extends ConsumerWidget {
                   recordingId: recording.id,
                   patch: {'is_inbox': !inInbox},
                   successMessage: inInbox
-                      ? 'Removed from inbox'
-                      : 'Moved to inbox',
+                      ? tr("Removed from inbox")
+                      : tr("Moved to inbox"),
                 );
               },
             ),
             const Divider(color: SpeakrColors.line, height: 1),
             ListTile(
               leading: const SpeakrIconView(SpeakrIcon.search),
-              title: Text('Edit speakers', style: SpeakrText.sans(size: 14)),
+              title: Text(
+                tr("Edit speakers"),
+                style: SpeakrText.sans(size: 14),
+              ),
               subtitle: Text(
-                'Rename detected speakers',
+                tr("Rename detected speakers"),
                 style: SpeakrText.sans(size: 12, color: SpeakrColors.muted),
               ),
               onTap: () {
@@ -295,11 +306,11 @@ class _MoreSheet extends ConsumerWidget {
             ListTile(
               leading: const SpeakrIconView(SpeakrIcon.mic),
               title: Text(
-                'Reprocess transcription',
+                tr("Reprocess transcription"),
                 style: SpeakrText.sans(size: 14),
               ),
               subtitle: Text(
-                'Replaces the current transcript',
+                tr("Replaces the current transcript"),
                 style: SpeakrText.sans(size: 12, color: SpeakrColors.muted),
               ),
               onTap: () {
@@ -315,11 +326,11 @@ class _MoreSheet extends ConsumerWidget {
             ListTile(
               leading: const SpeakrIconView(SpeakrIcon.flagBookmark),
               title: Text(
-                'Reprocess summary',
+                tr("Reprocess summary"),
                 style: SpeakrText.sans(size: 14),
               ),
               subtitle: Text(
-                'Regenerates the summary from the transcript',
+                tr("Regenerates the summary from the transcript"),
                 style: SpeakrText.sans(size: 12, color: SpeakrColors.muted),
               ),
               onTap: () {
@@ -336,11 +347,11 @@ class _MoreSheet extends ConsumerWidget {
             ListTile(
               leading: const SpeakrIconView(SpeakrIcon.trash),
               title: Text(
-                'Delete recording',
+                tr("Delete recording"),
                 style: SpeakrText.sans(size: 14, color: SpeakrColors.danger),
               ),
               subtitle: Text(
-                'Removes the recording, transcript, and audio',
+                tr("Removes the recording, transcript, and audio"),
                 style: SpeakrText.sans(size: 12, color: SpeakrColors.muted),
               ),
               onTap: () {
@@ -391,6 +402,7 @@ class _AudioPlayerBarState extends State<_AudioPlayerBar> {
 
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     return Container(
       margin: const EdgeInsets.fromLTRB(16, 0, 16, 14),
       padding: const EdgeInsets.fromLTRB(14, 14, 14, 14),
@@ -536,10 +548,15 @@ class _TabBar extends StatelessWidget {
   const _TabBar({required this.tab, required this.onChanged});
   final int tab;
   final ValueChanged<int> onChanged;
-  static const _labels = ['Summary', 'Transcript', 'Chat'];
+  static List<String> get _labels => [
+    tr("Summary"),
+    tr("Transcript"),
+    tr("Chat"),
+  ];
 
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     return Container(
       decoration: const BoxDecoration(
         border: Border.symmetric(

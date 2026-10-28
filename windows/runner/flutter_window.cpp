@@ -74,6 +74,21 @@ bool FlutterWindow::OnCreate() {
   };
   tray_icon_->on_exit_requested = [this]() { RequestExit(); };
   tray_icon_->Install(GetHandle());
+  tray_channel_->SetMethodCallHandler(
+      [this](const flutter::MethodCall<flutter::EncodableValue>& call,
+             std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result) {
+        if (call.method_name() == "setLanguage") {
+          const auto* language = call.arguments()
+              ? std::get_if<std::string>(call.arguments()) : nullptr;
+          if (tray_icon_ && language) {
+            tray_icon_->SetChinese(*language == "zh");
+          }
+          result->Success();
+        } else {
+          result->NotImplemented();
+        }
+      });
+
 
   SetChildContent(flutter_controller_->view()->GetNativeWindow());
 

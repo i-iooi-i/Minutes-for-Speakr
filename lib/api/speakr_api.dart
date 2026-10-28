@@ -1,3 +1,4 @@
+import 'package:speakr_app/l10n/strings.dart';
 // Thin Dio-based client over the Speakr API v1.
 // One method per OpenAPI operation that the UI actually calls. Other
 // operations from openapi/speakr-openapi.json can be added as needed.
@@ -260,7 +261,7 @@ class SpeakrApi {
     if (res['success'] == false) {
       throw SpeakrApiException(
         null,
-        (res['error'] ?? 'Failed to load suggestions').toString(),
+        (res['error'] ?? tr("Failed to load suggestions")).toString(),
       );
     }
     final raw = res['suggestions'];
@@ -349,7 +350,7 @@ class SpeakrApi {
   SpeakrApiException _toApiException(DioException e) {
     final code = e.response?.statusCode;
     final data = e.response?.data;
-    String msg = e.message ?? 'Network error';
+    String msg = e.message ?? tr("Network error");
     if (data is Map<String, dynamic>) {
       msg = (data['error'] ?? data['message'] ?? msg).toString();
     } else if (data is String && data.isNotEmpty) {

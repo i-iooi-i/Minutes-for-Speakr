@@ -1,3 +1,5 @@
+import 'package:speakr_app/l10n/strings.dart';
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -29,6 +31,7 @@ enum RecordingNav { toLibrary, pop }
 class RecordingController extends StateNotifier<RecordingState> {
   RecordingController(this._ref) : super(const RecordingState()) {
     _registerMainIpcHandler();
+    appLanguage.addListener(_pushLanguageToMini);
     addListener(_pushStateToMini, fireImmediately: false);
     _ref.listen<AsyncValue<List<Tag>>>(tagsProvider, (_, next) {
       final tags = next.value;
@@ -174,13 +177,15 @@ class RecordingController extends StateNotifier<RecordingState> {
     ).catchError((_) => null);
   }
 
+  void _pushLanguageToMini() => _pushStateToMini(state);
+
   void _pushStateToMini(RecordingState s) {
     final mini = _miniController;
     if (mini == null || !s.miniOpen) return;
     DesktopMultiWindow.invokeMethod(
       mini.windowId,
       MiniIpc.stateUpdate,
-      jsonEncode(s.toJson()),
+      jsonEncode({...s.toJson(), '_uiLanguage': appLanguage.value}),
     ).catchError((_) => null);
   }
 
@@ -280,14 +285,17 @@ class RecordingController extends StateNotifier<RecordingState> {
         videoEnabled ?? (await settingsOrDefault()).defaultVideoEnabled;
     if (wantVideo && _recorder.supportsVideo) {
       if (!await _serverKeepsVideo()) {
-        videoNote = 'Video retention is off on the Speakr server, so this '
-            'recording is audio only.';
+        videoNote = tr(
+          "Video retention is off on the Speakr server, so this recording is audio only.",
+        );
       } else {
         videoWindow = await _findMeetingWindow(
-            videoPids ?? await _allowlistPids(await settingsOrDefault()));
+          videoPids ?? await _allowlistPids(await settingsOrDefault()),
+        );
         if (videoWindow == null) {
-          videoNote = 'No meeting window found, so this recording is audio '
-              'only.';
+          videoNote = tr(
+            "No meeting window found, so this recording is audio only.",
+          );
         }
       }
     }
@@ -309,8 +317,9 @@ class RecordingController extends StateNotifier<RecordingState> {
     if (mic) {
       final granted = await _recorder.requestMicPermission();
       if (!granted) {
-        state =
-            state.copyWith(error: 'Microphone permission is required to record.');
+        state = state.copyWith(
+          error: tr("Microphone permission is required to record."),
+        );
         return;
       }
     }
@@ -319,14 +328,18 @@ class RecordingController extends StateNotifier<RecordingState> {
       final ok = await _recorder.requestSystemPermission();
       if (!ok) {
         if (!mic) {
-          state = state.copyWith(error: 'System-audio permission was denied.');
+          state = state.copyWith(
+            error: tr("System-audio permission was denied."),
+          );
           return;
         }
         // Continue mic-only.
         sysMode = SystemAudioMode.off;
         state = state.copyWith(
           systemMode: SystemAudioMode.off,
-          error: 'System-audio permission was denied — continuing with mic only.',
+          error: tr(
+            "System-audio permission was denied — continuing with mic only.",
+          ),
         );
       }
     }
@@ -357,7 +370,7 @@ class RecordingController extends StateNotifier<RecordingState> {
         await _openMiniWindow();
       }
     } catch (e) {
-      state = state.copyWith(error: 'Could not start recording: $e');
+      state = state.copyWith(error: tr("Could not start recording: {0}", [e]));
       await _cleanupAfterFailure();
     }
   }
@@ -384,12 +397,11 @@ class RecordingController extends StateNotifier<RecordingState> {
     String? exePath,
     required String matchKey,
     required AllowlistKind kind,
-  }) =>
-      _recorder.findProcessPids(
-        exePath: exePath,
-        matchKey: matchKey,
-        kind: kind,
-      );
+  }) => _recorder.findProcessPids(
+    exePath: exePath,
+    matchKey: matchKey,
+    kind: kind,
+  );
 
   /// Whether the server keeps uploaded video. Unknown (offline, older
   /// server) counts as yes: the server reduces video to audio on its
@@ -410,7 +422,8 @@ class RecordingController extends StateNotifier<RecordingState> {
     final pids = <int>[];
     for (final e in settings.allowlist) {
       pids.addAll(
-          await _recorder.findProcessPids(matchKey: e.key, kind: e.kind));
+        await _recorder.findProcessPids(matchKey: e.key, kind: e.kind),
+      );
     }
     return pids;
   }
@@ -439,7 +452,9 @@ class RecordingController extends StateNotifier<RecordingState> {
         videoWindowTitle: window?.title,
       );
     } catch (e) {
-      state = state.copyWith(error: 'Failed to switch video window: $e');
+      state = state.copyWith(
+        error: tr("Failed to switch video window: {0}", [e]),
+      );
     }
   }
 
@@ -461,7 +476,7 @@ class RecordingController extends StateNotifier<RecordingState> {
         audioLevel: nextPaused ? 0.0 : state.audioLevel,
       );
     } catch (e) {
-      state = state.copyWith(error: 'Failed to toggle pause: $e');
+      state = state.copyWith(error: tr("Failed to toggle pause: {0}", [e]));
     }
   }
 
@@ -480,7 +495,9 @@ class RecordingController extends StateNotifier<RecordingState> {
           if ((clamped - state.audioLevel).abs() < 0.005) return;
           state = state.copyWith(audioLevel: clamped);
         },
-        onError: (_) {/* ignore — meter is best-effort */},
+        onError: (_) {
+          /* ignore — meter is best-effort */
+        },
       );
     } catch (_) {
       // Platforms that don't expose a level stream: leave dot at the floor.
@@ -512,16 +529,12 @@ class RecordingController extends StateNotifier<RecordingState> {
         state = state.copyWith(micEnabled: v, micPending: false);
       } else {
         // Fallback: mic-off implies paused.
-        state = state.copyWith(
-          micEnabled: v,
-          micPending: false,
-          paused: !v,
-        );
+        state = state.copyWith(micEnabled: v, micPending: false, paused: !v);
       }
     } catch (e) {
       state = state.copyWith(
         micPending: false,
-        error: 'Failed to toggle mic: $e',
+        error: tr("Failed to toggle mic: {0}", [e]),
       );
     }
   }
@@ -537,18 +550,23 @@ class RecordingController extends StateNotifier<RecordingState> {
     if (state.systemPending) return;
     if (mode != SystemAudioMode.off && !_recorder.supportsSystemAudio) {
       state = state.copyWith(
-          error: 'System audio capture isn\'t supported on this device.');
+        error: tr("System audio capture isn't supported on this device."),
+      );
       return;
     }
     if (mode == SystemAudioMode.processOnly) {
       if (!_recorder.supportsProcessLoopback) {
         state = state.copyWith(
-            error: 'Per-process audio capture requires Windows 11 / Server 2022.');
+          error: tr(
+            "Per-process audio capture requires Windows 11 / Server 2022.",
+          ),
+        );
         return;
       }
       if (state.processSourcePid == null) {
         state = state.copyWith(
-            error: 'No trigger process available — pick "System" instead.');
+          error: tr("No trigger process available — pick \"System\" instead."),
+        );
         return;
       }
     }
@@ -564,7 +582,7 @@ class RecordingController extends StateNotifier<RecordingState> {
         if (!ok) {
           state = state.copyWith(
             systemPending: false,
-            error: 'System-audio permission was denied.',
+            error: tr("System-audio permission was denied."),
           );
           return;
         }
@@ -579,7 +597,7 @@ class RecordingController extends StateNotifier<RecordingState> {
     } catch (e) {
       state = state.copyWith(
         systemPending: false,
-        error: 'Failed to switch system audio mode: $e',
+        error: tr("Failed to switch system audio mode: {0}", [e]),
       );
     }
   }
@@ -593,7 +611,7 @@ class RecordingController extends StateNotifier<RecordingState> {
       _ticker = null;
       _unsubscribeAudioLevel();
       if (path == null) {
-        throw Exception('Recorder returned no file path.');
+        throw Exception(tr("Recorder returned no file path."));
       }
       final file = File(path);
       final api = _ref.read(speakrApiProvider);
@@ -641,7 +659,7 @@ class RecordingController extends StateNotifier<RecordingState> {
     } catch (e) {
       state = state.copyWith(
         uploading: false,
-        error: 'Upload failed: $e',
+        error: tr("Upload failed: {0}", [e]),
       );
     }
   }
@@ -734,7 +752,7 @@ class RecordingController extends StateNotifier<RecordingState> {
         jsonEncode({'role': MiniIpc.argRoleMini}),
       );
       _miniController = c;
-      await c.setTitle('Minutes Recording');
+      await c.setTitle(tr("Minutes Recording"));
       await c.show();
       // Update state — listener will push the current snapshot to the mini.
       state = state.copyWith(miniOpen: true, miniWindowId: c.windowId);
@@ -805,6 +823,7 @@ class RecordingController extends StateNotifier<RecordingState> {
 
   @override
   void dispose() {
+    appLanguage.removeListener(_pushLanguageToMini);
     _ticker?.cancel();
     _unsubscribeAudioLevel();
     _recorder.dispose();
@@ -815,5 +834,5 @@ class RecordingController extends StateNotifier<RecordingState> {
 
 final recordingControllerProvider =
     StateNotifierProvider<RecordingController, RecordingState>(
-  (ref) => RecordingController(ref),
-);
+      (ref) => RecordingController(ref),
+    );

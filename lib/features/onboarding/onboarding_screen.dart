@@ -1,3 +1,4 @@
+import 'package:speakr_app/l10n/strings.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -36,7 +37,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     final url = _urlCtrl.text.trim();
     final token = _tokenCtrl.text.trim();
     if (url.isEmpty || token.isEmpty) {
-      setState(() => _error = 'Server URL and API token are required.');
+      setState(() => _error = tr("Server URL and API token are required."));
       return;
     }
     final normalizedUrl = url.endsWith('/')
@@ -47,18 +48,22 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       _error = null;
     });
 
-    final probeDio = Dio(BaseOptions(
-      baseUrl: '$normalizedUrl/api/v1',
-      connectTimeout: const Duration(seconds: 8),
-      receiveTimeout: const Duration(seconds: 12),
-    ))
-      ..options.headers['X-API-Token'] = token
-      ..options.headers['Authorization'] = 'Bearer $token'
-      ..options.headers['Accept'] = 'application/json';
+    final probeDio =
+        Dio(
+            BaseOptions(
+              baseUrl: '$normalizedUrl/api/v1',
+              connectTimeout: const Duration(seconds: 8),
+              receiveTimeout: const Duration(seconds: 12),
+            ),
+          )
+          ..options.headers['X-API-Token'] = token
+          ..options.headers['Authorization'] = 'Bearer $token'
+          ..options.headers['Accept'] = 'application/json';
     try {
       await probeDio.get<dynamic>('/stats', queryParameters: {'scope': 'user'});
-      await ref.read(credentialsStoreProvider).write(
-          SpeakrCredentials(baseUrl: normalizedUrl, token: token));
+      await ref
+          .read(credentialsStoreProvider)
+          .write(SpeakrCredentials(baseUrl: normalizedUrl, token: token));
       // Force refresh of cached credentials so listeners pick up the change.
       ref.invalidate(currentCredentialsProvider);
       if (!mounted) return;
@@ -67,17 +72,19 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       String msg;
       final code = e.response?.statusCode;
       if (code == 401 || code == 403) {
-        msg = 'Token rejected by the server (HTTP $code).';
+        msg = tr("Token rejected by the server (HTTP {0}).", [code]);
       } else if (code != null) {
-        msg = 'Server replied with HTTP $code.';
+        msg = tr("Server replied with HTTP {0}.", [code]);
       } else {
-        msg = 'Could not reach $normalizedUrl. Check the URL and network.';
+        msg = tr("Could not reach {0}. Check the URL and network.", [
+          normalizedUrl,
+        ]);
       }
       if (!mounted) return;
       setState(() => _error = msg);
     } catch (e) {
       if (!mounted) return;
-      setState(() => _error = 'Unexpected error: $e');
+      setState(() => _error = tr("Unexpected error: {0}", [e]));
     } finally {
       probeDio.close(force: true);
       if (mounted) setState(() => _connecting = false);
@@ -86,6 +93,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     return Scaffold(
       backgroundColor: SpeakrColors.bg,
       body: SafeArea(
@@ -120,24 +128,26 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   Widget _buildSlide(int step) {
     switch (step) {
       case 0:
-        return const _Slide(
+        return _Slide(
           key: ValueKey('intro'),
           eyebrow: 'Minutes for Speakr',
-          headline: 'The quiet way to ',
-          headlineEm: 'capture',
-          headlineTail: ' a meeting.',
-          sub:
-              "Hit record. We'll handle the transcript, the summary, and the search.",
+          headline: tr("The quiet way to "),
+          headlineEm: tr("capture"),
+          headlineTail: tr(" a meeting."),
+          sub: tr(
+            "Hit record. We'll handle the transcript, the summary, and the search.",
+          ),
           art: HeroWave(),
         );
       case 1:
         return _Slide(
           key: const ValueKey('selfhost'),
-          eyebrow: 'Self-hosted',
-          headline: 'Your audio. ',
-          headlineEm: 'Your server.',
-          sub:
-              'Speakr runs on your own machine. Recordings never leave the box you point it at.',
+          eyebrow: tr("Self-hosted"),
+          headline: tr("Your audio. "),
+          headlineEm: tr("Your server."),
+          sub: tr(
+            "Speakr runs on your own machine. Recordings never leave the box you point it at.",
+          ),
           art: _ServerArt(),
         );
       case 2:
@@ -158,6 +168,7 @@ class _ProgressDots extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     return Padding(
       padding: const EdgeInsets.fromLTRB(28, 12, 28, 0),
       child: Row(
@@ -198,6 +209,7 @@ class _Slide extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     return Padding(
       padding: const EdgeInsets.fromLTRB(28, 32, 28, 16),
       child: Column(
@@ -225,15 +237,19 @@ class _Slide extends StatelessWidget {
                             style: FontStyle.italic,
                           ),
                         ),
-                        if (headlineTail.isNotEmpty) TextSpan(text: headlineTail),
+                        if (headlineTail.isNotEmpty)
+                          TextSpan(text: headlineTail),
                       ],
                     ),
                   ),
                   const SizedBox(height: 14),
                   Text(
                     sub,
-                    style:
-                        SpeakrText.sans(size: 15, height: 1.5, color: SpeakrColors.ink2),
+                    style: SpeakrText.sans(
+                      size: 15,
+                      height: 1.5,
+                      color: SpeakrColors.ink2,
+                    ),
                   ),
                 ],
               ),
@@ -248,6 +264,7 @@ class _Slide extends StatelessWidget {
 class _ServerArt extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     return Container(
       width: 200,
       height: 200,
@@ -266,10 +283,7 @@ class _ServerArt extends StatelessWidget {
               style: SpeakrText.mono(size: 11, color: SpeakrColors.muted),
             ),
           ),
-          CustomPaint(
-            size: const Size(80, 80),
-            painter: _ServerStackPainter(),
-          ),
+          CustomPaint(size: const Size(80, 80), painter: _ServerStackPainter()),
         ],
       ),
     );
@@ -315,20 +329,21 @@ class _ConnectForm extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     return SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(28, 24, 28, 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const MonoEyebrow('Get started'),
+          MonoEyebrow(tr("Get started")),
           const SizedBox(height: 12),
           RichText(
             text: TextSpan(
               style: SpeakrText.serif(size: 32, height: 1.15),
               children: [
-                const TextSpan(text: "Let's connect to "),
+                TextSpan(text: tr("Let's connect to ")),
                 TextSpan(
-                  text: 'your Speakr.',
+                  text: tr("your Speakr."),
                   style: SpeakrText.serif(
                     size: 32,
                     height: 1.15,
@@ -340,20 +355,23 @@ class _ConnectForm extends StatelessWidget {
           ),
           const SizedBox(height: 14),
           Text(
-            'Paste your server URL and an API token from Settings → API Tokens.',
-            style:
-                SpeakrText.sans(size: 15, height: 1.5, color: SpeakrColors.ink2),
+            tr(
+              "Paste your server URL and an API token from Settings → API Tokens.",
+            ),
+            style: SpeakrText.sans(
+              size: 15,
+              height: 1.5,
+              color: SpeakrColors.ink2,
+            ),
           ),
           const SizedBox(height: 28),
-          const MonoEyebrow('Server URL'),
+          MonoEyebrow(tr("Server URL")),
           const SizedBox(height: 8),
           TextField(
             controller: urlCtrl,
             autocorrect: false,
             keyboardType: TextInputType.url,
-            inputFormatters: [
-              FilteringTextInputFormatter.deny(RegExp(r'\s')),
-            ],
+            inputFormatters: [FilteringTextInputFormatter.deny(RegExp(r'\s'))],
             style: SpeakrText.mono(
               size: 14,
               color: SpeakrColors.ink2,
@@ -362,12 +380,14 @@ class _ConnectForm extends StatelessWidget {
             ),
             decoration: const InputDecoration(
               hintText: 'https://speakr.local',
-              contentPadding:
-                  EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              contentPadding: EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 14,
+              ),
             ),
           ),
           const SizedBox(height: 16),
-          const MonoEyebrow('API Token'),
+          MonoEyebrow(tr("API Token")),
           const SizedBox(height: 8),
           TextField(
             controller: tokenCtrl,
@@ -381,8 +401,10 @@ class _ConnectForm extends StatelessWidget {
             ),
             decoration: const InputDecoration(
               hintText: '••••••••••••••••••••',
-              contentPadding:
-                  EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              contentPadding: EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 14,
+              ),
             ),
             onSubmitted: (_) => onSubmit(),
           ),
@@ -409,6 +431,7 @@ class _Footer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     return SafeArea(
       top: false,
       child: Padding(
@@ -422,12 +445,14 @@ class _Footer extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: SpeakrColors.danger.withValues(alpha: 0.06),
                   border: Border.all(
-                      color: SpeakrColors.danger.withValues(alpha: 0.4)),
+                    color: SpeakrColors.danger.withValues(alpha: 0.4),
+                  ),
                   borderRadius: BorderRadius.circular(4),
                 ),
-                child: Text(error!,
-                    style: SpeakrText.sans(
-                        size: 13, color: SpeakrColors.danger)),
+                child: Text(
+                  error!,
+                  style: SpeakrText.sans(size: 13, color: SpeakrColors.danger),
+                ),
               ),
               const SizedBox(height: 12),
             ],
@@ -441,7 +466,7 @@ class _Footer extends StatelessWidget {
                         ? Colors.transparent
                         : SpeakrColors.ink2,
                   ),
-                  child: const Text('Back'),
+                  child: Text(tr("Back")),
                 ),
                 FilledButton(
                   onPressed: connecting ? null : onNext,
@@ -450,23 +475,29 @@ class _Footer extends StatelessWidget {
                     foregroundColor: SpeakrColors.bg,
                     shape: const StadiumBorder(),
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 24, vertical: 14),
+                      horizontal: 24,
+                      vertical: 14,
+                    ),
                   ),
                   child: connecting
                       ? const SizedBox(
                           width: 16,
                           height: 16,
                           child: CircularProgressIndicator(
-                              strokeWidth: 2, color: SpeakrColors.bg))
+                            strokeWidth: 2,
+                            color: SpeakrColors.bg,
+                          ),
+                        )
                       : Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Text(
-                              step < 2 ? 'Next' : 'Connect',
+                              step < 2 ? tr("Next") : tr("Connect"),
                               style: SpeakrText.sans(
-                                  size: 14,
-                                  weight: FontWeight.w500,
-                                  color: SpeakrColors.bg),
+                                size: 14,
+                                weight: FontWeight.w500,
+                                color: SpeakrColors.bg,
+                              ),
                             ),
                             const SizedBox(width: 6),
                             const SpeakrIconView(
@@ -485,4 +516,3 @@ class _Footer extends StatelessWidget {
     );
   }
 }
-

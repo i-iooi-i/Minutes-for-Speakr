@@ -1,3 +1,4 @@
+import '../l10n/strings.dart';
 import 'package:flutter/material.dart';
 
 import '../api/models.dart';
@@ -26,6 +27,7 @@ class _StatusBadgeState extends State<StatusBadge>
 
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     final inProgress = widget.status.isInProgress;
     if (inProgress) {
       _ctrl ??= AnimationController(

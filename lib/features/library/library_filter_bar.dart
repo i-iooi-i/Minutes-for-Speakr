@@ -1,3 +1,4 @@
+import 'package:speakr_app/l10n/strings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -26,6 +27,7 @@ class _LibraryFilterBarState extends ConsumerState<LibraryFilterBar> {
 
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     final filter = ref.watch(libraryFilterProvider);
     final folders = ref.watch(foldersProvider).value ?? const <Folder>[];
     final tags = ref.watch(tagsProvider).value ?? const <Tag>[];
@@ -65,12 +67,7 @@ class _LibraryFilterBarState extends ConsumerState<LibraryFilterBar> {
               ],
             ],
           ),
-          if (_open)
-            _PickerPanel(
-              filter: filter,
-              folders: folders,
-              tags: tags,
-            ),
+          if (_open) _PickerPanel(filter: filter, folders: folders, tags: tags),
         ],
       ),
     );
@@ -100,6 +97,7 @@ class _FiltersPill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     final filled = open || count > 0;
     final fg = filled ? SpeakrColors.bg : SpeakrColors.ink2;
     return InkWell(
@@ -117,7 +115,7 @@ class _FiltersPill extends StatelessWidget {
           children: [
             SpeakrIconView(SpeakrIcon.filter, size: 13, color: fg),
             const SizedBox(width: 7),
-            Text('Filters', style: SpeakrText.sans(size: 13, color: fg)),
+            Text(tr("Filters"), style: SpeakrText.sans(size: 13, color: fg)),
             if (count > 0) ...[
               const SizedBox(width: 6),
               Container(
@@ -159,51 +157,58 @@ class _ActiveChipsStrip extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    LanguageScope.watch(context);
     final notifier = ref.read(libraryFilterProvider.notifier);
     final children = <Widget>[];
 
     if (filter.statusKey != 'all') {
       final key = filter.statusKey;
-      children.add(_ActiveChip(
-        leading: key == 'highlighted'
-            ? const SpeakrIconView(
-                SpeakrIcon.star,
-                size: 10,
-                color: SpeakrColors.ink2,
-              )
-            : null,
-        label: _statusLabel(key),
-        color: SpeakrColors.ink2,
-        borderColor: SpeakrColors.line,
-        onTap: () => notifier.setStatus('all'),
-      ));
+      children.add(
+        _ActiveChip(
+          leading: key == 'highlighted'
+              ? const SpeakrIconView(
+                  SpeakrIcon.star,
+                  size: 10,
+                  color: SpeakrColors.ink2,
+                )
+              : null,
+          label: _statusLabel(key),
+          color: SpeakrColors.ink2,
+          borderColor: SpeakrColors.line,
+          onTap: () => notifier.setStatus('all'),
+        ),
+      );
     }
     if (filter.folderId != null) {
       final f = folders.firstWhere(
         (f) => f.id == filter.folderId,
-        orElse: () => Folder(id: filter.folderId!, name: 'Folder'),
+        orElse: () => Folder(id: filter.folderId!, name: tr("Folder")),
       );
       final c = parseHexColor(f.color);
-      children.add(_ActiveChip(
-        leading: _swatch(c, square: true, size: 6),
-        label: f.name,
-        color: c,
-        borderColor: c.withValues(alpha: 0.33),
-        onTap: () => notifier.setFolder(null),
-      ));
+      children.add(
+        _ActiveChip(
+          leading: _swatch(c, square: true, size: 6),
+          label: f.name,
+          color: c,
+          borderColor: c.withValues(alpha: 0.33),
+          onTap: () => notifier.setFolder(null),
+        ),
+      );
     }
     if (filter.tagId != null) {
       final t = tags.firstWhere(
         (t) => t.id == filter.tagId,
-        orElse: () => Tag(id: filter.tagId!, name: 'Tag'),
+        orElse: () => Tag(id: filter.tagId!, name: tr("Tag")),
       );
       final c = parseHexColor(t.color);
-      children.add(_ActiveChip(
-        label: t.name,
-        color: c,
-        borderColor: c.withValues(alpha: 0.33),
-        onTap: () => notifier.setTag(null),
-      ));
+      children.add(
+        _ActiveChip(
+          label: t.name,
+          color: c,
+          borderColor: c.withValues(alpha: 0.33),
+          onTap: () => notifier.setTag(null),
+        ),
+      );
     }
 
     return SingleChildScrollView(
@@ -236,6 +241,7 @@ class _ActiveChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     return InkWell(
       borderRadius: BorderRadius.circular(100),
       onTap: onTap,
@@ -248,10 +254,7 @@ class _ActiveChip extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            if (leading != null) ...[
-              leading!,
-              const SizedBox(width: 5),
-            ],
+            if (leading != null) ...[leading!, const SizedBox(width: 5)],
             Text(
               label.toUpperCase(),
               style: SpeakrText.mono(size: 10, color: color, letterSpacing: 1),
@@ -281,13 +284,14 @@ class _ClearButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     return InkWell(
       borderRadius: BorderRadius.circular(4),
       onTap: onTap,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
         child: Text(
-          'CLEAR',
+          tr("CLEAR"),
           style: SpeakrText.mono(
             size: 10,
             color: SpeakrColors.muted,
@@ -315,6 +319,7 @@ class _PickerPanel extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    LanguageScope.watch(context);
     final notifier = ref.read(libraryFilterProvider.notifier);
     return Container(
       margin: const EdgeInsets.only(top: 10),
@@ -327,25 +332,28 @@ class _PickerPanel extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const _SectionLabel('Status'),
+          _SectionLabel(tr("Status")),
           Wrap(
             spacing: 4,
             runSpacing: 4,
             children: [
-              for (final key in const ['completed', 'processing', 'highlighted'])
+              for (final key in const [
+                'completed',
+                'processing',
+                'highlighted',
+              ])
                 _PickerChip(
                   label: _statusLabel(key),
                   active: filter.statusKey == key,
                   leading: (active) => _statusLeading(key, active),
-                  onTap: () => notifier.setStatus(
-                    filter.statusKey == key ? 'all' : key,
-                  ),
+                  onTap: () =>
+                      notifier.setStatus(filter.statusKey == key ? 'all' : key),
                 ),
             ],
           ),
           if (folders.isNotEmpty) ...[
             const SizedBox(height: 12),
-            const _SectionLabel('Folder'),
+            _SectionLabel(tr("Folder")),
             Wrap(
               spacing: 4,
               runSpacing: 4,
@@ -369,7 +377,7 @@ class _PickerPanel extends ConsumerWidget {
           ],
           if (tags.isNotEmpty) ...[
             const SizedBox(height: 12),
-            const _SectionLabel('Tags'),
+            _SectionLabel(tr("Tags")),
             Wrap(
               spacing: 4,
               runSpacing: 4,
@@ -379,9 +387,8 @@ class _PickerPanel extends ConsumerWidget {
                     label: t.name,
                     active: filter.tagId == t.id,
                     tint: parseHexColor(t.color),
-                    onTap: () => notifier.setTag(
-                      filter.tagId == t.id ? null : t.id,
-                    ),
+                    onTap: () =>
+                        notifier.setTag(filter.tagId == t.id ? null : t.id),
                   ),
               ],
             ),
@@ -397,6 +404,7 @@ class _SectionLabel extends StatelessWidget {
   final String text;
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     return Padding(
       padding: const EdgeInsets.only(bottom: 6),
       child: Text(
@@ -432,6 +440,7 @@ class _PickerChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     final tinted = tint != null;
     final fg = tinted
         ? (active ? SpeakrColors.bg : tint!)
@@ -480,11 +489,11 @@ class _PickerChip extends StatelessWidget {
 String _statusLabel(String key) {
   switch (key) {
     case 'completed':
-      return 'Completed';
+      return tr("Completed");
     case 'processing':
-      return 'Processing';
+      return tr("Processing");
     case 'highlighted':
-      return 'Highlighted';
+      return tr("Highlighted");
   }
   return key;
 }
@@ -506,13 +515,10 @@ Widget _statusLeading(String key, bool active) {
 }
 
 Widget _dot(Color color) => Container(
-      width: 6,
-      height: 6,
-      decoration: BoxDecoration(
-        color: color,
-        shape: BoxShape.circle,
-      ),
-    );
+  width: 6,
+  height: 6,
+  decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+);
 
 Widget _swatch(Color color, {required bool square, required double size}) =>
     Container(
@@ -520,7 +526,8 @@ Widget _swatch(Color color, {required bool square, required double size}) =>
       height: size,
       decoration: BoxDecoration(
         color: color,
-        borderRadius:
-            square ? BorderRadius.circular(2) : BorderRadius.circular(size),
+        borderRadius: square
+            ? BorderRadius.circular(2)
+            : BorderRadius.circular(size),
       ),
     );

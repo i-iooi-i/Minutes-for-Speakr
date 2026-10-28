@@ -1,3 +1,5 @@
+import 'package:speakr_app/l10n/strings.dart';
+
 import 'dart:async';
 import 'dart:io' show Platform;
 
@@ -45,14 +47,13 @@ class _AutoUploadSettingsScreenState
     // caches values in this isolate's memory and won't pick up cross-
     // isolate writes until reload() is called. Poll the file every 2s
     // while the screen is mounted so the diagnostic rows update live.
-    _diagnosticsRefreshTimer = Timer.periodic(
-      const Duration(seconds: 2),
-      (_) async {
-        final store = await ref.read(autoUploadStoreProvider.future);
-        await store.reload();
-        if (mounted) setState(() {});
-      },
-    );
+    _diagnosticsRefreshTimer = Timer.periodic(const Duration(seconds: 2), (
+      _,
+    ) async {
+      final store = await ref.read(autoUploadStoreProvider.future);
+      await store.reload();
+      if (mounted) setState(() {});
+    });
   }
 
   @override
@@ -102,6 +103,7 @@ class _AutoUploadSettingsScreenState
 
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     final configsAsync = ref.watch(folderConfigsProvider);
     return Scaffold(
       backgroundColor: SpeakrColors.bg,
@@ -110,7 +112,8 @@ class _AutoUploadSettingsScreenState
           loading: () => const Center(
             child: CircularProgressIndicator(color: SpeakrColors.ink),
           ),
-          error: (e, _) => Center(child: Text('Could not load settings: $e')),
+          error: (e, _) =>
+              Center(child: Text(tr("Could not load settings: {0}", [e]))),
           data: (configs) {
             final canScan = configs.any((c) => c.enabled && c.hasFolder);
             return ListView(
@@ -123,9 +126,9 @@ class _AutoUploadSettingsScreenState
                         icon: SpeakrIcon.back,
                         onTap: () => context.pop(),
                       ),
-                      const Padding(
+                      Padding(
                         padding: EdgeInsets.only(left: 4),
-                        child: MonoEyebrow('Auto-upload', size: 10),
+                        child: MonoEyebrow(tr("Auto-upload"), size: 10),
                       ),
                     ],
                   ),
@@ -136,15 +139,14 @@ class _AutoUploadSettingsScreenState
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Auto-upload from folders',
+                        tr("Auto-upload from folders"),
                         style: SpeakrText.serif(size: 28, height: 1.1),
                       ),
                       const SizedBox(height: 6),
                       Text(
-                        'Watch one or more folders for new audio recordings '
-                        'and upload them to Speakr. Each folder has its own '
-                        'tag, language, and parsing rules. Files are deleted '
-                        'locally once they reach the server.',
+                        tr(
+                          "Watch one or more folders for new audio recordings and upload them to Speakr. Each folder has its own tag, language, and parsing rules. Files are deleted locally once they reach the server.",
+                        ),
                         style: SpeakrText.sans(
                           size: 13,
                           color: SpeakrColors.ink2,
@@ -156,11 +158,11 @@ class _AutoUploadSettingsScreenState
                 ),
                 if (Platform.isAndroid) const _PermissionsBanner(),
                 SettingsGroup(
-                  label: 'Folders',
+                  label: tr("Folders"),
                   children: [
                     for (final c in configs) _FolderListRow(c, _openEditor),
                     SettingsRow(
-                      label: 'Add folder…',
+                      label: tr("Add folder…"),
                       trailing: const Icon(
                         Icons.add,
                         size: 20,
@@ -171,10 +173,10 @@ class _AutoUploadSettingsScreenState
                   ],
                 ),
                 SettingsGroup(
-                  label: 'Run',
+                  label: tr("Run"),
                   children: [
                     SettingsRow(
-                      label: _scanning ? 'Scanning…' : 'Scan now',
+                      label: _scanning ? tr("Scanning…") : tr("Scan now"),
                       trailing: _scanning
                           ? const SizedBox(
                               width: 18,
@@ -198,7 +200,7 @@ class _AutoUploadSettingsScreenState
                 ),
                 if (Platform.isAndroid)
                   SettingsGroup(
-                    label: 'Call-end diagnostics',
+                    label: tr("Call-end diagnostics"),
                     children: const [
                       _LastPhoneStateRow(),
                       _LastPhoneStateDecisionRow(),
@@ -213,11 +215,10 @@ class _AutoUploadSettingsScreenState
       ),
     );
   }
-
 }
 
 String _folderLabel(FolderUploadConfig c) {
-  if (!c.hasFolder) return 'New folder (no path set)';
+  if (!c.hasFolder) return tr("New folder (no path set)");
   final path = c.folderPath ?? c.treeUri!;
   final parts = path.split(RegExp(r'[\\/]'));
   final last = parts.where((s) => s.isNotEmpty).toList();
@@ -235,19 +236,20 @@ class _FolderListRow extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final access = !config.hasFolder ||
-        (ref.watch(folderAccessProvider(config.treeUri)).asData?.value ??
-            true);
+    LanguageScope.watch(context);
+    final access =
+        !config.hasFolder ||
+        (ref.watch(folderAccessProvider(config.treeUri)).asData?.value ?? true);
     final String value;
     final Color color;
     if (!access) {
-      value = 'Needs access';
+      value = tr("Needs access");
       color = SpeakrColors.danger;
     } else if (config.enabled) {
-      value = 'On';
+      value = tr("On");
       color = SpeakrColors.ok;
     } else {
-      value = 'Off';
+      value = tr("Off");
       color = SpeakrColors.muted;
     }
     return SettingsRow(
@@ -293,7 +295,7 @@ class _FolderUploadEditScreenState
       context: context,
       builder: (_) => AlertDialog(
         backgroundColor: SpeakrColors.bg,
-        title: Text('Folder path', style: SpeakrText.serif(size: 20)),
+        title: Text(tr("Folder path"), style: SpeakrText.serif(size: 20)),
         content: TextField(
           controller: ctrl,
           autofocus: true,
@@ -305,11 +307,11 @@ class _FolderUploadEditScreenState
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text(tr("Cancel")),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, ctrl.text.trim()),
-            child: const Text('Save'),
+            child: Text(tr("Save")),
           ),
         ],
       ),
@@ -325,20 +327,21 @@ class _FolderUploadEditScreenState
       context: context,
       builder: (_) => AlertDialog(
         backgroundColor: SpeakrColors.bg,
-        title: Text('Delete folder?', style: SpeakrText.serif(size: 20)),
+        title: Text(tr("Delete folder?"), style: SpeakrText.serif(size: 20)),
         content: Text(
-          'Stop watching this folder. Files already on disk are not '
-          'touched. You can re-add the folder later.',
+          tr(
+            "Stop watching this folder. Files already on disk are not touched. You can re-add the folder later.",
+          ),
           style: SpeakrText.sans(size: 13, color: SpeakrColors.ink2),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            child: Text(tr("Cancel")),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Delete'),
+            child: Text(tr("Delete")),
           ),
         ],
       ),
@@ -350,6 +353,7 @@ class _FolderUploadEditScreenState
 
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     final configsAsync = ref.watch(folderConfigsProvider);
     return Scaffold(
       backgroundColor: SpeakrColors.bg,
@@ -358,7 +362,8 @@ class _FolderUploadEditScreenState
           loading: () => const Center(
             child: CircularProgressIndicator(color: SpeakrColors.ink),
           ),
-          error: (e, _) => Center(child: Text('Could not load settings: $e')),
+          error: (e, _) =>
+              Center(child: Text(tr("Could not load settings: {0}", [e]))),
           data: (configs) {
             FolderUploadConfig? c;
             for (final entry in configs) {
@@ -381,9 +386,9 @@ class _FolderUploadEditScreenState
                         icon: SpeakrIcon.back,
                         onTap: () => Navigator.of(context).pop(),
                       ),
-                      const Padding(
+                      Padding(
                         padding: EdgeInsets.only(left: 4),
-                        child: MonoEyebrow('Folder', size: 10),
+                        child: MonoEyebrow(tr("Folder"), size: 10),
                       ),
                     ],
                   ),
@@ -399,7 +404,7 @@ class _FolderUploadEditScreenState
                                   .split(RegExp(r'[\\/]'))
                                   .where((s) => s.isNotEmpty)
                                   .last
-                            : 'New folder',
+                            : tr("New folder"),
                         style: SpeakrText.serif(size: 24, height: 1.1),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -426,19 +431,19 @@ class _FolderUploadEditScreenState
                   ),
                 ],
                 SettingsGroup(
-                  label: 'Watcher',
+                  label: tr("Watcher"),
                   children: [
                     SettingsRow(
-                      label: 'Enabled',
+                      label: tr("Enabled"),
                       toggleValue: config.enabled,
                       onToggle: (v) => ref
                           .read(folderConfigsControllerProvider)
                           .setEnabled(config.id, v),
                     ),
                     SettingsRow(
-                      label: 'Folder',
+                      label: tr("Folder"),
                       value: config.folderPath == null
-                          ? 'Not set'
+                          ? tr("Not set")
                           : config.folderPath!.split(RegExp(r'[\\/]')).last,
                       subtitle: config.folderPath,
                       mono: false,
@@ -448,7 +453,7 @@ class _FolderUploadEditScreenState
                     // behind it, so this only exists off Android.
                     if (!Platform.isAndroid)
                       SettingsRow(
-                        label: 'Type folder path manually',
+                        label: tr("Type folder path manually"),
                         trailing: const Icon(
                           Icons.edit_outlined,
                           size: 18,
@@ -459,35 +464,35 @@ class _FolderUploadEditScreenState
                   ],
                 ),
                 SettingsGroup(
-                  label: 'Datetime parsing',
+                  label: tr("Datetime parsing"),
                   children: [
                     SettingsRow(
-                      label: 'Pattern',
+                      label: tr("Pattern"),
                       value: _parseLabel(config),
                       onTap: () => _showPresetSheet(config),
                     ),
                   ],
                 ),
                 SettingsGroup(
-                  label: 'Defaults applied to uploads',
+                  label: tr("Defaults applied to uploads"),
                   children: [
                     SettingsRow(
-                      label: 'Tag',
+                      label: tr("Tag"),
                       value: _TagLabel.of(ref, config.tagId),
                       onTap: () => _showTagSheet(config),
                     ),
                     SettingsRow(
-                      label: 'Folder',
+                      label: tr("Folder"),
                       value: _FolderLabel.of(ref, config.folderId),
                       onTap: () => _showFolderSheet(config),
                     ),
                     SettingsRow(
-                      label: 'Language',
+                      label: tr("Language"),
                       value: config.language ?? 'auto',
                       onTap: () => _editLanguage(config),
                     ),
                     SettingsRow(
-                      label: 'Min speakers',
+                      label: tr("Min speakers"),
                       trailing: _Stepper(
                         value: config.minSpeakers ?? 1,
                         min: 1,
@@ -498,7 +503,7 @@ class _FolderUploadEditScreenState
                       ),
                     ),
                     SettingsRow(
-                      label: 'Max speakers',
+                      label: tr("Max speakers"),
                       trailing: _Stepper(
                         value: config.maxSpeakers ?? 1,
                         min: 1,
@@ -511,25 +516,25 @@ class _FolderUploadEditScreenState
                   ],
                 ),
                 SettingsGroup(
-                  label: 'Filtering',
+                  label: tr("Filtering"),
                   children: [
                     SettingsRow(
-                      label: 'Auto-delete shorter than',
+                      label: tr("Auto-delete shorter than"),
                       value: config.autoDeleteShorterThanSeconds == null
-                          ? 'Off'
-                          : '${config.autoDeleteShorterThanSeconds} s',
-                      subtitle:
-                          'Recordings under this length are deleted from disk '
-                          'instead of being uploaded.',
+                          ? tr("Off")
+                          : tr("{0} s", [config.autoDeleteShorterThanSeconds]),
+                      subtitle: tr(
+                        "Recordings under this length are deleted from disk instead of being uploaded.",
+                      ),
                       onTap: () => _editAutoDeleteThreshold(config),
                     ),
                   ],
                 ),
                 SettingsGroup(
-                  label: 'Danger zone',
+                  label: tr("Danger zone"),
                   children: [
                     SettingsRow(
-                      label: 'Delete folder',
+                      label: tr("Delete folder"),
                       valueColor: SpeakrColors.danger,
                       trailing: const Icon(
                         Icons.delete_outline,
@@ -550,9 +555,9 @@ class _FolderUploadEditScreenState
   }
 
   String _parseLabel(FolderUploadConfig s) {
-    if (s.parsePresetId == null) return 'Off (use file mtime)';
-    if (s.parsePresetId == kCustomPresetId) return 'Custom regex';
-    return presetById(s.parsePresetId!)?.label ?? 'Off (use file mtime)';
+    if (s.parsePresetId == null) return tr("Off (use file mtime)");
+    if (s.parsePresetId == kCustomPresetId) return tr("Custom regex");
+    return tr(presetById(s.parsePresetId!)?.label ?? "Off (use file mtime)");
   }
 
   Future<void> _editLanguage(FolderUploadConfig s) async {
@@ -561,20 +566,20 @@ class _FolderUploadEditScreenState
       context: context,
       builder: (_) => AlertDialog(
         backgroundColor: SpeakrColors.bg,
-        title: Text('Language', style: SpeakrText.serif(size: 20)),
+        title: Text(tr("Language"), style: SpeakrText.serif(size: 20)),
         content: TextField(
           controller: ctrl,
           autofocus: true,
-          decoration: const InputDecoration(hintText: 'auto, en, da, …'),
+          decoration: InputDecoration(hintText: tr("auto, en, da, …")),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text(tr("Cancel")),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, ctrl.text.trim()),
-            child: const Text('Save'),
+            child: Text(tr("Save")),
           ),
         ],
       ),
@@ -596,7 +601,7 @@ class _FolderUploadEditScreenState
       builder: (dialogCtx) => AlertDialog(
         backgroundColor: SpeakrColors.bg,
         title: Text(
-          'Auto-delete shorter than',
+          tr("Auto-delete shorter than"),
           style: SpeakrText.serif(size: 20),
         ),
         content: Column(
@@ -604,8 +609,9 @@ class _FolderUploadEditScreenState
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Recordings under this many seconds are deleted from disk '
-              'instead of being uploaded. Leave blank or set 0 to disable.',
+              tr(
+                "Recordings under this many seconds are deleted from disk instead of being uploaded. Leave blank or set 0 to disable.",
+              ),
               style: SpeakrText.sans(
                 size: 12,
                 color: SpeakrColors.ink2,
@@ -617,9 +623,9 @@ class _FolderUploadEditScreenState
               controller: ctrl,
               autofocus: true,
               keyboardType: const TextInputType.numberWithOptions(),
-              decoration: const InputDecoration(
-                hintText: 'e.g. 5',
-                suffixText: 'seconds',
+              decoration: InputDecoration(
+                hintText: tr("e.g. 5"),
+                suffixText: tr("seconds"),
               ),
             ),
           ],
@@ -627,11 +633,11 @@ class _FolderUploadEditScreenState
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogCtx),
-            child: const Text('Cancel'),
+            child: Text(tr("Cancel")),
           ),
           TextButton(
             onPressed: () => Navigator.pop<int?>(dialogCtx, 0),
-            child: const Text('Off'),
+            child: Text(tr("Off")),
           ),
           TextButton(
             onPressed: () {
@@ -642,7 +648,7 @@ class _FolderUploadEditScreenState
                 Navigator.pop<int?>(dialogCtx, n);
               }
             },
-            child: const Text('Save'),
+            child: Text(tr("Save")),
           ),
         ],
       ),
@@ -687,6 +693,7 @@ class _MissingConfigView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     return Padding(
       padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
       child: Column(
@@ -698,16 +705,16 @@ class _MissingConfigView extends StatelessWidget {
                 icon: SpeakrIcon.back,
                 onTap: () => Navigator.of(context).pop(),
               ),
-              const Padding(
+              Padding(
                 padding: EdgeInsets.only(left: 4),
-                child: MonoEyebrow('Folder', size: 10),
+                child: MonoEyebrow(tr("Folder"), size: 10),
               ),
             ],
           ),
           Padding(
             padding: const EdgeInsets.fromLTRB(24, 32, 24, 18),
             child: Text(
-              'This folder no longer exists.',
+              tr("This folder no longer exists."),
               style: SpeakrText.serif(size: 22),
             ),
           ),
@@ -743,10 +750,7 @@ class _PermissionsBannerState extends State<_PermissionsBanner> {
     // the manifest no longer declares one. Asking for an undeclared
     // permission returns permanentlyDenied, so the banner would never
     // clear.
-    final wanted = <Permission>[
-      Permission.phone,
-      Permission.notification,
-    ];
+    final wanted = <Permission>[Permission.phone, Permission.notification];
     final missing = <Permission>[];
     for (final p in wanted) {
       final status = await p.status;
@@ -767,6 +771,7 @@ class _PermissionsBannerState extends State<_PermissionsBanner> {
 
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     if (!_checked || _missing.isEmpty) return const SizedBox.shrink();
     return Container(
       margin: const EdgeInsets.fromLTRB(24, 4, 24, 14),
@@ -780,7 +785,7 @@ class _PermissionsBannerState extends State<_PermissionsBanner> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Permissions needed',
+            tr("Permissions needed"),
             style: SpeakrText.sans(
               size: 13,
               weight: FontWeight.w600,
@@ -802,7 +807,7 @@ class _PermissionsBannerState extends State<_PermissionsBanner> {
             child: TextButton(
               onPressed: _grant,
               style: TextButton.styleFrom(padding: EdgeInsets.zero),
-              child: const Text('Grant permissions'),
+              child: Text(tr("Grant permissions")),
             ),
           ),
         ],
@@ -813,10 +818,10 @@ class _PermissionsBannerState extends State<_PermissionsBanner> {
   String _description(List<Permission> missing) {
     final parts = <String>[];
     if (missing.contains(Permission.phone)) {
-      parts.add('Phone state — to detect when calls end.');
+      parts.add(tr("Phone state — to detect when calls end."));
     }
     if (missing.contains(Permission.notification)) {
-      parts.add('Notifications — required for background uploads.');
+      parts.add(tr("Notifications — required for background uploads."));
     }
     return parts.join(' ');
   }
@@ -836,6 +841,7 @@ class _FolderAccessBanner extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    LanguageScope.watch(context);
     if (!config.hasFolder) return const SizedBox.shrink();
     final access = ref.watch(folderAccessProvider(config.treeUri));
     if (access.asData?.value != false) return const SizedBox.shrink();
@@ -852,7 +858,7 @@ class _FolderAccessBanner extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Folder access needed',
+            tr("Folder access needed"),
             style: SpeakrText.sans(
               size: 13,
               weight: FontWeight.w600,
@@ -862,12 +868,12 @@ class _FolderAccessBanner extends ConsumerWidget {
           const SizedBox(height: 4),
           Text(
             legacy
-                ? 'Minutes now reads this folder through Android\'s folder '
-                    'picker instead of "All files access". Re-select the '
-                    'folder once to keep auto-upload running; your upload '
-                    'history is kept.'
-                : 'Minutes no longer has permission to read this folder. '
-                    'Re-select it to grant access again.',
+                ? tr(
+                    "Minutes now reads this folder through Android's folder picker instead of \"All files access\". Re-select the folder once to keep auto-upload running; your upload history is kept.",
+                  )
+                : tr(
+                    "Minutes no longer has permission to read this folder. Re-select it to grant access again.",
+                  ),
             style: SpeakrText.sans(
               size: 12,
               color: SpeakrColors.ink2,
@@ -880,7 +886,7 @@ class _FolderAccessBanner extends ConsumerWidget {
             child: TextButton(
               onPressed: onReselect,
               style: TextButton.styleFrom(padding: EdgeInsets.zero),
-              child: const Text('Re-select folder'),
+              child: Text(tr("Re-select folder")),
             ),
           ),
         ],
@@ -905,6 +911,7 @@ class _Stepper extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -936,6 +943,7 @@ class _StepperBtn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     return InkWell(
       customBorder: const CircleBorder(),
       onTap: onTap,
@@ -965,9 +973,11 @@ class _StepperBtn extends StatelessWidget {
 class _LastScanRow extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    LanguageScope.watch(context);
     final storeAsync = ref.watch(autoUploadStoreProvider);
-    final pref = ref.watch(timeFormatPreferenceProvider).asData?.value
-        ?? TimeFormatPreference.system;
+    final pref =
+        ref.watch(timeFormatPreferenceProvider).asData?.value ??
+        TimeFormatPreference.system;
     final use24 = resolveUse24Hour(pref, context);
     return storeAsync.maybeWhen(
       data: (store) {
@@ -979,12 +989,12 @@ class _LastScanRow extends ConsumerWidget {
         // useful both for normal info ("trigger=… ok=… skipped=…") and
         // for diagnosing why a scan didn't behave as expected.
         return SettingsRow(
-          label: 'Last scan',
+          label: tr("Last scan"),
           value: at == null ? '—' : formatHourMinute(at, use24Hour: use24),
           subtitle: result,
         );
       },
-      orElse: () => const SettingsRow(label: 'Last scan', value: '—'),
+      orElse: () => SettingsRow(label: tr("Last scan"), value: '—'),
     );
   }
 }
@@ -1005,9 +1015,11 @@ class _LastPhoneStateRow extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    LanguageScope.watch(context);
     final storeAsync = ref.watch(autoUploadStoreProvider);
-    final pref = ref.watch(timeFormatPreferenceProvider).asData?.value
-        ?? TimeFormatPreference.system;
+    final pref =
+        ref.watch(timeFormatPreferenceProvider).asData?.value ??
+        TimeFormatPreference.system;
     final use24 = resolveUse24Hour(pref, context);
     return storeAsync.maybeWhen(
       data: (store) {
@@ -1015,20 +1027,18 @@ class _LastPhoneStateRow extends ConsumerWidget {
         final state = store.lastPhoneState;
         final prev = store.lastPhoneStatePrevious;
         final subtitle = at == null
-            ? 'never — receiver hasn\'t fired since install. '
-                'READ_PHONE_STATE may be denied, or the OEM is suppressing '
-                'manifest receivers (check OnePlus auto-launch / battery).'
-            : 'state=${state ?? '—'} · prev=${prev ?? '—'}';
+            ? tr(
+                "never — receiver hasn't fired since install. READ_PHONE_STATE may be denied, or the OEM is suppressing manifest receivers (check OnePlus auto-launch / battery).",
+              )
+            : tr("state={0} · prev={1}", [state ?? '—', prev ?? '—']);
         return SettingsRow(
-          label: 'Last phone-state event',
+          label: tr("Last phone-state event"),
           value: at == null ? '—' : formatHourMinute(at, use24Hour: use24),
           subtitle: subtitle,
         );
       },
-      orElse: () => const SettingsRow(
-        label: 'Last phone-state event',
-        value: '—',
-      ),
+      orElse: () =>
+          SettingsRow(label: tr("Last phone-state event"), value: '—'),
     );
   }
 }
@@ -1038,17 +1048,18 @@ class _LastPhoneStateDecisionRow extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    LanguageScope.watch(context);
     final storeAsync = ref.watch(autoUploadStoreProvider);
     return storeAsync.maybeWhen(
       data: (store) {
         final decision = store.lastPhoneStateDecision;
         return SettingsRow(
-          label: 'Last decision',
+          label: tr("Last decision"),
           value: decision == null ? '—' : '',
           subtitle: decision,
         );
       },
-      orElse: () => const SettingsRow(label: 'Last decision', value: '—'),
+      orElse: () => SettingsRow(label: tr("Last decision"), value: '—'),
     );
   }
 }
@@ -1058,26 +1069,28 @@ class _LastCallEndEnqueueRow extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    LanguageScope.watch(context);
     final storeAsync = ref.watch(autoUploadStoreProvider);
-    final pref = ref.watch(timeFormatPreferenceProvider).asData?.value
-        ?? TimeFormatPreference.system;
+    final pref =
+        ref.watch(timeFormatPreferenceProvider).asData?.value ??
+        TimeFormatPreference.system;
     final use24 = resolveUse24Hour(pref, context);
     return storeAsync.maybeWhen(
       data: (store) {
         final at = store.lastCallEndEnqueueAt;
         return SettingsRow(
-          label: 'Last call-end enqueue',
-          value: at == null ? 'never' : formatHourMinute(at, use24Hour: use24),
+          label: tr("Last call-end enqueue"),
+          value: at == null
+              ? tr("never")
+              : formatHourMinute(at, use24Hour: use24),
           subtitle: at == null
-              ? 'No OFFHOOK→IDLE transition has reached the enqueue '
-                  'branch since install. If "Last phone-state event" '
-                  'shows IDLE with prev=null, the app process was killed '
-                  'between OFFHOOK and IDLE.'
+              ? tr(
+                  "No OFFHOOK→IDLE transition has reached the enqueue branch since install. If \"Last phone-state event\" shows IDLE with prev=null, the app process was killed between OFFHOOK and IDLE.",
+                )
               : null,
         );
       },
-      orElse: () =>
-          const SettingsRow(label: 'Last call-end enqueue', value: '—'),
+      orElse: () => SettingsRow(label: tr("Last call-end enqueue"), value: '—'),
     );
   }
 }
@@ -1123,20 +1136,20 @@ class _PresetSheetState extends ConsumerState<_PresetSheet> {
       final groupStr = _group.text.trim();
       final format = _format.text.trim();
       if (regex.isEmpty || format.isEmpty) {
-        setState(() => _customError = 'Regex and format are required.');
+        setState(() => _customError = tr("Regex and format are required."));
         return;
       }
       final group = int.tryParse(groupStr);
       if (group == null || group < 1) {
         setState(
-          () => _customError = 'Capture group must be a positive integer.',
+          () => _customError = tr("Capture group must be a positive integer."),
         );
         return;
       }
       try {
         RegExp(regex);
       } catch (_) {
-        setState(() => _customError = 'Invalid regex syntax.');
+        setState(() => _customError = tr("Invalid regex syntax."));
         return;
       }
       await ctrl.setCustomParse(
@@ -1153,6 +1166,7 @@ class _PresetSheetState extends ConsumerState<_PresetSheet> {
 
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     return Padding(
       padding: EdgeInsets.only(
         bottom: MediaQuery.of(context).viewInsets.bottom,
@@ -1165,7 +1179,7 @@ class _PresetSheetState extends ConsumerState<_PresetSheet> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24),
               child: Text(
-                'Datetime pattern',
+                tr("Datetime pattern"),
                 style: SpeakrText.serif(size: 22),
               ),
             ),
@@ -1173,9 +1187,9 @@ class _PresetSheetState extends ConsumerState<_PresetSheet> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24),
               child: Text(
-                'Parse the recording datetime out of the filename. '
-                'Falls back to file modification time if the pattern '
-                'doesn\'t match.',
+                tr(
+                  "Parse the recording datetime out of the filename. Falls back to file modification time if the pattern doesn't match.",
+                ),
                 style: SpeakrText.sans(
                   size: 12,
                   color: SpeakrColors.ink2,
@@ -1185,18 +1199,18 @@ class _PresetSheetState extends ConsumerState<_PresetSheet> {
             ),
             const SizedBox(height: 14),
             _PresetTile(
-              label: 'Off — use file modification time',
+              label: tr("Off — use file modification time"),
               selected: _selected == null,
               onTap: () => setState(() => _selected = null),
             ),
             for (final p in kDateTimePresets)
               _PresetTile(
-                label: p.label,
+                label: tr(p.label),
                 selected: _selected == p.id,
                 onTap: () => setState(() => _selected = p.id),
               ),
             _PresetTile(
-              label: 'Custom regex…',
+              label: tr("Custom regex…"),
               selected: _selected == kCustomPresetId,
               onTap: () => setState(() => _selected = kCustomPresetId),
             ),
@@ -1207,16 +1221,16 @@ class _PresetSheetState extends ConsumerState<_PresetSheet> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _CustomField(label: 'Regex', controller: _regex),
+                    _CustomField(label: tr("Regex"), controller: _regex),
                     const SizedBox(height: 10),
                     _CustomField(
-                      label: 'Capture group (1-based)',
+                      label: tr("Capture group (1-based)"),
                       controller: _group,
                       keyboardType: TextInputType.number,
                     ),
                     const SizedBox(height: 10),
                     _CustomField(
-                      label: 'DateFormat pattern',
+                      label: tr("DateFormat pattern"),
                       controller: _format,
                       hint: 'yyyy-MM-dd HH-mm-ss',
                     ),
@@ -1241,10 +1255,10 @@ class _PresetSheetState extends ConsumerState<_PresetSheet> {
                 children: [
                   TextButton(
                     onPressed: () => Navigator.pop(context),
-                    child: const Text('Cancel'),
+                    child: Text(tr("Cancel")),
                   ),
                   const Spacer(),
-                  FilledButton(onPressed: _save, child: const Text('Save')),
+                  FilledButton(onPressed: _save, child: Text(tr("Save"))),
                 ],
               ),
             ),
@@ -1268,6 +1282,7 @@ class _PresetTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     return InkWell(
       onTap: onTap,
       child: Container(
@@ -1311,6 +1326,7 @@ class _CustomField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -1334,14 +1350,14 @@ class _CustomField extends StatelessWidget {
 
 class _TagLabel {
   static String of(WidgetRef ref, int? tagId) {
-    if (tagId == null) return 'None';
+    if (tagId == null) return tr("None");
     final tagsAsync = ref.read(tagsProvider);
     final tags = tagsAsync.value;
-    if (tags == null) return 'Tag #$tagId';
+    if (tags == null) return tr("Tag #{0}", [tagId]);
     for (final t in tags) {
       if (t.id == tagId) return t.name;
     }
-    return 'Tag #$tagId';
+    return tr("Tag #{0}", [tagId]);
   }
 }
 
@@ -1352,6 +1368,7 @@ class _TagSheet extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    LanguageScope.watch(context);
     final tagsAsync = ref.watch(tagsProvider);
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 14),
@@ -1361,7 +1378,7 @@ class _TagSheet extends ConsumerWidget {
         children: [
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: Text('Default tag', style: SpeakrText.serif(size: 22)),
+            child: Text(tr("Default tag"), style: SpeakrText.serif(size: 22)),
           ),
           const SizedBox(height: 12),
           tagsAsync.when(
@@ -1374,14 +1391,14 @@ class _TagSheet extends ConsumerWidget {
             error: (e, _) => Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24),
               child: Text(
-                'Could not load tags: $e',
+                tr("Could not load tags: {0}", [e]),
                 style: SpeakrText.sans(size: 13),
               ),
             ),
             data: (tags) => Column(
               children: [
                 _TagOption(
-                  label: 'None',
+                  label: tr("None"),
                   selected: currentId == null,
                   onTap: () async {
                     await ref
@@ -1415,14 +1432,14 @@ class _TagSheet extends ConsumerWidget {
 
 class _FolderLabel {
   static String of(WidgetRef ref, int? folderId) {
-    if (folderId == null) return 'None';
+    if (folderId == null) return tr("None");
     final foldersAsync = ref.read(foldersProvider);
     final folders = foldersAsync.value;
-    if (folders == null) return 'Folder #$folderId';
+    if (folders == null) return tr("Folder #{0}", [folderId]);
     for (final f in folders) {
       if (f.id == folderId) return f.name;
     }
-    return 'Folder #$folderId';
+    return tr("Folder #{0}", [folderId]);
   }
 }
 
@@ -1433,6 +1450,7 @@ class _FolderSheet extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    LanguageScope.watch(context);
     final foldersAsync = ref.watch(foldersProvider);
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 14),
@@ -1442,7 +1460,10 @@ class _FolderSheet extends ConsumerWidget {
         children: [
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: Text('Default folder', style: SpeakrText.serif(size: 22)),
+            child: Text(
+              tr("Default folder"),
+              style: SpeakrText.serif(size: 22),
+            ),
           ),
           const SizedBox(height: 12),
           foldersAsync.when(
@@ -1455,14 +1476,14 @@ class _FolderSheet extends ConsumerWidget {
             error: (e, _) => Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24),
               child: Text(
-                'Could not load folders: $e',
+                tr("Could not load folders: {0}", [e]),
                 style: SpeakrText.sans(size: 13),
               ),
             ),
             data: (folders) => Column(
               children: [
                 _TagOption(
-                  label: 'None',
+                  label: tr("None"),
                   selected: currentId == null,
                   onTap: () async {
                     await ref
@@ -1506,6 +1527,7 @@ class _TagOption extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     return InkWell(
       onTap: onTap,
       child: Container(

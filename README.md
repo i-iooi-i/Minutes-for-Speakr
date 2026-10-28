@@ -1,5 +1,8 @@
 # Minutes for Speakr
 
+> 简体中文分支：保留原版界面，默认中文，支持中英文切换。详见 [中文说明](README.zh-CN.md)。
+> Simplified Chinese fork with an English language option. Original project: [Inrego/Minutes-for-Speakr](https://github.com/Inrego/Minutes-for-Speakr).
+
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Platforms](https://img.shields.io/badge/platforms-Android%20%7C%20iOS%20%7C%20Windows-informational.svg)](#requirements)
 [![Latest release](https://img.shields.io/github/v/release/Inrego/Minutes-for-Speakr?sort=semver)](https://github.com/Inrego/Minutes-for-Speakr/releases/latest)

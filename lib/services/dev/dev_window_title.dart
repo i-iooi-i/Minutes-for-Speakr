@@ -18,18 +18,20 @@ Future<void> applyDevBranchTitleIfDebug() async {
 
   try {
     if (kDebugMode) {
-      final res = Process.runSync(
-        'git',
-        ['rev-parse', '--abbrev-ref', 'HEAD'],
-        runInShell: true,
-      );
+      final res = Process.runSync('git', [
+        'rev-parse',
+        '--abbrev-ref',
+        'HEAD',
+      ], runInShell: true);
       if (res.exitCode != 0) return;
       final branch = (res.stdout as String).trim();
       if (branch.isEmpty || branch == 'HEAD') return;
       await MiniWindowNative.setMainWindowTitle('Minutes — $branch');
     } else {
       final info = await PackageInfo.fromPlatform();
-      await MiniWindowNative.setMainWindowTitle('Minutes v${info.version}');
+      await MiniWindowNative.setMainWindowTitle(
+        'Minutes v${info.version}+${info.buildNumber}',
+      );
     }
   } on ProcessException {
     // git not on PATH — leave default title.

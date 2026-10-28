@@ -1,3 +1,5 @@
+import 'package:speakr_app/l10n/strings.dart';
+
 import 'dart:async';
 import 'dart:io';
 
@@ -154,7 +156,8 @@ Duration? _estimateMp3Duration(File file) {
         id3Header[1] == 0x44 &&
         id3Header[2] == 0x33) {
       // ID3v2 size is a 4-byte syncsafe int (each byte uses only 7 bits).
-      final size = (id3Header[6] << 21) |
+      final size =
+          (id3Header[6] << 21) |
           (id3Header[7] << 14) |
           (id3Header[8] << 7) |
           id3Header[9];
@@ -204,9 +207,7 @@ Duration? _estimateMp3Duration(File file) {
       } else {
         raf.setPositionSync(absoluteNext);
         final probe = raf.readSync(2);
-        if (probe.length < 2 ||
-            probe[0] != 0xFF ||
-            (probe[1] & 0xE0) != 0xE0) {
+        if (probe.length < 2 || probe[0] != 0xFF || (probe[1] & 0xE0) != 0xE0) {
           continue;
         }
       }
@@ -237,19 +238,94 @@ class _Mp3FrameHeader {
 // MP3 bitrate tables (kbps). Index 0 = free format, index 15 = bad — both
 // rejected by the caller. We only index 1..14.
 const List<int> _kV1L1 = [
-  0, 32, 64, 96, 128, 160, 192, 224, 256, 288, 320, 352, 384, 416, 448, -1,
+  0,
+  32,
+  64,
+  96,
+  128,
+  160,
+  192,
+  224,
+  256,
+  288,
+  320,
+  352,
+  384,
+  416,
+  448,
+  -1,
 ];
 const List<int> _kV1L2 = [
-  0, 32, 48, 56, 64, 80, 96, 112, 128, 160, 192, 224, 256, 320, 384, -1,
+  0,
+  32,
+  48,
+  56,
+  64,
+  80,
+  96,
+  112,
+  128,
+  160,
+  192,
+  224,
+  256,
+  320,
+  384,
+  -1,
 ];
 const List<int> _kV1L3 = [
-  0, 32, 40, 48, 56, 64, 80, 96, 112, 128, 160, 192, 224, 256, 320, -1,
+  0,
+  32,
+  40,
+  48,
+  56,
+  64,
+  80,
+  96,
+  112,
+  128,
+  160,
+  192,
+  224,
+  256,
+  320,
+  -1,
 ];
 const List<int> _kV2L1 = [
-  0, 32, 48, 56, 64, 80, 96, 112, 128, 144, 160, 176, 192, 224, 256, -1,
+  0,
+  32,
+  48,
+  56,
+  64,
+  80,
+  96,
+  112,
+  128,
+  144,
+  160,
+  176,
+  192,
+  224,
+  256,
+  -1,
 ];
 const List<int> _kV2L23 = [
-  0, 8, 16, 24, 32, 40, 48, 56, 64, 80, 96, 112, 128, 144, 160, -1,
+  0,
+  8,
+  16,
+  24,
+  32,
+  40,
+  48,
+  56,
+  64,
+  80,
+  96,
+  112,
+  128,
+  144,
+  160,
+  -1,
 ];
 
 _Mp3FrameHeader? _decodeMp3FrameHeader(List<int> buf, int offset) {
@@ -324,8 +400,10 @@ _Mp3FrameHeader? _decodeMp3FrameHeader(List<int> buf, int offset) {
 /// duration couldn't be read. Includes the filename so the dialog text
 /// makes sense without extra context.
 String _durationErrorMessage(AutoUploadFile file, String detail) {
-  return "Couldn't read the duration of ${file.name}. The file may be corrupt "
-      'or use an unsupported codec.\n\n$detail';
+  return tr(
+    "Couldn't read the duration of {0}. The file may be corrupt or use an unsupported codec.\n\n{1}",
+    [file.name, detail],
+  );
 }
 
 Future<String?> _fileSignature(AutoUploadFile file) async {
@@ -342,10 +420,10 @@ bool _signatureMatches(String? stored, String current) {
 }
 
 String _deleteAfterUploadErrorMessage(AutoUploadFile file, Object detail) {
-  return '${file.name} was uploaded to Speakr, but the app could not delete '
-      'the local copy. Automatic scans will skip this exact file to avoid '
-      'duplicate uploads.\n\nDelete it manually, or tap this item and choose '
-      'Delete file.\n\n$detail';
+  return tr(
+    "{0} was uploaded to Speakr, but the app could not delete the local copy. Automatic scans will skip this exact file to avoid duplicate uploads.\n\nDelete it manually, or tap this item and choose Delete file.\n\n{1}",
+    [file.name, detail],
+  );
 }
 
 /// Deletes the source recording with a short retry ladder (call-recorder
@@ -368,7 +446,7 @@ Future<Object?> deleteLocalAutoUploadFile(
       await Future<void>.delayed(initialDelay * (attempt + 1));
     }
   }
-  return lastError ?? 'File still exists after delete';
+  return lastError ?? tr("File still exists after delete");
 }
 
 Future<void> _deleteUploadCopy(File copy) async {
@@ -484,7 +562,7 @@ Future<AutoUploadLock> _acquireAutoUploadLock(
     if (lock != null) return lock;
     if (!DateTime.now().isBefore(deadline)) {
       throw AutoUploadStillWritingException(
-        'A scan is already in progress. Try again in a moment.',
+        tr("A scan is already in progress. Try again in a moment."),
       );
     }
     await Future<void>.delayed(const Duration(milliseconds: 750));
@@ -510,7 +588,7 @@ Future<Recording> uploadOneFile(
     final stable = await _checkFileStable(file);
     if (stable != AutoUploadOutcome.uploaded) {
       throw AutoUploadStillWritingException(
-        'This recording is still being written. Try again shortly.',
+        tr("This recording is still being written. Try again shortly."),
       );
     }
     final api = buildBackgroundApi();
@@ -560,9 +638,10 @@ Future<bool> runAutoUploadScan({required String trigger}) async {
     for (final config in configs) {
       if (config.needsAndroidGrant) {
         listingFailed = true;
-        result.lastError =
-            '${config.folderPath} must be re-selected in Auto-upload '
-            'settings before it can be scanned.';
+        result.lastError = tr(
+          "{0} must be re-selected in Auto-upload settings before it can be scanned.",
+          [config.folderPath],
+        );
         _logAutoUpload('skip ${config.folderPath}: no folder grant');
         continue;
       }
@@ -650,8 +729,10 @@ Future<bool> runAutoUploadScan({required String trigger}) async {
               } else {
                 await store.setFileError(
                   file.key,
-                  'Could not delete ${file.name} after the '
-                  'auto-delete duration rule matched.\n\n$deleteError',
+                  tr(
+                    "Could not delete {0} after the auto-delete duration rule matched.\n\n{1}",
+                    [file.name, deleteError],
+                  ),
                 );
                 result.failed++;
                 result.lastError = deleteError.toString();
@@ -675,9 +756,10 @@ Future<bool> runAutoUploadScan({required String trigger}) async {
           result.uploaded++;
           if (!upload.deleted) {
             result.failed++;
-            result.lastError =
-                'Uploaded but could not delete '
-                '${file.name}: ${upload.deleteError}';
+            result.lastError = tr("Uploaded but could not delete {0}: {1}", [
+              file.name,
+              upload.deleteError,
+            ]);
           }
         } catch (e) {
           result.failed++;

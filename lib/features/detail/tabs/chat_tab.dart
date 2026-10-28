@@ -1,3 +1,4 @@
+import 'package:speakr_app/l10n/strings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -74,6 +75,7 @@ class _ChatTabState extends ConsumerState<ChatTab> {
 
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     return Column(
       children: [
         Expanded(
@@ -92,7 +94,9 @@ class _ChatTabState extends ConsumerState<ChatTab> {
                   ),
                 ),
                 child: Text(
-                  'Ask anything about this recording — decisions, action items, who said what.',
+                  tr(
+                    "Ask anything about this recording — decisions, action items, who said what.",
+                  ),
                   style: SpeakrText.serif(
                     size: 13,
                     height: 1.45,
@@ -115,10 +119,13 @@ class _ChatTabState extends ConsumerState<ChatTab> {
                       const MonoEyebrow('Speakr', size: 9),
                       const SizedBox(width: 8),
                       const SizedBox(
-                          width: 14,
-                          height: 14,
-                          child: CircularProgressIndicator(
-                              strokeWidth: 2, color: SpeakrColors.muted)),
+                        width: 14,
+                        height: 14,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: SpeakrColors.muted,
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -127,10 +134,13 @@ class _ChatTabState extends ConsumerState<ChatTab> {
                   padding: const EdgeInsets.only(top: 8),
                   child: Text(
                     _error!,
-                    style: SpeakrText.sans(size: 13, color: SpeakrColors.danger),
+                    style: SpeakrText.sans(
+                      size: 13,
+                      color: SpeakrColors.danger,
+                    ),
                   ),
                 ),
-              ]
+              ],
             ],
           ),
         ),
@@ -151,26 +161,27 @@ class _ChatTabState extends ConsumerState<ChatTab> {
                     style: SpeakrText.sans(size: 13),
                     decoration: InputDecoration(
                       isDense: true,
-                      hintText: 'Ask about this recording…',
+                      hintText: tr("Ask about this recording…"),
                       hintStyle: SpeakrText.sans(
-                          size: 13, color: SpeakrColors.muted),
+                        size: 13,
+                        color: SpeakrColors.muted,
+                      ),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(100),
-                        borderSide:
-                            const BorderSide(color: SpeakrColors.line),
+                        borderSide: const BorderSide(color: SpeakrColors.line),
                       ),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(100),
-                        borderSide:
-                            const BorderSide(color: SpeakrColors.line),
+                        borderSide: const BorderSide(color: SpeakrColors.line),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(100),
-                        borderSide:
-                            const BorderSide(color: SpeakrColors.ink),
+                        borderSide: const BorderSide(color: SpeakrColors.ink),
                       ),
                       contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 12),
+                        horizontal: 16,
+                        vertical: 12,
+                      ),
                     ),
                   ),
                 ),
@@ -186,8 +197,11 @@ class _ChatTabState extends ConsumerState<ChatTab> {
                       color: SpeakrColors.ink,
                       shape: BoxShape.circle,
                     ),
-                    child: const SpeakrIconView(SpeakrIcon.send,
-                        size: 18, color: SpeakrColors.bg),
+                    child: const SpeakrIconView(
+                      SpeakrIcon.send,
+                      size: 18,
+                      color: SpeakrColors.bg,
+                    ),
                   ),
                 ),
               ],
@@ -205,15 +219,18 @@ class _Message extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     final isUser = message.role == 'user';
     return Align(
       alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
       child: ConstrainedBox(
         constraints: BoxConstraints(
-            maxWidth: MediaQuery.of(context).size.width * 0.86),
+          maxWidth: MediaQuery.of(context).size.width * 0.86,
+        ),
         child: Column(
-          crossAxisAlignment:
-              isUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+          crossAxisAlignment: isUser
+              ? CrossAxisAlignment.end
+              : CrossAxisAlignment.start,
           children: [
             if (!isUser) ...[
               const Padding(
@@ -226,8 +243,7 @@ class _Message extends StatelessWidget {
               decoration: BoxDecoration(
                 color: isUser ? SpeakrColors.ink : Colors.transparent,
                 border: isUser ? null : Border.all(color: SpeakrColors.line),
-                borderRadius:
-                    BorderRadius.circular(isUser ? 14 : 6),
+                borderRadius: BorderRadius.circular(isUser ? 14 : 6),
               ),
               child: Text(
                 message.text,

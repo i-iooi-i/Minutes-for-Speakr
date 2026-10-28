@@ -1,3 +1,4 @@
+import 'package:speakr_app/l10n/strings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -25,6 +26,7 @@ class _AutoRecordPromptListenerState
 
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     ref.listen(autoRecordPromptsProvider, (_, next) {
       next.whenData((req) => _show(req));
     });
@@ -85,37 +87,36 @@ class _StopPromptDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     return AlertDialog(
       backgroundColor: SpeakrColors.bg,
-      title: Text('Stop recording?', style: SpeakrText.serif(size: 20)),
+      title: Text(tr("Stop recording?"), style: SpeakrText.serif(size: 20)),
       content: Text(
-        'Minutes has been auto-recording ${req.triggerLabel} for '
-        '${_formatElapsed(req.elapsed)}. The mic and audio output have '
-        'been idle.',
+        tr(
+          "Minutes has been auto-recording {0} for {1}. The mic and audio output have been idle.",
+          [req.triggerLabel, _formatElapsed(req.elapsed)],
+        ),
         style: SpeakrText.sans(size: 14, color: SpeakrColors.ink2),
       ),
       actions: [
         TextButton(
-          onPressed: () =>
-              Navigator.of(context).pop(_StopPromptChoice.keep),
+          onPressed: () => Navigator.of(context).pop(_StopPromptChoice.keep),
           child: Text(
-            'Continue recording',
+            tr("Continue recording"),
             style: SpeakrText.sans(size: 14, color: SpeakrColors.ink),
           ),
         ),
         TextButton(
-          onPressed: () =>
-              Navigator.of(context).pop(_StopPromptChoice.discard),
+          onPressed: () => Navigator.of(context).pop(_StopPromptChoice.discard),
           child: Text(
-            'Discard',
+            tr("Discard"),
             style: SpeakrText.sans(size: 14, color: SpeakrColors.danger),
           ),
         ),
         TextButton(
-          onPressed: () =>
-              Navigator.of(context).pop(_StopPromptChoice.stop),
+          onPressed: () => Navigator.of(context).pop(_StopPromptChoice.stop),
           child: Text(
-            'Stop & save',
+            tr("Stop & save"),
             style: SpeakrText.sans(size: 14, color: SpeakrColors.ink),
           ),
         ),

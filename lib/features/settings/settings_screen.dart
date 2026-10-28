@@ -1,3 +1,5 @@
+import 'package:speakr_app/l10n/strings.dart';
+
 import 'dart:io';
 
 import 'package:dio/dio.dart';
@@ -111,21 +113,22 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       context: context,
       builder: (_) => AlertDialog(
         backgroundColor: SpeakrColors.bg,
-        title: Text('Sign out?', style: SpeakrText.serif(size: 20)),
+        title: Text(tr("Sign out?"), style: SpeakrText.serif(size: 20)),
         content: Text(
-          'Disconnects from the server and clears stored credentials.',
+          tr("Disconnects from the server and clears stored credentials."),
           style: SpeakrText.sans(size: 14, color: SpeakrColors.ink2),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancel'),
+            child: Text(tr("Cancel")),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: Text('Sign out',
-                style: SpeakrText.sans(
-                    size: 14, color: SpeakrColors.danger)),
+            child: Text(
+              tr("Sign out"),
+              style: SpeakrText.sans(size: 14, color: SpeakrColors.danger),
+            ),
           ),
         ],
       ),
@@ -143,7 +146,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Could not update auto-start: $e')),
+        SnackBar(content: Text(tr("Could not update auto-start: {0}", [e]))),
       );
     } finally {
       ref.invalidate(autoStartEnabledProvider);
@@ -158,13 +161,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       if (!mounted) return;
       setState(() => _autoSummarize = !v);
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Could not update setting: $e')),
+        SnackBar(content: Text(tr("Could not update setting: {0}", [e]))),
       );
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     return Scaffold(
       backgroundColor: SpeakrColors.bg,
       body: SafeArea(
@@ -175,10 +179,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               child: Row(
                 children: [
                   GhostIconButton(
-                      icon: SpeakrIcon.back, onTap: () => context.pop()),
-                  const Padding(
+                    icon: SpeakrIcon.back,
+                    onTap: () => context.pop(),
+                  ),
+                  Padding(
                     padding: EdgeInsets.only(left: 4),
-                    child: MonoEyebrow('Settings', size: 10),
+                    child: MonoEyebrow(tr("Settings"), size: 10),
                   ),
                 ],
               ),
@@ -196,7 +202,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       shape: BoxShape.circle,
                     ),
                     child: Text(
-                      'ME',
+                      tr("ME"),
                       style: SpeakrText.serif(size: 22, color: SpeakrColors.bg),
                     ),
                   ),
@@ -205,13 +211,17 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Connected user',
-                            style: SpeakrText.serif(size: 20)),
+                        Text(
+                          tr("Connected user"),
+                          style: SpeakrText.serif(size: 20),
+                        ),
                         const SizedBox(height: 2),
                         Text(
                           _baseUrl.isEmpty ? '—' : _baseUrl,
                           style: SpeakrText.mono(
-                              size: 11, color: SpeakrColors.muted),
+                            size: 11,
+                            color: SpeakrColors.muted,
+                          ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -222,36 +232,44 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               ),
             ),
             SettingsGroup(
-              label: 'Server',
+              label: tr("Server"),
               children: [
-                SettingsRow(label: 'Server URL', value: _baseUrl, mono: true),
-                SettingsRow(label: 'API Token', value: _maskedToken, mono: true),
                 SettingsRow(
-                  label: 'Status',
+                  label: tr("Server URL"),
+                  value: _baseUrl,
+                  mono: true,
+                ),
+                SettingsRow(
+                  label: tr("API Token"),
+                  value: _maskedToken,
+                  mono: true,
+                ),
+                SettingsRow(
+                  label: tr("Status"),
                   value: _checkingServer
-                      ? 'Checking…'
-                      : (_serverOk ? 'Connected' : 'Unreachable'),
+                      ? tr("Checking…")
+                      : (_serverOk ? tr("Connected") : tr("Unreachable")),
                   valueColor: _checkingServer
                       ? SpeakrColors.muted
-                      : (_serverOk
-                          ? SpeakrColors.ok
-                          : SpeakrColors.danger),
+                      : (_serverOk ? SpeakrColors.ok : SpeakrColors.danger),
                 ),
               ],
             ),
             SettingsGroup(
-              label: 'Recording',
+              label: tr("Recording"),
               children: [
                 Consumer(
                   builder: (context, ref, _) {
                     final s = ref.watch(autoRecordSettingsProvider);
                     final settings = s.value;
-                    final controller =
-                        ref.read(autoRecordSettingsControllerProvider);
+                    final controller = ref.read(
+                      autoRecordSettingsControllerProvider,
+                    );
                     return SettingsRow(
-                      label: 'Record microphone by default',
-                      subtitle: 'New sessions start with the mic source on. '
-                          'Can be toggled mid-recording.',
+                      label: tr("Record microphone by default"),
+                      subtitle: tr(
+                        "New sessions start with the mic source on. Can be toggled mid-recording.",
+                      ),
                       toggleValue: settings?.defaultMicEnabled ?? true,
                       onToggle: settings == null
                           ? null
@@ -263,18 +281,19 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   builder: (context, ref, _) {
                     final s = ref.watch(autoRecordSettingsProvider);
                     final settings = s.value;
-                    final controller =
-                        ref.read(autoRecordSettingsControllerProvider);
-                    final supported =
-                        Platform.isWindows || Platform.isAndroid;
+                    final controller = ref.read(
+                      autoRecordSettingsControllerProvider,
+                    );
+                    final supported = Platform.isWindows || Platform.isAndroid;
                     return SettingsRow(
-                      label: 'Record system audio by default',
+                      label: tr("Record system audio by default"),
                       subtitle: supported
-                          ? 'New sessions start with system (loopback) audio '
-                              'on. Can be toggled mid-recording. Captures '
-                              'audio from other apps that are playing.'
-                          : 'System audio capture is only available on '
-                              'Windows and Android 10+.',
+                          ? tr(
+                              "New sessions start with system (loopback) audio on. Can be toggled mid-recording. Captures audio from other apps that are playing.",
+                            )
+                          : tr(
+                              "System audio capture is only available on Windows and Android 10+.",
+                            ),
                       toggleValue: settings?.defaultSystemEnabled ?? false,
                       onToggle: (supported && settings != null)
                           ? controller.setDefaultSystemEnabled
@@ -291,20 +310,22 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     }
                     final processSupported =
                         ref.watch(processLoopbackSupportedProvider).value ??
-                            false;
+                        false;
                     if (!processSupported) return const SizedBox.shrink();
-                    final controller =
-                        ref.read(autoRecordSettingsControllerProvider);
-                    final isProcessOnly = settings.defaultSystemScope ==
+                    final controller = ref.read(
+                      autoRecordSettingsControllerProvider,
+                    );
+                    final isProcessOnly =
+                        settings.defaultSystemScope ==
                         SystemAudioScope.processOnly;
                     return SettingsRow(
-                      label: 'Default system-audio scope',
-                      subtitle:
-                          "All-system mixes every app. Trigger-only captures "
-                          'only the auto-record trigger app (Windows 11 / '
-                          'Server 2022). Used when an app has no per-app '
-                          'override.',
-                      value: isProcessOnly ? 'Trigger app only' : 'All system',
+                      label: tr("Default system-audio scope"),
+                      subtitle: tr(
+                        "All-system mixes every app. Trigger-only captures only the auto-record trigger app (Windows 11 / Server 2022). Used when an app has no per-app override.",
+                      ),
+                      value: isProcessOnly
+                          ? tr("Trigger app only")
+                          : tr("All system"),
                       onTap: () => controller.setDefaultSystemScope(
                         isProcessOnly
                             ? SystemAudioScope.allSystem
@@ -314,7 +335,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   },
                 ),
                 SettingsRow(
-                  label: 'Auto-summarize',
+                  label: tr("Auto-summarize"),
                   toggleValue: _autoSummarize,
                   onToggle: _toggleAutoSummarize,
                 ),
@@ -324,15 +345,17 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       final s = ref.watch(autoRecordSettingsProvider);
                       final summary = s.maybeWhen(
                         data: (settings) {
-                          if (!settings.enabled) return 'Off';
+                          if (!settings.enabled) return tr("Off");
                           final n = settings.allowlist.length;
-                          if (n == 0) return 'On · no apps';
-                          return n == 1 ? 'On · 1 app' : 'On · $n apps';
+                          if (n == 0) return tr("On · no apps");
+                          return n == 1
+                              ? tr("On · 1 app")
+                              : tr("On · {0} apps", [n]);
                         },
                         orElse: () => '—',
                       );
                       return SettingsRow(
-                        label: 'Auto-record on mic activity',
+                        label: tr("Auto-record on mic activity"),
                         value: summary,
                         onTap: () => context.push('/settings/auto-record'),
                       );
@@ -341,20 +364,27 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               ],
             ),
             SettingsGroup(
-              label: 'Display',
-              children: const [_TimeFormatRow()],
+              label: tr("Display"),
+              children: [
+                SettingsRow(
+                  label: tr("Interface language"),
+                  trailing: const LanguagePicker(),
+                ),
+                const _TimeFormatRow(),
+              ],
             ),
             if (Platform.isWindows)
               Consumer(
                 builder: (context, ref, _) {
                   final enabled = ref.watch(autoStartEnabledProvider);
                   return SettingsGroup(
-                    label: 'Startup',
+                    label: tr("Startup"),
                     children: [
                       SettingsRow(
-                        label: 'Start with Windows',
-                        subtitle:
-                            'Launches Minutes minimized to the tray when you sign in.',
+                        label: tr("Start with Windows"),
+                        subtitle: tr(
+                          "Launches Minutes minimized to the tray when you sign in.",
+                        ),
                         toggleValue: enabled.maybeWhen(
                           data: (v) => v,
                           orElse: () => false,
@@ -372,19 +402,19 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 final configs = ref.watch(folderConfigsProvider);
                 final summary = configs.maybeWhen(
                   data: (list) {
-                    if (list.isEmpty) return 'Disabled';
+                    if (list.isEmpty) return tr("Disabled");
                     final enabled = list.where((c) => c.enabled).length;
                     final total = list.length;
-                    final word = total == 1 ? 'folder' : 'folders';
-                    return '$enabled of $total $word enabled';
+                    final word = tr(total == 1 ? 'folder' : 'folders');
+                    return tr("{0} of {1} {2} enabled", [enabled, total, word]);
                   },
                   orElse: () => '—',
                 );
                 return SettingsGroup(
-                  label: 'Auto-upload',
+                  label: tr("Auto-upload"),
                   children: [
                     SettingsRow(
-                      label: 'Auto-upload from folders',
+                      label: tr("Auto-upload from folders"),
                       value: summary,
                       onTap: () => context.push('/settings/auto-upload'),
                     ),
@@ -393,23 +423,23 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               },
             ),
             SettingsGroup(
-              label: 'Storage',
+              label: tr("Storage"),
               children: [
                 SettingsRow(
-                  label: 'Recordings',
+                  label: tr("Recordings"),
                   value: _recordingsCount?.toString() ?? '—',
                 ),
                 SettingsRow(
-                  label: 'Storage used',
+                  label: tr("Storage used"),
                   value: formatBytes(_storageBytes),
                 ),
               ],
             ),
             SettingsGroup(
-              label: 'About',
+              label: tr("About"),
               children: [
                 SettingsRow(
-                  label: 'App version',
+                  label: tr("App version"),
                   value: ref
                       .watch(appVersionProvider)
                       .maybeWhen(data: (v) => v, orElse: () => '—'),
@@ -427,7 +457,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     foregroundColor: SpeakrColors.danger,
                     padding: EdgeInsets.zero,
                   ),
-                  child: const Text('Sign out'),
+                  child: Text(tr("Sign out")),
                 ),
               ),
             ),
@@ -443,20 +473,26 @@ class _TimeFormatRow extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final pref = ref.watch(timeFormatPreferenceProvider).asData?.value
-        ?? TimeFormatPreference.system;
+    LanguageScope.watch(context);
+    final pref =
+        ref.watch(timeFormatPreferenceProvider).asData?.value ??
+        TimeFormatPreference.system;
     final systemUses24 = MediaQuery.alwaysUse24HourFormatOf(context);
     final subtitle = pref == TimeFormatPreference.system
         ? (Platform.isWindows
-            ? 'System (Windows always reports 12-hour — pick 24h to override)'
-            : 'Following system (currently ${systemUses24 ? '24-hour' : '12-hour'})')
+              ? tr(
+                  "System (Windows always reports 12-hour — pick 24h to override)",
+                )
+              : tr("Following system (currently {0})", [
+                  systemUses24 ? '24-hour' : '12-hour',
+                ]))
         : null;
 
     Future<void> select(TimeFormatPreference next) =>
         ref.read(timeFormatControllerProvider).set(next);
 
     return SettingsRow(
-      label: 'Time format',
+      label: tr("Time format"),
       subtitle: subtitle,
       trailing: _TimeFormatSegments(value: pref, onChanged: select),
     );
@@ -470,6 +506,7 @@ class _TimeFormatSegments extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     return DecoratedBox(
       decoration: BoxDecoration(
         border: Border.all(color: SpeakrColors.line),
@@ -478,9 +515,9 @@ class _TimeFormatSegments extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          _segment('Auto', TimeFormatPreference.system),
-          _segment('12h', TimeFormatPreference.twelveHour),
-          _segment('24h', TimeFormatPreference.twentyFourHour),
+          _segment(tr("Auto"), TimeFormatPreference.system),
+          _segment(tr("12h"), TimeFormatPreference.twelveHour),
+          _segment(tr("24h"), TimeFormatPreference.twentyFourHour),
         ],
       ),
     );

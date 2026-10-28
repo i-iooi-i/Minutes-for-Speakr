@@ -1,3 +1,5 @@
+import 'package:speakr_app/l10n/strings.dart';
+
 import 'dart:io' show Platform, SocketException;
 
 import 'package:dio/dio.dart';
@@ -98,20 +100,20 @@ class _SettingsDesktopScreenState extends ConsumerState<SettingsDesktopScreen> {
       context: context,
       builder: (_) => AlertDialog(
         backgroundColor: SpeakrColors.bg,
-        title: Text('Sign out?', style: SpeakrText.serif(size: 20)),
+        title: Text(tr("Sign out?"), style: SpeakrText.serif(size: 20)),
         content: Text(
-          'Disconnects from the server and clears stored credentials.',
+          tr("Disconnects from the server and clears stored credentials."),
           style: SpeakrText.sans(size: 14, color: SpeakrColors.ink2),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancel'),
+            child: Text(tr("Cancel")),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
             child: Text(
-              'Sign out',
+              tr("Sign out"),
               style: SpeakrText.sans(size: 14, color: SpeakrColors.danger),
             ),
           ),
@@ -127,6 +129,7 @@ class _SettingsDesktopScreenState extends ConsumerState<SettingsDesktopScreen> {
 
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     return Scaffold(
       backgroundColor: SpeakrColors.bg,
       body: Row(
@@ -171,7 +174,9 @@ class _SettingsDesktopScreenState extends ConsumerState<SettingsDesktopScreen> {
               if (!mounted) return;
               setState(() => _autoSummarize = prev);
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Could not update setting: $e')),
+                SnackBar(
+                  content: Text(tr("Could not update setting: {0}", [e])),
+                ),
               );
             }
           },
@@ -207,17 +212,19 @@ class _SubSidebar extends StatelessWidget {
   final VoidCallback onBack;
 
   static List<(_SettingsSection, String)> get _items => [
-    (_SettingsSection.profile, 'Profile'),
-    (_SettingsSection.server, 'Server'),
-    (_SettingsSection.recording, 'Recording'),
-    (_SettingsSection.transcription, 'Transcription'),
-    (_SettingsSection.appearance, 'Appearance'),
-    if (supportsKeyboardShortcuts) (_SettingsSection.shortcuts, 'Shortcuts'),
-    (_SettingsSection.about, 'About'),
+    (_SettingsSection.profile, tr("Profile")),
+    (_SettingsSection.server, tr("Server")),
+    (_SettingsSection.recording, tr("Recording")),
+    (_SettingsSection.transcription, tr("Transcription")),
+    (_SettingsSection.appearance, tr("Appearance")),
+    if (supportsKeyboardShortcuts)
+      (_SettingsSection.shortcuts, tr("Shortcuts")),
+    (_SettingsSection.about, tr("About")),
   ];
 
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     return SizedBox(
       width: 220,
       child: Material(
@@ -231,7 +238,7 @@ class _SubSidebar extends StatelessWidget {
             ),
             Padding(
               padding: const EdgeInsets.fromLTRB(22, 4, 22, 14),
-              child: Text('Settings', style: SpeakrText.serif(size: 26)),
+              child: Text(tr("Settings"), style: SpeakrText.serif(size: 26)),
             ),
             for (final (sec, label) in _items)
               InkWell(
@@ -274,6 +281,7 @@ class _BackChip extends StatelessWidget {
   final VoidCallback onTap;
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     return Material(
       color: Colors.white,
       shape: RoundedRectangleBorder(
@@ -296,7 +304,7 @@ class _BackChip extends StatelessWidget {
               ),
               const SizedBox(width: 2),
               Text(
-                'Back',
+                tr("Back"),
                 style: SpeakrText.sans(size: 12, color: SpeakrColors.ink2),
               ),
             ],
@@ -317,6 +325,7 @@ class _SectionHead extends StatelessWidget {
   final String? sub;
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     return Padding(
       padding: const EdgeInsets.only(bottom: 28),
       child: Column(
@@ -364,6 +373,7 @@ class _Field extends StatelessWidget {
   final Widget child;
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     return Container(
       decoration: const BoxDecoration(
         border: Border(bottom: BorderSide(color: SpeakrColors.line)),
@@ -416,6 +426,7 @@ class _TextValue extends StatelessWidget {
   final bool mono;
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     return Container(
       constraints: const BoxConstraints(maxWidth: 360),
       height: 34,
@@ -448,6 +459,7 @@ class _Toggle extends StatelessWidget {
   final VoidCallback? onTap;
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     return Align(
       alignment: Alignment.centerLeft,
       child: InkWell(
@@ -486,6 +498,7 @@ class _DropdownStub extends StatelessWidget {
   final String value;
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     return Container(
       height: 34,
       padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -540,12 +553,13 @@ class _ChevPainter extends CustomPainter {
 class _ProfileSection extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    LanguageScope.watch(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const _SectionHead(
-          title: 'Profile',
-          sub: 'How you appear in shared recordings and team views.',
+        _SectionHead(
+          title: tr("Profile"),
+          sub: tr("How you appear in shared recordings and team views."),
         ),
         Container(
           decoration: const BoxDecoration(
@@ -563,7 +577,7 @@ class _ProfileSection extends ConsumerWidget {
                   shape: BoxShape.circle,
                 ),
                 child: Text(
-                  'ME',
+                  tr("ME"),
                   style: SpeakrText.serif(size: 28, color: SpeakrColors.bg),
                 ),
               ),
@@ -571,10 +585,10 @@ class _ProfileSection extends ConsumerWidget {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Connected user', style: SpeakrText.serif(size: 22)),
+                  Text(tr("Connected user"), style: SpeakrText.serif(size: 22)),
                   const SizedBox(height: 4),
                   Text(
-                    'Speakr account · self-hosted',
+                    tr("Speakr account · self-hosted"),
                     style: SpeakrText.mono(
                       size: 11,
                       color: SpeakrColors.muted,
@@ -587,13 +601,13 @@ class _ProfileSection extends ConsumerWidget {
           ),
         ),
         _Field(
-          label: 'Display name',
-          child: const _TextValue(text: 'Speakr user'),
+          label: tr("Display name"),
+          child: _TextValue(text: tr("Speakr user")),
         ),
         _Field(
-          label: 'Default speaker label',
-          hint: "What 'me' is named in transcripts.",
-          child: const _TextValue(text: 'Speakr user'),
+          label: tr("Default speaker label"),
+          hint: tr("What 'me' is named in transcripts."),
+          child: _TextValue(text: tr("Speakr user")),
         ),
       ],
     );
@@ -617,6 +631,7 @@ class _ServerSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    LanguageScope.watch(context);
     final asyncCreds = ref.watch(currentCredentialsProvider);
     final creds = asyncCreds.value;
     final url = creds?.baseUrl ?? '—';
@@ -625,23 +640,24 @@ class _ServerSection extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const _SectionHead(
-          title: 'Server',
-          sub:
-              'Speakr is self-hosted. Audio and transcripts stay on the machine you point this app at.',
+        _SectionHead(
+          title: tr("Server"),
+          sub: tr(
+            "Speakr is self-hosted. Audio and transcripts stay on the machine you point this app at.",
+          ),
         ),
         _Field(
-          label: 'Server URL',
+          label: tr("Server URL"),
           child: _TextValue(text: url, mono: true),
         ),
         _Field(
-          label: 'API token',
-          hint: 'Generated in Settings → API Tokens on your server.',
+          label: tr("API token"),
+          hint: tr("Generated in Settings → API Tokens on your server."),
           child: _TextValue(text: token, mono: true),
         ),
         _Field(
-          label: 'Connection',
-          hint: 'Last verified just now.',
+          label: tr("Connection"),
+          hint: tr("Last verified just now."),
           child: Row(
             children: [
               if (checking)
@@ -665,8 +681,8 @@ class _ServerSection extends ConsumerWidget {
               const SizedBox(width: 7),
               Text(
                 checking
-                    ? 'CHECKING…'
-                    : (serverOk ? 'CONNECTED' : 'UNREACHABLE'),
+                    ? tr("CHECKING…")
+                    : (serverOk ? tr("CONNECTED") : tr("UNREACHABLE")),
                 style: SpeakrText.mono(
                   size: 11,
                   color: serverOk ? SpeakrColors.ok : SpeakrColors.danger,
@@ -688,7 +704,7 @@ class _ServerSection extends ConsumerWidget {
                     padding: const EdgeInsets.symmetric(horizontal: 12),
                     alignment: Alignment.center,
                     child: Text(
-                      'Test connection',
+                      tr("Test connection"),
                       style: SpeakrText.sans(
                         size: 12,
                         color: SpeakrColors.ink2,
@@ -715,6 +731,7 @@ class _RecordingSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    LanguageScope.watch(context);
     final settingsAsync = ref.watch(autoRecordSettingsProvider);
     final controller = ref.read(autoRecordSettingsControllerProvider);
     final settings = settingsAsync.value;
@@ -724,13 +741,13 @@ class _RecordingSection extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const _SectionHead(
-          title: 'Recording',
-          sub: 'Defaults for new recordings.',
+        _SectionHead(
+          title: tr("Recording"),
+          sub: tr("Defaults for new recordings."),
         ),
         _Field(
-          label: 'Record microphone by default',
-          hint: 'New sessions start with the mic source on.',
+          label: tr("Record microphone by default"),
+          hint: tr("New sessions start with the mic source on."),
           child: _Toggle(
             on: settings?.defaultMicEnabled ?? true,
             onTap: settings == null
@@ -741,10 +758,10 @@ class _RecordingSection extends ConsumerWidget {
           ),
         ),
         _Field(
-          label: 'Record system audio by default',
+          label: tr("Record system audio by default"),
           hint: supportsSystem
-              ? 'Captures audio from other apps that are playing.'
-              : 'Available on Windows and Android 10+ only.',
+              ? tr("Captures audio from other apps that are playing.")
+              : tr("Available on Windows and Android 10+ only."),
           child: _Toggle(
             on: settings?.defaultSystemEnabled ?? false,
             onTap: (settings != null && supportsSystem)
@@ -762,14 +779,13 @@ class _RecordingSection extends ConsumerWidget {
             final processSupported =
                 ref.watch(processLoopbackSupportedProvider).value ?? false;
             if (!processSupported) return const SizedBox.shrink();
-            final isProcessOnly = settings.defaultSystemScope ==
-                SystemAudioScope.processOnly;
+            final isProcessOnly =
+                settings.defaultSystemScope == SystemAudioScope.processOnly;
             return _Field(
-              label: 'Default system-audio scope',
-              hint:
-                  "All-system mixes every app's output. Trigger-only captures "
-                  'only the auto-record trigger app and its children. Used '
-                  'when an app has no per-app override.',
+              label: tr("Default system-audio scope"),
+              hint: tr(
+                "All-system mixes every app's output. Trigger-only captures only the auto-record trigger app and its children. Used when an app has no per-app override.",
+              ),
               child: Align(
                 alignment: Alignment.centerLeft,
                 child: Material(
@@ -790,7 +806,9 @@ class _RecordingSection extends ConsumerWidget {
                       padding: const EdgeInsets.symmetric(horizontal: 12),
                       alignment: Alignment.centerLeft,
                       child: Text(
-                        isProcessOnly ? 'Trigger app only' : 'All system',
+                        isProcessOnly
+                            ? tr("Trigger app only")
+                            : tr("All system"),
                         style: SpeakrText.sans(
                           size: 12,
                           color: SpeakrColors.ink,
@@ -809,10 +827,10 @@ class _RecordingSection extends ConsumerWidget {
                 ref.watch(videoCaptureSupportedProvider).value ?? false;
             if (!videoSupported) return const SizedBox.shrink();
             return _Field(
-              label: 'Record video by default',
-              hint: "Records the meeting app's window (cameras, shared "
-                  'screens) as video, about 0.7 GB per hour. Needs '
-                  'VIDEO_RETENTION on the Speakr server.',
+              label: tr("Record video by default"),
+              hint: tr(
+                "Records the meeting app's window (cameras, shared screens) as video, about 0.7 GB per hour. Needs VIDEO_RETENTION on the Speakr server.",
+              ),
               child: _Toggle(
                 on: settings?.defaultVideoEnabled ?? false,
                 onTap: settings == null
@@ -825,8 +843,8 @@ class _RecordingSection extends ConsumerWidget {
           },
         ),
         _Field(
-          label: 'Auto-summarize',
-          hint: 'Generate a TL;DR after each recording completes.',
+          label: tr("Auto-summarize"),
+          hint: tr("Generate a TL;DR after each recording completes."),
           child: _Toggle(
             on: autoSummarize,
             onTap: () => onAutoSummarize(!autoSummarize),
@@ -834,9 +852,10 @@ class _RecordingSection extends ConsumerWidget {
         ),
         if (!kIsWeb && Platform.isWindows)
           _Field(
-            label: 'Auto-record on mic activity',
-            hint:
-                'Start recording automatically when a listed app uses the mic.',
+            label: tr("Auto-record on mic activity"),
+            hint: tr(
+              "Start recording automatically when a listed app uses the mic.",
+            ),
             child: Align(
               alignment: Alignment.centerLeft,
               child: Material(
@@ -855,7 +874,7 @@ class _RecordingSection extends ConsumerWidget {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
-                          'Configure…',
+                          tr("Configure…"),
                           style: SpeakrText.sans(
                             size: 12,
                             color: SpeakrColors.ink2,
@@ -885,11 +904,12 @@ class _AutoStartField extends ConsumerWidget {
   const _AutoStartField();
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    LanguageScope.watch(context);
     final asyncEnabled = ref.watch(autoStartEnabledProvider);
     final service = ref.read(autoStartServiceProvider);
     return _Field(
-      label: 'Start with Windows',
-      hint: 'Launches Minutes minimized to the tray when you sign in.',
+      label: tr("Start with Windows"),
+      hint: tr("Launches Minutes minimized to the tray when you sign in."),
       child: _Toggle(
         on: asyncEnabled.maybeWhen(data: (v) => v, orElse: () => false),
         onTap: asyncEnabled.hasValue
@@ -900,7 +920,11 @@ class _AutoStartField extends ConsumerWidget {
                 } catch (e) {
                   if (!context.mounted) return;
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Could not update auto-start: $e')),
+                    SnackBar(
+                      content: Text(
+                        tr("Could not update auto-start: {0}", [e]),
+                      ),
+                    ),
                   );
                 } finally {
                   ref.invalidate(autoStartEnabledProvider);
@@ -916,9 +940,12 @@ class _AutoUploadField extends StatelessWidget {
   const _AutoUploadField();
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     return _Field(
-      label: 'Auto-upload from folders',
-      hint: 'Watch device folders and upload new recordings as they appear.',
+      label: tr("Auto-upload from folders"),
+      hint: tr(
+        "Watch device folders and upload new recordings as they appear.",
+      ),
       child: Align(
         alignment: Alignment.centerLeft,
         child: Material(
@@ -937,7 +964,7 @@ class _AutoUploadField extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    'Configure…',
+                    tr("Configure…"),
                     style: SpeakrText.sans(size: 12, color: SpeakrColors.ink2),
                   ),
                   const SizedBox(width: 8),
@@ -960,31 +987,32 @@ class _TranscriptionSection extends StatelessWidget {
   const _TranscriptionSection();
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const _SectionHead(
-          title: 'Transcription',
-          sub:
-              'How Speakr turns audio into words. These settings live on the '
-              'server — change them in the Speakr web admin.',
+        _SectionHead(
+          title: tr("Transcription"),
+          sub: tr(
+            "How Speakr turns audio into words. These settings live on the server — change them in the Speakr web admin.",
+          ),
         ),
         _Field(
-          label: 'Model',
-          child: const _DropdownStub(value: 'Server default'),
+          label: tr("Model"),
+          child: _DropdownStub(value: tr("Server default")),
         ),
         _Field(
-          label: 'Language',
-          child: const _DropdownStub(value: 'Auto-detect'),
+          label: tr("Language"),
+          child: _DropdownStub(value: tr("Auto-detect")),
         ),
         _Field(
-          label: 'Speaker diarization',
-          hint: 'Separate voices into labeled speakers.',
+          label: tr("Speaker diarization"),
+          hint: tr("Separate voices into labeled speakers."),
           child: const _Toggle(on: true),
         ),
         _Field(
-          label: 'Filter filler words',
-          hint: "Remove 'um', 'uh', 'like' from the readable transcript.",
+          label: tr("Filter filler words"),
+          hint: tr("Remove 'um', 'uh', 'like' from the readable transcript."),
           child: const _Toggle(on: false),
         ),
       ],
@@ -996,6 +1024,7 @@ class _AppearanceSection extends ConsumerWidget {
   const _AppearanceSection();
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    LanguageScope.watch(context);
     final pref =
         ref.watch(timeFormatPreferenceProvider).asData?.value ??
         TimeFormatPreference.system;
@@ -1003,40 +1032,41 @@ class _AppearanceSection extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const _SectionHead(title: 'Appearance'),
+        _SectionHead(title: tr("Appearance")),
+        _Field(label: tr("Interface language"), child: const LanguagePicker()),
         _Field(
-          label: 'Theme',
+          label: tr("Theme"),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              _ThemeChip(label: 'Light', selected: true),
+              _ThemeChip(label: tr("Light"), selected: true),
               const SizedBox(width: 8),
-              _ThemeChip(label: 'Dark', selected: false, disabled: true),
+              _ThemeChip(label: tr("Dark"), selected: false, disabled: true),
               const SizedBox(width: 8),
-              _ThemeChip(label: 'System', selected: false, disabled: true),
+              _ThemeChip(label: tr("System"), selected: false, disabled: true),
             ],
           ),
         ),
         _Field(
-          label: 'Time format',
-          hint: 'Affects timestamps, list dates and transcript markers.',
+          label: tr("Time format"),
+          hint: tr("Affects timestamps, list dates and transcript markers."),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
               _TimeChip(
-                label: 'Auto',
+                label: tr("Auto"),
                 selected: pref == TimeFormatPreference.system,
                 onTap: () => controller.set(TimeFormatPreference.system),
               ),
               const SizedBox(width: 6),
               _TimeChip(
-                label: '12h',
+                label: tr("12h"),
                 selected: pref == TimeFormatPreference.twelveHour,
                 onTap: () => controller.set(TimeFormatPreference.twelveHour),
               ),
               const SizedBox(width: 6),
               _TimeChip(
-                label: '24h',
+                label: tr("24h"),
                 selected: pref == TimeFormatPreference.twentyFourHour,
                 onTap: () =>
                     controller.set(TimeFormatPreference.twentyFourHour),
@@ -1060,6 +1090,7 @@ class _ThemeChip extends StatelessWidget {
   final bool disabled;
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     return Opacity(
       opacity: disabled ? 0.5 : 1,
       child: Container(
@@ -1093,6 +1124,7 @@ class _TimeChip extends StatelessWidget {
   final VoidCallback onTap;
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     return InkWell(
       borderRadius: BorderRadius.circular(100),
       onTap: selected ? null : onTap,
@@ -1126,25 +1158,26 @@ class _ShortcutsSection extends StatelessWidget {
     final isMac = Platform.isMacOS;
     String combo(String key) => isMac ? '$modLabel $key' : '$modLabel$key';
     return [
-      ('New recording', combo('R')),
-      ('Pause / resume', combo('.')),
-      ('Stop & save', combo(returnKeyLabel)),
-      ('Search library', combo('K')),
-      ('Open settings', combo(',')),
+      (tr("New recording"), combo('R')),
+      (tr("Pause / resume"), combo('.')),
+      (tr("Stop & save"), combo(returnKeyLabel)),
+      (tr("Search library"), combo('K')),
+      (tr("Open settings"), combo(',')),
     ];
   }
 
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     if (!supportsKeyboardShortcuts) return const SizedBox.shrink();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const _SectionHead(
-          title: 'Shortcuts',
-          sub:
-              "System-wide hotkeys live on the roadmap. Today's shortcuts "
-              "are active only while Minutes is focused.",
+        _SectionHead(
+          title: tr("Shortcuts"),
+          sub: tr(
+            "System-wide hotkeys live on the roadmap. Today's shortcuts are active only while Minutes is focused.",
+          ),
         ),
         for (final (label, key) in _buildRows())
           Container(
@@ -1198,12 +1231,13 @@ class _AboutSection extends StatelessWidget {
   final VoidCallback onSignOut;
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const _SectionHead(title: 'About'),
+        _SectionHead(title: tr("About")),
         _Field(
-          label: 'App version',
+          label: tr("App version"),
           child: Consumer(
             builder: (context, ref, _) => _TextValue(
               text: ref
@@ -1214,10 +1248,12 @@ class _AboutSection extends StatelessWidget {
           ),
         ),
         _Field(
-          label: 'Storage used',
+          label: tr("Storage used"),
           child: _TextValue(
-            text:
-                '${formatBytes(storageBytes)} · ${recordingsCount ?? '—'} recordings',
+            text: tr("{0} · {1} recordings", [
+              formatBytes(storageBytes),
+              recordingsCount ?? '—',
+            ]),
           ),
         ),
         const SizedBox(height: 30),
@@ -1228,7 +1264,7 @@ class _AboutSection extends StatelessWidget {
             padding: EdgeInsets.zero,
           ),
           child: Text(
-            'Sign out',
+            tr("Sign out"),
             style: SpeakrText.sans(size: 13, color: SpeakrColors.danger),
           ),
         ),

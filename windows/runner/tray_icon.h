@@ -24,6 +24,8 @@ class TrayIcon {
   // Removes the tray icon. Safe to call multiple times.
   void Remove();
 
+  void SetChinese(bool enabled) { chinese_ = enabled; }
+
   // Routes a window message destined for the owner HWND. Returns true when the
   // message was consumed (tray callback, WM_COMMAND for our menu items, or the
   // TaskbarCreated broadcast that follows an Explorer restart).
@@ -43,6 +45,7 @@ class TrayIcon {
  private:
   void ShowContextMenu(HWND owner);
 
+  bool chinese_ = true;
   HWND owner_ = nullptr;
   bool installed_ = false;
   UINT taskbar_created_msg_ = 0;

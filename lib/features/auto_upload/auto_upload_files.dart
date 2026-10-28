@@ -1,3 +1,5 @@
+import 'package:speakr_app/l10n/strings.dart';
+
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
@@ -99,7 +101,10 @@ class LocalAutoUploadFile extends AutoUploadFile {
     await _clearWindowsReadOnlyAttribute(file);
     await file.delete();
     if (await file.exists()) {
-      throw FileSystemException('File still exists after delete', file.path);
+      throw FileSystemException(
+        tr("File still exists after delete"),
+        file.path,
+      );
     }
   }
 }
@@ -151,7 +156,7 @@ class SafAutoUploadFile extends AutoUploadFile {
   Future<void> delete() async {
     final ok = await SpeakrSaf.delete(document.uri);
     if (!ok) {
-      throw FileSystemException('Provider refused to delete', displayPath);
+      throw FileSystemException(tr("Provider refused to delete"), displayPath);
     }
   }
 }
@@ -185,16 +190,15 @@ Future<List<AutoUploadFile>> listCandidateFiles(
       return [
         for (final d in docs)
           if (_isAudioName(d.name))
-            SafAutoUploadFile(
-              d,
-              folderDisplayPath: config.folderPath ?? tree,
-            ),
+            SafAutoUploadFile(d, folderDisplayPath: config.folderPath ?? tree),
       ];
     } on SafPermissionLostException catch (e) {
       throw AutoUploadFolderAccessException(
         config,
-        'Access to ${config.folderPath ?? 'the folder'} was lost. '
-        'Re-select it in Auto-upload settings. ($e)',
+        tr(
+          "Access to {0} was lost. Re-select it in Auto-upload settings. ({1})",
+          [config.folderPath ?? 'the folder', e],
+        ),
       );
     }
   }

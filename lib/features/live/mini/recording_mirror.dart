@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 
 import '../../../api/models.dart';
+import '../../../l10n/strings.dart';
 import '../recording_state.dart';
 import 'mini_ipc.dart';
 import 'mini_window_native.dart';
@@ -42,6 +43,9 @@ class RecordingMirror extends StateNotifier<RecordingState> {
           final json = raw is String
               ? jsonDecode(raw) as Map<String, dynamic>
               : Map<String, dynamic>.from(raw as Map);
+          if (json['_uiLanguage'] is String) {
+            applyLanguage(json['_uiLanguage'] as String);
+          }
           state = RecordingState.fromJson(json);
         } catch (_) {}
         return null;
@@ -99,8 +103,7 @@ class RecordingMirror extends StateNotifier<RecordingState> {
       _send(MiniIpc.cmdSetSpeakers, {'value': v});
   Future<void> toggleTag(String name) =>
       _send(MiniIpc.cmdToggleTag, {'name': name});
-  Future<void> setFolder(int? id) =>
-      _send(MiniIpc.cmdSetFolder, {'id': id});
+  Future<void> setFolder(int? id) => _send(MiniIpc.cmdSetFolder, {'id': id});
   Future<void> setMicEnabled(bool enabled) =>
       _send(MiniIpc.cmdSetMicEnabled, {'enabled': enabled});
   Future<void> setSystemMode(SystemAudioMode mode) =>
@@ -116,6 +119,7 @@ class RecordingMirror extends StateNotifier<RecordingState> {
         return 'processOnly';
     }
   }
+
   Future<void> beginDrag() => _send(MiniIpc.cmdBeginDrag);
   Future<void> showMain() => _send(MiniIpc.cmdShowMain);
   Future<void> resumeAutoStop() => _send(MiniIpc.cmdResumeAutoStop);
@@ -123,8 +127,8 @@ class RecordingMirror extends StateNotifier<RecordingState> {
 
 final recordingMirrorProvider =
     StateNotifierProvider<RecordingMirror, RecordingState>(
-  (ref) => RecordingMirror(ref),
-);
+      (ref) => RecordingMirror(ref),
+    );
 
 /// Server tag list pushed from the main engine via [MiniIpc.tagsUpdate].
 /// The mini's `MetadataCard` watches this to render the same suggestion

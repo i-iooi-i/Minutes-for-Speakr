@@ -1,3 +1,4 @@
+import 'package:speakr_app/l10n/strings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:just_audio/just_audio.dart';
@@ -30,13 +31,16 @@ class TranscriptTab extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    LanguageScope.watch(context);
     final async = ref.watch(transcriptProvider(recordingId));
     return async.when(
       loading: () => const Center(
         child: Padding(
           padding: EdgeInsets.all(32),
           child: CircularProgressIndicator(
-              strokeWidth: 2, color: SpeakrColors.ink),
+            strokeWidth: 2,
+            color: SpeakrColors.ink,
+          ),
         ),
       ),
       error: (e, _) => Padding(
@@ -44,7 +48,7 @@ class TranscriptTab extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const MonoEyebrow('Couldn’t load transcript'),
+            MonoEyebrow(tr("Couldn’t load transcript")),
             const SizedBox(height: 8),
             Text(e.toString(), style: SpeakrText.sans(size: 14)),
           ],
@@ -55,9 +59,12 @@ class TranscriptTab extends ConsumerWidget {
           return Padding(
             padding: const EdgeInsets.all(24),
             child: Text(
-              'Transcript not available yet.',
+              tr("Transcript not available yet."),
               style: SpeakrText.serif(
-                  size: 15, color: SpeakrColors.ink2, height: 1.5),
+                size: 15,
+                color: SpeakrColors.ink2,
+                height: 1.5,
+              ),
             ),
           );
         }
@@ -119,9 +126,11 @@ class _Bubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     final align = isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start;
-    final timestamp =
-        segment.startTime == null ? '' : formatDuration(segment.startTime!);
+    final timestamp = segment.startTime == null
+        ? ''
+        : formatDuration(segment.startTime!);
 
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
@@ -134,64 +143,67 @@ class _Bubble extends StatelessWidget {
       child: Column(
         crossAxisAlignment: align,
         children: [
-        if (segment.speaker != null) ...[
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 6),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  segment.speaker!.toUpperCase(),
-                  style: SpeakrText.sans(
-                    size: 11,
-                    weight: FontWeight.w600,
-                    color: speakerColor,
-                    letterSpacing: 0.8,
-                  ),
-                ),
-                if (timestamp.isNotEmpty) ...[
-                  const SizedBox(width: 6),
+          if (segment.speaker != null) ...[
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 6),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
                   Text(
-                    timestamp,
-                    style: SpeakrText.mono(
-                      size: 10,
-                      color: SpeakrColors.muted,
-                      letterSpacing: 0,
+                    segment.speaker!.toUpperCase(),
+                    style: SpeakrText.sans(
+                      size: 11,
+                      weight: FontWeight.w600,
+                      color: speakerColor,
+                      letterSpacing: 0.8,
                     ),
                   ),
+                  if (timestamp.isNotEmpty) ...[
+                    const SizedBox(width: 6),
+                    Text(
+                      timestamp,
+                      style: SpeakrText.mono(
+                        size: 10,
+                        color: SpeakrColors.muted,
+                        letterSpacing: 0,
+                      ),
+                    ),
+                  ],
                 ],
-              ],
-            ),
-          ),
-          const SizedBox(height: 4),
-        ],
-        ConstrainedBox(
-          constraints: BoxConstraints(
-              maxWidth: MediaQuery.of(context).size.width * 0.82),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-            decoration: BoxDecoration(
-              color: isMe ? SpeakrColors.ink : Colors.white,
-              border: isMe ? null : Border.all(color: SpeakrColors.line),
-              borderRadius: BorderRadius.only(
-                topLeft: const Radius.circular(16),
-                topRight: const Radius.circular(16),
-                bottomLeft:
-                    isMe ? const Radius.circular(16) : const Radius.circular(4),
-                bottomRight:
-                    isMe ? const Radius.circular(4) : const Radius.circular(16),
               ),
             ),
-            child: Text(
-              segment.sentence ?? '',
-              style: SpeakrText.serif(
-                size: 14.5,
-                height: 1.45,
-                color: isMe ? SpeakrColors.bg : SpeakrColors.ink,
+            const SizedBox(height: 4),
+          ],
+          ConstrainedBox(
+            constraints: BoxConstraints(
+              maxWidth: MediaQuery.of(context).size.width * 0.82,
+            ),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              decoration: BoxDecoration(
+                color: isMe ? SpeakrColors.ink : Colors.white,
+                border: isMe ? null : Border.all(color: SpeakrColors.line),
+                borderRadius: BorderRadius.only(
+                  topLeft: const Radius.circular(16),
+                  topRight: const Radius.circular(16),
+                  bottomLeft: isMe
+                      ? const Radius.circular(16)
+                      : const Radius.circular(4),
+                  bottomRight: isMe
+                      ? const Radius.circular(4)
+                      : const Radius.circular(16),
+                ),
+              ),
+              child: Text(
+                segment.sentence ?? '',
+                style: SpeakrText.serif(
+                  size: 14.5,
+                  height: 1.45,
+                  color: isMe ? SpeakrColors.bg : SpeakrColors.ink,
+                ),
               ),
             ),
           ),
-        ),
         ],
       ),
     );

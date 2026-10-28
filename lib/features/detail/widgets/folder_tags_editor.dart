@@ -1,3 +1,4 @@
+import 'package:speakr_app/l10n/strings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -47,6 +48,7 @@ class _FolderTagsEditorState extends ConsumerState<FolderTagsEditor> {
 
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     final folders = ref.watch(foldersProvider).value ?? const <Folder>[];
     final allTags = ref.watch(tagsProvider).value ?? const <Tag>[];
     final folderColor = resolveFolderColor(_folderId, folders);
@@ -161,9 +163,12 @@ class _ChipRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     final hasFolder = folderName != null && folderName!.isNotEmpty;
     final hasContent = hasFolder || tags.isNotEmpty;
-    final actionLabel = editing ? 'Done' : (hasContent ? 'Edit' : '+ Add');
+    final actionLabel = editing
+        ? tr("Done")
+        : (hasContent ? tr("Edit") : tr("+ Add"));
     return Wrap(
       spacing: 4,
       runSpacing: 4,
@@ -205,6 +210,7 @@ class _EditorCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     final selectedIds = selectedTags.map((t) => t.id).toSet();
     final suggested = allTags
         .where((t) => !selectedIds.contains(t.id))
@@ -220,7 +226,7 @@ class _EditorCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const MonoEyebrow('Folder', size: 9),
+          MonoEyebrow(tr("Folder"), size: 9),
           const SizedBox(height: 8),
           Wrap(
             spacing: 4,
@@ -243,11 +249,11 @@ class _EditorCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 12),
-          const MonoEyebrow('Tags', size: 9),
+          MonoEyebrow(tr("Tags"), size: 9),
           const SizedBox(height: 8),
           if (selectedTags.isEmpty && suggested.isEmpty)
             Text(
-              'No tags configured',
+              tr("No tags configured"),
               style: SpeakrText.sans(
                 size: 12,
                 color: SpeakrColors.muted,
@@ -304,6 +310,7 @@ class _NoneFolderChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(3),
@@ -315,7 +322,7 @@ class _NoneFolderChip extends StatelessWidget {
           borderRadius: BorderRadius.circular(3),
         ),
         child: Text(
-          'NONE',
+          tr("NONE"),
           style: SpeakrText.mono(
             size: 10,
             color: selected ? SpeakrColors.bg : SpeakrColors.muted,
@@ -334,6 +341,7 @@ class _DashedTextButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(3),

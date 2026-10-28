@@ -1,3 +1,4 @@
+import 'package:speakr_app/l10n/strings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -67,7 +68,8 @@ class _ReprocessTranscriptionDialogState
       return v.isEmpty ? null : v;
     }
 
-    final showDiarization = config?.connectorSupportsDiarization == true ||
+    final showDiarization =
+        config?.connectorSupportsDiarization == true ||
         config?.connectorSupportsSpeakerCount == true;
     final showHotwords = config?.connectorSupportsHotwords == true;
     final showInitialPrompt = config?.connectorSupportsInitialPrompt == true;
@@ -85,10 +87,14 @@ class _ReprocessTranscriptionDialogState
 
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     final configAsync = ref.watch(configProvider);
     return AlertDialog(
       backgroundColor: SpeakrColors.bg,
-      title: Text('Reprocess transcription', style: SpeakrText.serif(size: 20)),
+      title: Text(
+        tr("Reprocess transcription"),
+        style: SpeakrText.serif(size: 20),
+      ),
       content: SizedBox(
         width: 420,
         child: configAsync.when(
@@ -112,7 +118,7 @@ class _ReprocessTranscriptionDialogState
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
           child: Text(
-            'Cancel',
+            tr("Cancel"),
             style: SpeakrText.sans(size: 13, color: SpeakrColors.muted),
           ),
         ),
@@ -121,7 +127,7 @@ class _ReprocessTranscriptionDialogState
               ? null
               : () => _submit(configAsync.value),
           child: Text(
-            'Reprocess',
+            tr("Reprocess"),
             style: SpeakrText.sans(
               size: 13,
               weight: FontWeight.w600,
@@ -155,24 +161,31 @@ class _Body extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final showDiarization = config.connectorSupportsDiarization ||
+    LanguageScope.watch(context);
+    final showDiarization =
+        config.connectorSupportsDiarization ||
         config.connectorSupportsSpeakerCount;
     final modelValue =
         config.transcriptionModelOptions.any((o) => o.value == model)
-            ? model
-            : null;
+        ? model
+        : null;
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Text(
-          'The current transcript and any speaker labels will be replaced. '
-          'Processing happens on the server and may take a few minutes.',
-          style: SpeakrText.sans(size: 13, height: 1.4, color: SpeakrColors.ink2),
+          tr(
+            "The current transcript and any speaker labels will be replaced. Processing happens on the server and may take a few minutes.",
+          ),
+          style: SpeakrText.sans(
+            size: 13,
+            height: 1.4,
+            color: SpeakrColors.ink2,
+          ),
         ),
         const SizedBox(height: 16),
         if (config.transcriptionModelOptions.isNotEmpty) ...[
-          _label('Model'),
+          _label(tr("Model")),
           DropdownButtonFormField<String>(
             initialValue: modelValue,
             isExpanded: true,
@@ -192,7 +205,7 @@ class _Body extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    _label('Min speakers'),
+                    _label(tr("Min speakers")),
                     TextField(
                       controller: minSpeakers,
                       keyboardType: TextInputType.number,
@@ -207,7 +220,7 @@ class _Body extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    _label('Max speakers'),
+                    _label(tr("Max speakers")),
                     TextField(
                       controller: maxSpeakers,
                       keyboardType: TextInputType.number,
@@ -222,26 +235,24 @@ class _Body extends StatelessWidget {
           const SizedBox(height: 12),
         ],
         if (config.connectorSupportsHotwords) ...[
-          _label('Hotwords'),
+          _label(tr("Hotwords")),
           TextField(
             controller: hotwords,
             style: SpeakrText.sans(size: 14),
-            decoration: const InputDecoration(
-              hintText: 'Comma-separated terms to bias toward',
+            decoration: InputDecoration(
+              hintText: tr("Comma-separated terms to bias toward"),
             ),
           ),
           const SizedBox(height: 12),
         ],
         if (config.connectorSupportsInitialPrompt) ...[
-          _label('Initial prompt'),
+          _label(tr("Initial prompt")),
           TextField(
             controller: initialPrompt,
             maxLines: 4,
             minLines: 2,
             style: SpeakrText.sans(size: 14),
-            decoration: const InputDecoration(
-              hintText: 'Free-text context hint',
-            ),
+            decoration: InputDecoration(hintText: tr("Free-text context hint")),
           ),
         ],
       ],
@@ -249,16 +260,16 @@ class _Body extends StatelessWidget {
   }
 
   static Widget _label(String text) => Padding(
-        padding: const EdgeInsets.only(bottom: 4),
-        child: Text(
-          text,
-          style: SpeakrText.sans(
-            size: 12,
-            weight: FontWeight.w500,
-            color: SpeakrColors.muted,
-          ),
-        ),
-      );
+    padding: const EdgeInsets.only(bottom: 4),
+    child: Text(
+      text,
+      style: SpeakrText.sans(
+        size: 12,
+        weight: FontWeight.w500,
+        color: SpeakrColors.muted,
+      ),
+    ),
+  );
 }
 
 class _ErrorBody extends StatelessWidget {
@@ -267,14 +278,20 @@ class _ErrorBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          "Couldn't load server config — you can still reprocess with the "
-          'server defaults.',
-          style: SpeakrText.sans(size: 13, height: 1.4, color: SpeakrColors.ink2),
+          tr(
+            "Couldn't load server config — you can still reprocess with the server defaults.",
+          ),
+          style: SpeakrText.sans(
+            size: 13,
+            height: 1.4,
+            color: SpeakrColors.ink2,
+          ),
         ),
         const SizedBox(height: 8),
         Text(

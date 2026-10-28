@@ -1,3 +1,4 @@
+import 'package:speakr_app/l10n/strings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -49,9 +50,7 @@ Future<void> reprocessRecording(
     // Pre-fill from the already-loaded recording when available; fall back to
     // an empty Recording shell so the dialog still opens if detail hasn't
     // been fetched yet.
-    final cached = container
-        .read(recordingDetailProvider(recordingId))
-        .value;
+    final cached = container.read(recordingDetailProvider(recordingId)).value;
     transcriptionParams = await showDialog<ReprocessTranscriptionParams>(
       context: context,
       builder: (ctx) => ReprocessTranscriptionDialog(
@@ -64,23 +63,28 @@ Future<void> reprocessRecording(
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: SpeakrColors.bg,
-        title: Text('Reprocess summary?', style: SpeakrText.serif(size: 20)),
+        title: Text(
+          tr("Reprocess summary?"),
+          style: SpeakrText.serif(size: 20),
+        ),
         content: Text(
-          'The current summary will be replaced. Processing happens on the server and may take a few minutes.',
+          tr(
+            "The current summary will be replaced. Processing happens on the server and may take a few minutes.",
+          ),
           style: SpeakrText.sans(size: 14, height: 1.4),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
             child: Text(
-              'Cancel',
+              tr("Cancel"),
               style: SpeakrText.sans(size: 13, color: SpeakrColors.muted),
             ),
           ),
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(true),
             child: Text(
-              'Reprocess',
+              tr("Reprocess"),
               style: SpeakrText.sans(
                 size: 13,
                 weight: FontWeight.w600,
@@ -113,8 +117,8 @@ Future<void> reprocessRecording(
       SnackBar(
         content: Text(
           kind == ReprocessKind.transcription
-              ? 'Transcription queued — refresh in a moment'
-              : 'Summary queued — refresh in a moment',
+              ? tr("Transcription queued — refresh in a moment")
+              : tr("Summary queued — refresh in a moment"),
         ),
       ),
     );
@@ -138,16 +142,18 @@ Future<void> deleteRecording(
     context: context,
     builder: (ctx) => AlertDialog(
       backgroundColor: SpeakrColors.bg,
-      title: Text('Delete recording?', style: SpeakrText.serif(size: 20)),
+      title: Text(tr("Delete recording?"), style: SpeakrText.serif(size: 20)),
       content: Text(
-        'This permanently deletes the recording, its transcript, and its audio. This cannot be undone.',
+        tr(
+          "This permanently deletes the recording, its transcript, and its audio. This cannot be undone.",
+        ),
         style: SpeakrText.sans(size: 14, height: 1.4),
       ),
       actions: [
         TextButton(
           onPressed: () => Navigator.of(ctx).pop(false),
           child: Text(
-            'Cancel',
+            tr("Cancel"),
             style: SpeakrText.sans(size: 13, color: SpeakrColors.muted),
           ),
         ),
@@ -155,7 +161,7 @@ Future<void> deleteRecording(
           onPressed: () => Navigator.of(ctx).pop(true),
           style: TextButton.styleFrom(foregroundColor: SpeakrColors.danger),
           child: Text(
-            'Delete',
+            tr("Delete"),
             style: SpeakrText.sans(
               size: 13,
               weight: FontWeight.w600,
@@ -172,9 +178,7 @@ Future<void> deleteRecording(
     container.read(uploadKickProvider.notifier).state++;
     container.invalidate(recordingDetailProvider(recordingId));
     if (goRouter.canPop()) goRouter.pop();
-    messenger.showSnackBar(
-      const SnackBar(content: Text('Recording deleted')),
-    );
+    messenger.showSnackBar(SnackBar(content: Text(tr("Recording deleted"))));
   } on SpeakrApiException catch (e) {
     messenger.showSnackBar(SnackBar(content: Text(e.message)));
   } catch (e) {

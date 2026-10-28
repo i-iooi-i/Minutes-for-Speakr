@@ -8,6 +8,10 @@ analyzer:
   exclude:
     - "**/*.freezed.dart"
     - "**/*.g.dart"
+    - build/**
+    - android/**
+    - ios/**
+    - windows/**
 
 linter:
   rules:

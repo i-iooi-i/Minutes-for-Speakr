@@ -1,3 +1,5 @@
+import 'package:speakr_app/l10n/strings.dart';
+
 import 'dart:async';
 import 'dart:io' show Platform;
 
@@ -108,10 +110,13 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
   /// Called from build with the latest items snapshot. Starts a 5s timer
   /// when anything is in flight and cancels it when nothing is.
   void _evaluatePolling(List<LibraryItem>? items) {
-    final inFlight = items != null &&
-        items.any((it) =>
-            it is PendingLibraryItem ||
-            (it is RemoteLibraryItem && it.recording.status.isInProgress));
+    final inFlight =
+        items != null &&
+        items.any(
+          (it) =>
+              it is PendingLibraryItem ||
+              (it is RemoteLibraryItem && it.recording.status.isInProgress),
+        );
     if (inFlight && _pollTimer == null) {
       _pollTimer = Timer.periodic(_pollInterval, (_) => _tick());
     } else if (!inFlight && _pollTimer != null) {
@@ -141,6 +146,7 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
 
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     final asyncItems = ref.watch(libraryItemsProvider);
     _evaluatePolling(asyncItems.value);
     final totalCount = asyncItems.value?.length ?? 0;
@@ -215,6 +221,7 @@ class _Header extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 14, 16, 8),
       child: Row(
@@ -227,7 +234,7 @@ class _Header extends StatelessWidget {
                     onSubmitted: onSubmitSearch,
                     style: SpeakrText.sans(size: 14),
                     decoration: InputDecoration(
-                      hintText: 'Search recordings…',
+                      hintText: tr("Search recordings…"),
                       isDense: true,
                       filled: false,
                       border: InputBorder.none,
@@ -264,15 +271,19 @@ class _Title extends StatelessWidget {
   final int total;
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     return Padding(
       padding: const EdgeInsets.fromLTRB(24, 4, 24, 18),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Recordings', style: SpeakrText.serif(size: 38, height: 1.05)),
+          Text(
+            tr("Recordings"),
+            style: SpeakrText.serif(size: 38, height: 1.05),
+          ),
           const SizedBox(height: 6),
           Text(
-            total > 0 ? '$total total' : 'No recordings yet',
+            total > 0 ? tr("{0} total", [total]) : tr("No recordings yet"),
             style: SpeakrText.sans(size: 13, color: SpeakrColors.muted),
           ),
         ],
@@ -287,6 +298,7 @@ class _ItemsList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     final groups = groupBy<LibraryItem, String>(
       items,
       (i) => formatRelativeDay(i.when),
@@ -340,23 +352,24 @@ class _PendingTileState extends ConsumerState<_PendingTile> {
         builder: (_) => AlertDialog(
           backgroundColor: SpeakrColors.bg,
           title: Text(
-            'Upload this recording?',
+            tr("Upload this recording?"),
             style: SpeakrText.serif(size: 20),
           ),
           content: Text(
-            '${widget.pending.file.name}\n\n'
-            'The file will be uploaded to your Speakr server and removed '
-            'from this device.',
+            tr(
+              "{0}\n\nThe file will be uploaded to your Speakr server and removed from this device.",
+              [widget.pending.file.name],
+            ),
             style: SpeakrText.sans(size: 13, color: SpeakrColors.ink2),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, false),
-              child: const Text('Cancel'),
+              child: Text(tr("Cancel")),
             ),
             TextButton(
               onPressed: () => Navigator.pop(context, true),
-              child: const Text('Upload'),
+              child: Text(tr("Upload")),
             ),
           ],
         ),
@@ -401,7 +414,7 @@ class _PendingTileState extends ConsumerState<_PendingTile> {
       builder: (dialogCtx) => AlertDialog(
         backgroundColor: SpeakrColors.bg,
         title: Text(
-          "Couldn't process recording",
+          tr("Couldn't process recording"),
           style: SpeakrText.serif(size: 20),
         ),
         content: Text(
@@ -415,18 +428,18 @@ class _PendingTileState extends ConsumerState<_PendingTile> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogCtx),
-            child: const Text('Cancel'),
+            child: Text(tr("Cancel")),
           ),
           TextButton(
             onPressed: () =>
                 Navigator.pop(dialogCtx, _PendingErrorAction.delete),
             style: TextButton.styleFrom(foregroundColor: SpeakrColors.danger),
-            child: const Text('Delete file'),
+            child: Text(tr("Delete file")),
           ),
           TextButton(
             onPressed: () =>
                 Navigator.pop(dialogCtx, _PendingErrorAction.forceUpload),
-            child: const Text('Force upload'),
+            child: Text(tr("Force upload")),
           ),
         ],
       ),
@@ -447,7 +460,9 @@ class _PendingTileState extends ConsumerState<_PendingTile> {
     if (deleteError != null) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Could not delete file: $deleteError')),
+        SnackBar(
+          content: Text(tr("Could not delete file: {0}", [deleteError])),
+        ),
       );
       return;
     }
@@ -461,6 +476,7 @@ class _PendingTileState extends ConsumerState<_PendingTile> {
 
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     final p = widget.pending;
     final name = p.file.name;
     final errors =
@@ -504,15 +520,24 @@ class _PendingTileState extends ConsumerState<_PendingTile> {
                     ),
                   ),
                   const SizedBox(height: 2),
-                  Builder(builder: (context) {
-                    final pref = ref.watch(timeFormatPreferenceProvider).asData?.value
-                        ?? TimeFormatPreference.system;
-                    final use24 = resolveUse24Hour(pref, context);
-                    return Text(
-                      '${formatHourMinute(p.dateTime, use24Hour: use24)} · ${formatBytes(p.size)}',
-                      style: SpeakrText.sans(size: 12, color: SpeakrColors.muted),
-                    );
-                  }),
+                  Builder(
+                    builder: (context) {
+                      final pref =
+                          ref
+                              .watch(timeFormatPreferenceProvider)
+                              .asData
+                              ?.value ??
+                          TimeFormatPreference.system;
+                      final use24 = resolveUse24Hour(pref, context);
+                      return Text(
+                        '${formatHourMinute(p.dateTime, use24Hour: use24)} · ${formatBytes(p.size)}',
+                        style: SpeakrText.sans(
+                          size: 12,
+                          color: SpeakrColors.muted,
+                        ),
+                      );
+                    },
+                  ),
                 ],
               ),
             ),
@@ -544,6 +569,7 @@ class _NotUploadedBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
@@ -563,7 +589,7 @@ class _NotUploadedBadge extends StatelessWidget {
           ),
           const SizedBox(width: 6),
           Text(
-            'not uploaded',
+            tr("not uploaded"),
             style: SpeakrText.mono(size: 10, letterSpacing: 1),
           ),
         ],
@@ -577,6 +603,7 @@ class _ErrorBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
@@ -615,6 +642,7 @@ class _RecordingTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    LanguageScope.watch(context);
     final r = recording;
     final completed = r.status == RecordingStatus.completed;
     // Failed often just means summary generation failed — audio and transcript
@@ -625,8 +653,9 @@ class _RecordingTile extends ConsumerWidget {
         .split(',')
         .where((s) => s.trim().isNotEmpty)
         .length;
-    final pref = ref.watch(timeFormatPreferenceProvider).asData?.value
-        ?? TimeFormatPreference.system;
+    final pref =
+        ref.watch(timeFormatPreferenceProvider).asData?.value ??
+        TimeFormatPreference.system;
     final use24 = resolveUse24Hour(pref, context);
     final folders = ref.watch(foldersProvider).value ?? const <Folder>[];
     final folder = r.folder;
@@ -686,18 +715,22 @@ class _RecordingTile extends ConsumerWidget {
                               if (r.isHighlighted)
                                 const Padding(
                                   padding: EdgeInsets.only(right: 6),
-                                  child:
-                                      SpeakrIconView(SpeakrIcon.star, size: 14),
+                                  child: SpeakrIconView(
+                                    SpeakrIcon.star,
+                                    size: 14,
+                                  ),
                                 ),
                               Flexible(
                                 child: Text(
                                   r.title?.isNotEmpty == true
                                       ? r.title!
-                                      : 'Untitled recording',
+                                      : tr("Untitled recording"),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
-                                  style:
-                                      SpeakrText.serif(size: 17, height: 1.25),
+                                  style: SpeakrText.serif(
+                                    size: 17,
+                                    height: 1.25,
+                                  ),
                                 ),
                               ),
                             ],
@@ -750,7 +783,7 @@ class _RecordingTile extends ConsumerWidget {
 
   String _subtitle(DateTime? when, int speakers, bool use24Hour) {
     final t = when == null ? '' : formatHourMinute(when, use24Hour: use24Hour);
-    if (speakers > 1) return '$t · $speakers speakers';
+    if (speakers > 1) return tr("{0} · {1} speakers", [t, speakers]);
     return t;
   }
 }
@@ -759,6 +792,7 @@ class _Loading extends StatelessWidget {
   const _Loading();
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     return ListView(
       physics: const AlwaysScrollableScrollPhysics(),
       children: const [
@@ -778,19 +812,20 @@ class _Empty extends StatelessWidget {
   const _Empty();
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     return ListView(
       physics: const AlwaysScrollableScrollPhysics(),
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 80),
       children: [
-        const MonoEyebrow('Empty'),
+        MonoEyebrow(tr("Empty")),
         const SizedBox(height: 12),
         Text(
-          'Nothing to show yet.',
+          tr("Nothing to show yet."),
           style: SpeakrText.serif(size: 26, height: 1.15),
         ),
         const SizedBox(height: 14),
         Text(
-          'Tap the mic in the corner to make your first recording.',
+          tr("Tap the mic in the corner to make your first recording."),
           style: SpeakrText.sans(
             size: 15,
             height: 1.5,
@@ -808,15 +843,16 @@ class _ErrorView extends StatelessWidget {
   final VoidCallback onRetry;
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     return ListView(
       physics: const AlwaysScrollableScrollPhysics(),
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 60),
       children: [
-        const MonoEyebrow('Couldn’t load'),
+        MonoEyebrow(tr("Couldn’t load")),
         const SizedBox(height: 8),
         Text(message, style: SpeakrText.sans(size: 14)),
         const SizedBox(height: 16),
-        OutlinedButton(onPressed: onRetry, child: const Text('Retry')),
+        OutlinedButton(onPressed: onRetry, child: Text(tr("Retry"))),
       ],
     );
   }
@@ -828,6 +864,7 @@ class _RecordFab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     return SizedBox(
       width: 64,
       height: 64,

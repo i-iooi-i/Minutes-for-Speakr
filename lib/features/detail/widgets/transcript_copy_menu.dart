@@ -1,3 +1,4 @@
+import 'package:speakr_app/l10n/strings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -27,7 +28,7 @@ Future<void> showTranscriptCopyMenu(
     items: [
       PopupMenuItem<String>(
         value: 'copy',
-        child: Text('Copy', style: SpeakrText.sans(size: 13)),
+        child: Text(tr("Copy"), style: SpeakrText.sans(size: 13)),
       ),
     ],
   );

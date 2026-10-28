@@ -1,3 +1,5 @@
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:speakr_app/l10n/strings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -27,11 +29,17 @@ class _MiniRecorderAppState extends ConsumerState<MiniRecorderApp> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Minutes Recording',
-      debugShowCheckedModeBanner: false,
-      theme: buildSpeakrTheme(),
-      home: const MiniRecorderScreen(),
+    LanguageScope.watch(context);
+    return LocalizedApp(
+      builder: (locale) => MaterialApp(
+        locale: locale,
+        supportedLocales: appLocales,
+        localizationsDelegates: GlobalMaterialLocalizations.delegates,
+        title: tr("Minutes Recording"),
+        debugShowCheckedModeBanner: false,
+        theme: buildSpeakrTheme(),
+        home: const MiniRecorderScreen(),
+      ),
     );
   }
 }

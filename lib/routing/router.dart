@@ -1,3 +1,4 @@
+import 'package:speakr_app/l10n/strings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -106,7 +107,7 @@ final routerProvider = Provider<GoRouter>((ref) {
     ],
     errorBuilder: (_, state) => Scaffold(
       backgroundColor: SpeakrColors.bg,
-      body: Center(child: Text('Route not found: ${state.uri.path}')),
+      body: Center(child: Text(tr("Route not found: {0}", [state.uri.path]))),
     ),
   );
 });

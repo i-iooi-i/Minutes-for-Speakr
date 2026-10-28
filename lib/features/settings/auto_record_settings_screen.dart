@@ -1,3 +1,5 @@
+import 'package:speakr_app/l10n/strings.dart';
+
 import 'dart:io' show Platform;
 
 import 'package:flutter/material.dart';
@@ -36,6 +38,7 @@ class _AutoRecordSettingsScreenState
 
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     final settingsAsync = ref.watch(autoRecordSettingsProvider);
     final micUsersAsync = ref.watch(micUsersProvider);
     final controller = ref.read(autoRecordSettingsControllerProvider);
@@ -47,11 +50,12 @@ class _AutoRecordSettingsScreenState
           loading: () => const Center(
             child: CircularProgressIndicator(color: SpeakrColors.ink),
           ),
-          error: (e, _) => Center(child: Text('Could not load settings: $e')),
+          error: (e, _) =>
+              Center(child: Text(tr("Could not load settings: {0}", [e]))),
           data: (s) {
             final activeMicUsers =
                 micUsersAsync.value?.where((u) => u.isInUse).toList() ??
-                    const [];
+                const [];
             return ListView(
               padding: const EdgeInsets.only(bottom: 32),
               children: [
@@ -63,9 +67,9 @@ class _AutoRecordSettingsScreenState
                         icon: SpeakrIcon.back,
                         onTap: () => context.pop(),
                       ),
-                      const Padding(
+                      Padding(
                         padding: EdgeInsets.only(left: 4),
-                        child: MonoEyebrow('Auto-record', size: 10),
+                        child: MonoEyebrow(tr("Auto-record"), size: 10),
                       ),
                     ],
                   ),
@@ -76,19 +80,15 @@ class _AutoRecordSettingsScreenState
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Auto-record on mic activity',
+                        tr("Auto-record on mic activity"),
                         style: SpeakrText.serif(size: 28, height: 1.1),
                       ),
                       const SizedBox(height: 6),
                       Text(
-                        'When an allowlisted app starts using your '
-                        'microphone, Minutes automatically begins '
-                        'recording. Recording continues until both the '
-                        'app has released the mic and the audio output '
-                        'has been idle for ${s.silenceSeconds} seconds — '
-                        'then the recording pill counts down '
-                        '$kAutoStopCountdownSeconds seconds before '
-                        'stopping, unless you click Resume.',
+                        tr(
+                          "When an allowlisted app starts using your microphone, Minutes automatically begins recording. Recording continues until both the app has released the mic and the audio output has been idle for {0} seconds — then the recording pill counts down {1} seconds before stopping, unless you click Resume.",
+                          [s.silenceSeconds, kAutoStopCountdownSeconds],
+                        ),
                         style: SpeakrText.sans(
                           size: 13,
                           color: SpeakrColors.ink2,
@@ -98,8 +98,9 @@ class _AutoRecordSettingsScreenState
                       if (!Platform.isWindows) ...[
                         const SizedBox(height: 10),
                         Text(
-                          'Windows only. This screen is read-only on '
-                          'other platforms.',
+                          tr(
+                            "Windows only. This screen is read-only on other platforms.",
+                          ),
                           style: SpeakrText.sans(
                             size: 12,
                             color: SpeakrColors.danger,
@@ -110,10 +111,10 @@ class _AutoRecordSettingsScreenState
                   ),
                 ),
                 SettingsGroup(
-                  label: 'Master',
+                  label: tr("Master"),
                   children: [
                     SettingsRow(
-                      label: 'Enable auto-record',
+                      label: tr("Enable auto-record"),
                       toggleValue: s.enabled,
                       onToggle: Platform.isWindows
                           ? (v) => controller.setEnabled(v)
@@ -121,10 +122,7 @@ class _AutoRecordSettingsScreenState
                     ),
                   ],
                 ),
-                _AllowlistGroup(
-                  settings: s,
-                  controller: controller,
-                ),
+                _AllowlistGroup(settings: s, controller: controller),
                 _SuggestionsGroup(
                   settings: s,
                   controller: controller,
@@ -148,15 +146,17 @@ class _AllowlistGroup extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    LanguageScope.watch(context);
     return SettingsGroup(
-      label: 'Allowlist',
+      label: tr("Allowlist"),
       children: [
         if (settings.allowlist.isEmpty)
           Padding(
             padding: const EdgeInsets.fromLTRB(24, 12, 24, 12),
             child: Text(
-              'No apps yet. Add one below — type an exe basename, or '
-              'pick from apps recently seen using your mic.',
+              tr(
+                "No apps yet. Add one below — type an exe basename, or pick from apps recently seen using your mic.",
+              ),
               style: SpeakrText.sans(size: 12, color: SpeakrColors.muted),
             ),
           )
@@ -180,7 +180,8 @@ class _AllowlistGroup extends ConsumerWidget {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(8)),
       ),
-      builder: (_) => _PerAppConfigSheet(entryKey: entry.key, entryKind: entry.kind),
+      builder: (_) =>
+          _PerAppConfigSheet(entryKey: entry.key, entryKind: entry.kind),
     );
   }
 }
@@ -203,12 +204,14 @@ class _AllowlistRow extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    LanguageScope.watch(context);
     final tagsAsync = ref.watch(tagsProvider);
     final knownTags = tagsAsync.value ?? const <Tag>[];
     final resolvedSpeakers = entry.speakers ?? defaults.defaultSpeakers;
     final speakersIsDefault = entry.speakers == null;
-    final resolvedTagIds =
-        entry.tagIds.isNotEmpty ? entry.tagIds : defaults.defaultTagIds;
+    final resolvedTagIds = entry.tagIds.isNotEmpty
+        ? entry.tagIds
+        : defaults.defaultTagIds;
     final tagsIsDefault = entry.tagIds.isEmpty;
     final summary = _summarize(
       resolvedSpeakers: resolvedSpeakers,
@@ -232,22 +235,25 @@ class _AllowlistRow extends ConsumerWidget {
                 children: [
                   Text(
                     entry.displayName,
-                    style:
-                        SpeakrText.sans(size: 14, color: SpeakrColors.ink),
+                    style: SpeakrText.sans(size: 14, color: SpeakrColors.ink),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     summary,
                     style: SpeakrText.mono(
-                        size: 11,
-                        color: SpeakrColors.muted,
-                        letterSpacing: 0),
+                      size: 11,
+                      color: SpeakrColors.muted,
+                      letterSpacing: 0,
+                    ),
                   ),
                 ],
               ),
             ),
-            const Icon(Icons.chevron_right,
-                size: 18, color: SpeakrColors.muted),
+            const Icon(
+              Icons.chevron_right,
+              size: 18,
+              color: SpeakrColors.muted,
+            ),
             const SizedBox(width: 4),
             InkWell(
               onTap: onRemove,
@@ -259,7 +265,10 @@ class _AllowlistRow extends ConsumerWidget {
                 child: Text(
                   '×',
                   style: SpeakrText.serif(
-                      size: 16, color: SpeakrColors.muted, height: 1),
+                    size: 16,
+                    color: SpeakrColors.muted,
+                    height: 1,
+                  ),
                 ),
               ),
             ),
@@ -277,8 +286,8 @@ class _AllowlistRow extends ConsumerWidget {
     required List<Tag> knownTags,
   }) {
     final speakersLabel = speakersIsDefault
-        ? '$resolvedSpeakers speakers (default)'
-        : '$resolvedSpeakers speakers';
+        ? tr("{0} speakers (default)", [resolvedSpeakers])
+        : tr("{0} speakers", [resolvedSpeakers]);
     if (resolvedTagIds.isEmpty) {
       return speakersLabel;
     }
@@ -286,7 +295,7 @@ class _AllowlistRow extends ConsumerWidget {
       for (final id in resolvedTagIds) _tagNameForId(id, knownTags),
     ];
     final tagsLabel = tagsIsDefault
-        ? '${names.join(', ')} (default)'
+        ? tr("{0} (default)", [names.join(', ')])
         : names.join(', ');
     return '$speakersLabel · $tagsLabel';
   }
@@ -296,14 +305,14 @@ String _tagNameForId(int id, List<Tag> known) {
   for (final t in known) {
     if (t.id == id) return t.name;
   }
-  return 'Tag #$id';
+  return tr("Tag #{0}", [id]);
 }
 
 String _folderNameForId(int id, List<Folder> known) {
   for (final f in known) {
     if (f.id == id) return f.name;
   }
-  return 'Folder #$id';
+  return tr("Folder #{0}", [id]);
 }
 
 class _SuggestionsGroup extends StatelessWidget {
@@ -321,22 +330,23 @@ class _SuggestionsGroup extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final recent = settings.recentlySeen
-        .where((r) => !_isInAllowlist(r.toAllowlistEntry()))
-        .toList()
-      ..sort((a, b) => b.lastSeenMs.compareTo(a.lastSeenMs));
+    LanguageScope.watch(context);
+    final recent =
+        settings.recentlySeen
+            .where((r) => !_isInAllowlist(r.toAllowlistEntry()))
+            .toList()
+          ..sort((a, b) => b.lastSeenMs.compareTo(a.lastSeenMs));
     return SettingsGroup(
-      label: 'Add app',
+      label: tr("Add app"),
       children: [
         if (recent.isNotEmpty)
           _SuggestionRow(
-            title: 'Recently seen using your mic',
+            title: tr("Recently seen using your mic"),
             children: [
               for (final r in recent.take(12))
                 _AddChip(
                   label: r.displayName,
-                  onTap: () =>
-                      controller.addToAllowlist(r.toAllowlistEntry()),
+                  onTap: () => controller.addToAllowlist(r.toAllowlistEntry()),
                 ),
             ],
           ),
@@ -348,8 +358,8 @@ class _SuggestionsGroup extends StatelessWidget {
                 child: TextField(
                   controller: customCtrl,
                   style: SpeakrText.sans(size: 13),
-                  decoration: const InputDecoration(
-                    hintText: 'Custom app — exe basename, e.g. Mumble.exe',
+                  decoration: InputDecoration(
+                    hintText: tr("Custom app — exe basename, e.g. Mumble.exe"),
                     isDense: true,
                     border: UnderlineInputBorder(
                       borderSide: BorderSide(color: SpeakrColors.line),
@@ -366,12 +376,14 @@ class _SuggestionsGroup extends StatelessWidget {
                 onTap: () => _addCustom(customCtrl.text, controller),
                 child: Container(
                   padding: const EdgeInsets.symmetric(
-                      horizontal: 12, vertical: 6),
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
                   decoration: BoxDecoration(
                     border: Border.all(color: SpeakrColors.line),
                     borderRadius: BorderRadius.circular(3),
                   ),
-                  child: const MonoEyebrow('Add', size: 9),
+                  child: MonoEyebrow(tr("Add"), size: 9),
                 ),
               ),
             ],
@@ -384,11 +396,9 @@ class _SuggestionsGroup extends StatelessWidget {
   void _addCustom(String raw, AutoRecordSettingsController c) {
     final v = raw.trim();
     if (v.isEmpty) return;
-    c.addToAllowlist(AllowlistEntry(
-      key: v,
-      displayName: v,
-      kind: AllowlistKind.exeBasename,
-    ));
+    c.addToAllowlist(
+      AllowlistEntry(key: v, displayName: v, kind: AllowlistKind.exeBasename),
+    );
     customCtrl.clear();
   }
 }
@@ -399,6 +409,7 @@ class _SuggestionRow extends StatelessWidget {
   final List<Widget> children;
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     return Container(
       padding: const EdgeInsets.fromLTRB(24, 12, 24, 0),
       child: Column(
@@ -419,6 +430,7 @@ class _AddChip extends StatelessWidget {
   final VoidCallback onTap;
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     return InkWell(
       onTap: onTap,
       child: Container(
@@ -430,9 +442,14 @@ class _AddChip extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text('+ ',
-                style: SpeakrText.mono(
-                    size: 11, color: SpeakrColors.muted, letterSpacing: 0)),
+            Text(
+              '+ ',
+              style: SpeakrText.mono(
+                size: 11,
+                color: SpeakrColors.muted,
+                letterSpacing: 0,
+              ),
+            ),
             Text(
               label,
               style: SpeakrText.sans(size: 12, color: SpeakrColors.ink),
@@ -451,26 +468,27 @@ class _BehaviorGroup extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    LanguageScope.watch(context);
     final tagsAsync = ref.watch(tagsProvider);
     final knownTags = tagsAsync.value ?? const <Tag>[];
     final foldersAsync = ref.watch(foldersProvider);
     final knownFolders = foldersAsync.value ?? const <Folder>[];
     final defaultTagsLabel = settings.defaultTagIds.isEmpty
-        ? 'None'
+        ? tr("None")
         : settings.defaultTagIds
-            .map((id) => _tagNameForId(id, knownTags))
-            .join(', ');
+              .map((id) => _tagNameForId(id, knownTags))
+              .join(', ');
     final defaultFolderLabel = settings.defaultFolderId == null
-        ? 'None'
+        ? tr("None")
         : _folderNameForId(settings.defaultFolderId!, knownFolders);
     return SettingsGroup(
-      label: 'Behavior',
+      label: tr("Behavior"),
       children: [
         SettingsRow(
-          label: 'Auto-stop idle threshold',
+          label: tr("Auto-stop idle threshold"),
           trailing: _IntStepper(
             value: settings.silenceSeconds,
-            suffix: 's',
+            suffix: tr("seconds"),
             step: 5,
             min: 5,
             max: 120,
@@ -478,10 +496,10 @@ class _BehaviorGroup extends ConsumerWidget {
           ),
         ),
         SettingsRow(
-          label: 'Discard recordings shorter than',
+          label: tr("Discard recordings shorter than"),
           trailing: _IntStepper(
             value: settings.minKeepSeconds,
-            suffix: 's',
+            suffix: tr("seconds"),
             step: 5,
             min: 0,
             max: 120,
@@ -489,8 +507,8 @@ class _BehaviorGroup extends ConsumerWidget {
           ),
         ),
         SettingsRow(
-          label: 'Default speakers',
-          subtitle: 'Used when an app has no per-app override.',
+          label: tr("Default speakers"),
+          subtitle: tr("Used when an app has no per-app override."),
           trailing: _IntStepper(
             value: settings.defaultSpeakers,
             step: 1,
@@ -500,9 +518,9 @@ class _BehaviorGroup extends ConsumerWidget {
           ),
         ),
         SettingsRow(
-          label: 'Default tags',
+          label: tr("Default tags"),
           value: defaultTagsLabel,
-          subtitle: 'Used when an app has no per-app override.',
+          subtitle: tr("Used when an app has no per-app override."),
           onTap: () {
             showModalBottomSheet<void>(
               context: context,
@@ -519,9 +537,9 @@ class _BehaviorGroup extends ConsumerWidget {
           },
         ),
         SettingsRow(
-          label: 'Default folder',
+          label: tr("Default folder"),
           value: defaultFolderLabel,
-          subtitle: 'Used when an app has no per-app override.',
+          subtitle: tr("Used when an app has no per-app override."),
           onTap: () {
             showModalBottomSheet<void>(
               context: context,
@@ -531,7 +549,7 @@ class _BehaviorGroup extends ConsumerWidget {
                 borderRadius: BorderRadius.vertical(top: Radius.circular(8)),
               ),
               builder: (_) => _FolderPickerSheet(
-                title: 'Default folder',
+                title: tr("Default folder"),
                 selectedId: settings.defaultFolderId,
                 onChanged: controller.setDefaultFolderId,
               ),
@@ -561,12 +579,14 @@ class _IntStepper extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
         InkWell(
-          onTap:
-              value > min ? () => onChanged((value - step).clamp(min, max)) : null,
+          onTap: value > min
+              ? () => onChanged((value - step).clamp(min, max))
+              : null,
           child: Container(
             width: 26,
             height: 26,
@@ -589,8 +609,9 @@ class _IntStepper extends StatelessWidget {
         ),
         const SizedBox(width: 8),
         InkWell(
-          onTap:
-              value < max ? () => onChanged((value + step).clamp(min, max)) : null,
+          onTap: value < max
+              ? () => onChanged((value + step).clamp(min, max))
+              : null,
           child: Container(
             width: 26,
             height: 26,
@@ -613,17 +634,13 @@ class _StatusGroup extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     final summary = activeUsers.isEmpty
-        ? 'No apps currently using the mic.'
+        ? tr("No apps currently using the mic.")
         : activeUsers.map((u) => u.displayName).join(', ');
     return SettingsGroup(
-      label: 'Status',
-      children: [
-        SettingsRow(
-          label: 'Currently using mic',
-          value: summary,
-        ),
-      ],
+      label: tr("Status"),
+      children: [SettingsRow(label: tr("Currently using mic"), value: summary)],
     );
   }
 }
@@ -640,6 +657,7 @@ class _PerAppConfigSheet extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    LanguageScope.watch(context);
     final settingsAsync = ref.watch(autoRecordSettingsProvider);
     final controller = ref.read(autoRecordSettingsControllerProvider);
     return SafeArea(
@@ -647,12 +665,16 @@ class _PerAppConfigSheet extends ConsumerWidget {
       child: settingsAsync.when(
         loading: () => const Padding(
           padding: EdgeInsets.symmetric(vertical: 32),
-          child: Center(child: CircularProgressIndicator(color: SpeakrColors.ink)),
+          child: Center(
+            child: CircularProgressIndicator(color: SpeakrColors.ink),
+          ),
         ),
         error: (e, _) => Padding(
           padding: const EdgeInsets.fromLTRB(24, 24, 24, 24),
-          child: Text('Could not load settings: $e',
-              style: SpeakrText.sans(size: 13)),
+          child: Text(
+            tr("Could not load settings: {0}", [e]),
+            style: SpeakrText.sans(size: 13),
+          ),
         ),
         data: (s) {
           final entry = _findEntry(s.allowlist);
@@ -661,7 +683,7 @@ class _PerAppConfigSheet extends ConsumerWidget {
             return Padding(
               padding: const EdgeInsets.fromLTRB(24, 24, 24, 24),
               child: Text(
-                'This app is no longer in the allowlist.',
+                tr("This app is no longer in the allowlist."),
                 style: SpeakrText.sans(size: 13),
               ),
             );
@@ -683,8 +705,11 @@ class _PerAppConfigSheet extends ConsumerWidget {
   }
 
   AllowlistEntry? _findEntry(List<AllowlistEntry> allowlist) {
-    final probe =
-        AllowlistEntry(key: entryKey, displayName: entryKey, kind: entryKind);
+    final probe = AllowlistEntry(
+      key: entryKey,
+      displayName: entryKey,
+      kind: entryKind,
+    );
     for (final e in allowlist) {
       if (e == probe) return e;
     }
@@ -716,6 +741,7 @@ class _PerAppConfigSheetBody extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    LanguageScope.watch(context);
     final videoSupported =
         ref.watch(videoCaptureSupportedProvider).value ?? false;
     final tagsAsync = ref.watch(tagsProvider);
@@ -736,32 +762,33 @@ class _PerAppConfigSheetBody extends ConsumerWidget {
         children: [
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: Text(entry.displayName,
-                style: SpeakrText.serif(size: 22)),
+            child: Text(entry.displayName, style: SpeakrText.serif(size: 22)),
           ),
           const SizedBox(height: 4),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24),
             child: Text(
-              'These overrides apply when ${entry.displayName} triggers '
-              'an auto-recording.',
+              tr("These overrides apply when {0} triggers an auto-recording.", [
+                entry.displayName,
+              ]),
               style: SpeakrText.sans(
-                  size: 12, color: SpeakrColors.muted, height: 1.4),
+                size: 12,
+                color: SpeakrColors.muted,
+                height: 1.4,
+              ),
             ),
           ),
           const SizedBox(height: 16),
           // ── Speakers ────────────────────────────────────────────────────
           Padding(
             padding: const EdgeInsets.fromLTRB(24, 0, 24, 6),
-            child: MonoEyebrow('Speakers', size: 9),
+            child: MonoEyebrow(tr("Speakers"), size: 9),
           ),
           _SheetRow(
-            label: 'Use default ($defaultSpeakers)',
+            label: tr("Use default ({0})", [defaultSpeakers]),
             selected: speakersIsDefault,
-            onTap: () => controller.setEntryOverrides(
-              entry,
-              clearSpeakers: true,
-            ),
+            onTap: () =>
+                controller.setEntryOverrides(entry, clearSpeakers: true),
           ),
           Container(
             padding: const EdgeInsets.fromLTRB(24, 12, 24, 12),
@@ -772,7 +799,7 @@ class _PerAppConfigSheetBody extends ConsumerWidget {
               children: [
                 Expanded(
                   child: Text(
-                    speakersIsDefault ? 'Set custom' : 'Custom',
+                    speakersIsDefault ? tr("Set custom") : 'Custom',
                     style: SpeakrText.sans(size: 14, color: SpeakrColors.ink),
                   ),
                 ),
@@ -781,10 +808,8 @@ class _PerAppConfigSheetBody extends ConsumerWidget {
                   step: 1,
                   min: 1,
                   max: 12,
-                  onChanged: (v) => controller.setEntryOverrides(
-                    entry,
-                    speakers: v,
-                  ),
+                  onChanged: (v) =>
+                      controller.setEntryOverrides(entry, speakers: v),
                 ),
               ],
             ),
@@ -793,18 +818,21 @@ class _PerAppConfigSheetBody extends ConsumerWidget {
           // ── Tags ────────────────────────────────────────────────────────
           Padding(
             padding: const EdgeInsets.fromLTRB(24, 0, 24, 6),
-            child: MonoEyebrow('Tags', size: 9),
+            child: MonoEyebrow(tr("Tags"), size: 9),
           ),
           _SheetRow(
             label: defaultTagIds.isEmpty
-                ? 'Use default (none)'
-                : 'Use default '
-                    '(${defaultTagIds.map((id) => _tagNameForId(id, tagsAsync.value ?? const [])).join(', ')})',
+                ? tr("Use default (none)")
+                : tr("Use default ({0})", [
+                    defaultTagIds
+                        .map(
+                          (id) =>
+                              _tagNameForId(id, tagsAsync.value ?? const []),
+                        )
+                        .join(', '),
+                  ]),
             selected: tagsIsDefault,
-            onTap: () => controller.setEntryOverrides(
-              entry,
-              tagIds: const [],
-            ),
+            onTap: () => controller.setEntryOverrides(entry, tagIds: const []),
           ),
           tagsAsync.when(
             loading: () => const Padding(
@@ -815,8 +843,10 @@ class _PerAppConfigSheetBody extends ConsumerWidget {
             ),
             error: (e, _) => Padding(
               padding: const EdgeInsets.fromLTRB(24, 12, 24, 12),
-              child: Text('Could not load tags: $e',
-                  style: SpeakrText.sans(size: 13)),
+              child: Text(
+                tr("Could not load tags: {0}", [e]),
+                style: SpeakrText.sans(size: 13),
+              ),
             ),
             data: (tags) => Column(
               children: [
@@ -828,8 +858,9 @@ class _PerAppConfigSheetBody extends ConsumerWidget {
                     onTap: () {
                       // Toggle: build the next list, never empty when
                       // toggled-on (avoid revert-to-default surprise).
-                      final current =
-                          tagsIsDefault ? <int>[] : List<int>.from(entry.tagIds);
+                      final current = tagsIsDefault
+                          ? <int>[]
+                          : List<int>.from(entry.tagIds);
                       if (current.contains(t.id)) {
                         current.remove(t.id);
                       } else {
@@ -845,15 +876,12 @@ class _PerAppConfigSheetBody extends ConsumerWidget {
           // ── Folder ──────────────────────────────────────────────────────
           Padding(
             padding: const EdgeInsets.fromLTRB(24, 0, 24, 6),
-            child: MonoEyebrow('Folder', size: 9),
+            child: MonoEyebrow(tr("Folder"), size: 9),
           ),
           _SheetRow(
-            label: 'Use default ($defaultFolderLabel)',
+            label: tr("Use default ({0})", [defaultFolderLabel]),
             selected: folderIsDefault,
-            onTap: () => controller.setEntryOverrides(
-              entry,
-              clearFolder: true,
-            ),
+            onTap: () => controller.setEntryOverrides(entry, clearFolder: true),
           ),
           foldersAsync.when(
             loading: () => const Padding(
@@ -864,8 +892,10 @@ class _PerAppConfigSheetBody extends ConsumerWidget {
             ),
             error: (e, _) => Padding(
               padding: const EdgeInsets.fromLTRB(24, 12, 24, 12),
-              child: Text('Could not load folders: $e',
-                  style: SpeakrText.sans(size: 13)),
+              child: Text(
+                tr("Could not load folders: {0}", [e]),
+                style: SpeakrText.sans(size: 13),
+              ),
             ),
             data: (folders) => Column(
               children: [
@@ -874,10 +904,8 @@ class _PerAppConfigSheetBody extends ConsumerWidget {
                     label: f.name,
                     color: parseHexColor(f.color),
                     selected: entry.folderId == f.id,
-                    onTap: () => controller.setEntryOverrides(
-                      entry,
-                      folderId: f.id,
-                    ),
+                    onTap: () =>
+                        controller.setEntryOverrides(entry, folderId: f.id),
                   ),
               ],
             ),
@@ -886,30 +914,28 @@ class _PerAppConfigSheetBody extends ConsumerWidget {
           // ── Microphone source ───────────────────────────────────────────
           Padding(
             padding: const EdgeInsets.fromLTRB(24, 0, 24, 6),
-            child: MonoEyebrow('Microphone', size: 9),
+            child: MonoEyebrow(tr("Microphone"), size: 9),
           ),
           _SheetRow(
-            label: 'Use default (${defaultMicEnabled ? 'on' : 'off'})',
+            label: tr("Use default ({0})", [defaultMicEnabled ? 'on' : 'off']),
             selected: entry.micEnabled == null,
             onTap: () => controller.setEntryOverrides(entry, clearMic: true),
           ),
           _SheetRow(
-            label: 'Always on',
+            label: tr("Always on"),
             selected: entry.micEnabled == true,
-            onTap: () =>
-                controller.setEntryOverrides(entry, micEnabled: true),
+            onTap: () => controller.setEntryOverrides(entry, micEnabled: true),
           ),
           _SheetRow(
-            label: 'Always off',
+            label: tr("Always off"),
             selected: entry.micEnabled == false,
-            onTap: () =>
-                controller.setEntryOverrides(entry, micEnabled: false),
+            onTap: () => controller.setEntryOverrides(entry, micEnabled: false),
           ),
           const SizedBox(height: 16),
           // ── System audio source ─────────────────────────────────────────
           Padding(
             padding: const EdgeInsets.fromLTRB(24, 0, 24, 6),
-            child: MonoEyebrow('System audio', size: 9),
+            child: MonoEyebrow(tr("System audio"), size: 9),
           ),
           _SystemAudioSection(
             entry: entry,
@@ -922,22 +948,24 @@ class _PerAppConfigSheetBody extends ConsumerWidget {
             // ── Video ───────────────────────────────────────────────────────
             Padding(
               padding: const EdgeInsets.fromLTRB(24, 0, 24, 6),
-              child: MonoEyebrow('Video', size: 9),
+              child: MonoEyebrow(tr("Video"), size: 9),
             ),
             _SheetRow(
-              label: 'Use default (${defaultVideoEnabled ? 'on' : 'off'})',
+              label: tr("Use default ({0})", [
+                defaultVideoEnabled ? 'on' : 'off',
+              ]),
               selected: entry.videoEnabled == null,
               onTap: () =>
                   controller.setEntryOverrides(entry, clearVideo: true),
             ),
             _SheetRow(
-              label: "Always record this app's window",
+              label: tr("Always record this app's window"),
               selected: entry.videoEnabled == true,
               onTap: () =>
                   controller.setEntryOverrides(entry, videoEnabled: true),
             ),
             _SheetRow(
-              label: 'Never record video',
+              label: tr("Never record video"),
               selected: entry.videoEnabled == false,
               onTap: () =>
                   controller.setEntryOverrides(entry, videoEnabled: false),
@@ -970,28 +998,29 @@ class _SystemAudioSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    LanguageScope.watch(context);
     final processSupported =
         ref.watch(processLoopbackSupportedProvider).value ?? false;
 
     final defaultLabel = defaultSystemEnabled
         ? defaultSystemScope == SystemAudioScope.processOnly
-            ? 'on, this app only'
-            : 'on, all system audio'
+              ? tr("on, this app only")
+              : tr("on, all system audio")
         : 'off';
 
     final isDefault = entry.systemEnabled == null && entry.systemScope == null;
     final isOff = entry.systemEnabled == false;
     final scope = entry.systemScope ?? defaultSystemScope;
-    final isAlwaysOnAll = entry.systemEnabled == true &&
-        scope == SystemAudioScope.allSystem;
-    final isAlwaysOnProcess = entry.systemEnabled == true &&
-        scope == SystemAudioScope.processOnly;
+    final isAlwaysOnAll =
+        entry.systemEnabled == true && scope == SystemAudioScope.allSystem;
+    final isAlwaysOnProcess =
+        entry.systemEnabled == true && scope == SystemAudioScope.processOnly;
 
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         _SheetRow(
-          label: 'Use default ($defaultLabel)',
+          label: tr("Use default ({0})", [defaultLabel]),
           selected: isDefault,
           onTap: () => controller.setEntryOverrides(
             entry,
@@ -1000,7 +1029,7 @@ class _SystemAudioSection extends ConsumerWidget {
           ),
         ),
         _SheetRow(
-          label: 'Always off',
+          label: tr("Always off"),
           selected: isOff,
           onTap: () => controller.setEntryOverrides(
             entry,
@@ -1009,7 +1038,7 @@ class _SystemAudioSection extends ConsumerWidget {
           ),
         ),
         _SheetRow(
-          label: 'Always on — all system audio',
+          label: tr("Always on — all system audio"),
           selected: isAlwaysOnAll,
           onTap: () => controller.setEntryOverrides(
             entry,
@@ -1019,7 +1048,7 @@ class _SystemAudioSection extends ConsumerWidget {
         ),
         if (processSupported)
           _SheetRow(
-            label: "Always on — only this app's audio",
+            label: tr("Always on — only this app's audio"),
             selected: isAlwaysOnProcess,
             onTap: () => controller.setEntryOverrides(
               entry,
@@ -1031,9 +1060,9 @@ class _SystemAudioSection extends ConsumerWidget {
           Padding(
             padding: const EdgeInsets.fromLTRB(24, 8, 24, 0),
             child: Text(
-              "Only this app's audio uses Windows process-loopback — "
-              "child processes (e.g. Teams' WebView helpers) are included "
-              'automatically.',
+              tr(
+                "Only this app's audio uses Windows process-loopback — child processes (e.g. Teams' WebView helpers) are included automatically.",
+              ),
               style: SpeakrText.sans(
                 size: 11.5,
                 color: SpeakrColors.muted,
@@ -1051,15 +1080,13 @@ class _SystemAudioSection extends ConsumerWidget {
 /// Multi-select picker for [AutoRecordSettings.defaultTagIds]. Used as
 /// the fallback when an allowlist entry has no per-app tag override.
 class _GlobalTagSheet extends ConsumerWidget {
-  const _GlobalTagSheet({
-    required this.selectedIds,
-    required this.onChanged,
-  });
+  const _GlobalTagSheet({required this.selectedIds, required this.onChanged});
   final List<int> selectedIds;
   final Future<void> Function(List<int>) onChanged;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    LanguageScope.watch(context);
     final tagsAsync = ref.watch(tagsProvider);
     return SafeArea(
       top: false,
@@ -1071,22 +1098,28 @@ class _GlobalTagSheet extends ConsumerWidget {
           children: [
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24),
-              child:
-                  Text('Default tags', style: SpeakrText.serif(size: 22)),
+              child: Text(
+                tr("Default tags"),
+                style: SpeakrText.serif(size: 22),
+              ),
             ),
             const SizedBox(height: 4),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24),
               child: Text(
-                'Attached to auto-recordings when the triggering app has '
-                'no per-app tag override.',
+                tr(
+                  "Attached to auto-recordings when the triggering app has no per-app tag override.",
+                ),
                 style: SpeakrText.sans(
-                    size: 12, color: SpeakrColors.muted, height: 1.4),
+                  size: 12,
+                  color: SpeakrColors.muted,
+                  height: 1.4,
+                ),
               ),
             ),
             const SizedBox(height: 12),
             _SheetRow(
-              label: 'None',
+              label: tr("None"),
               selected: selectedIds.isEmpty,
               onTap: () => onChanged(const []),
             ),
@@ -1094,14 +1127,15 @@ class _GlobalTagSheet extends ConsumerWidget {
               loading: () => const Padding(
                 padding: EdgeInsets.symmetric(vertical: 24),
                 child: Center(
-                  child:
-                      CircularProgressIndicator(color: SpeakrColors.ink),
+                  child: CircularProgressIndicator(color: SpeakrColors.ink),
                 ),
               ),
               error: (e, _) => Padding(
                 padding: const EdgeInsets.fromLTRB(24, 12, 24, 12),
-                child: Text('Could not load tags: $e',
-                    style: SpeakrText.sans(size: 13)),
+                child: Text(
+                  tr("Could not load tags: {0}", [e]),
+                  style: SpeakrText.sans(size: 13),
+                ),
               ),
               data: (tags) => Column(
                 children: [
@@ -1148,6 +1182,7 @@ class _FolderPickerSheet extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    LanguageScope.watch(context);
     final foldersAsync = ref.watch(foldersProvider);
     return SafeArea(
       top: false,
@@ -1163,7 +1198,7 @@ class _FolderPickerSheet extends ConsumerWidget {
             ),
             const SizedBox(height: 12),
             _SheetRow(
-              label: 'None',
+              label: tr("None"),
               selected: selectedId == null,
               onTap: () async {
                 await onChanged(null);
@@ -1174,14 +1209,15 @@ class _FolderPickerSheet extends ConsumerWidget {
               loading: () => const Padding(
                 padding: EdgeInsets.symmetric(vertical: 24),
                 child: Center(
-                  child:
-                      CircularProgressIndicator(color: SpeakrColors.ink),
+                  child: CircularProgressIndicator(color: SpeakrColors.ink),
                 ),
               ),
               error: (e, _) => Padding(
                 padding: const EdgeInsets.fromLTRB(24, 12, 24, 12),
-                child: Text('Could not load folders: $e',
-                    style: SpeakrText.sans(size: 13)),
+                child: Text(
+                  tr("Could not load folders: {0}", [e]),
+                  style: SpeakrText.sans(size: 13),
+                ),
               ),
               data: (folders) => Column(
                 children: [
@@ -1221,6 +1257,7 @@ class _SheetRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     return InkWell(
       onTap: onTap,
       child: Container(
@@ -1234,14 +1271,11 @@ class _SheetRow extends StatelessWidget {
               Container(
                 width: 10,
                 height: 10,
-                decoration:
-                    BoxDecoration(color: color, shape: BoxShape.circle),
+                decoration: BoxDecoration(color: color, shape: BoxShape.circle),
               ),
               const SizedBox(width: 8),
             ],
-            Expanded(
-              child: Text(label, style: SpeakrText.sans(size: 14)),
-            ),
+            Expanded(child: Text(label, style: SpeakrText.sans(size: 14))),
             if (selected)
               const Icon(Icons.check, size: 18, color: SpeakrColors.ink),
           ],

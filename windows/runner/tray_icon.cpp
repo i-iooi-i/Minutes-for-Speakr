@@ -114,10 +114,10 @@ void TrayIcon::ShowContextMenu(HWND owner) {
   HMENU menu = CreatePopupMenu();
   if (menu == nullptr) return;
 
-  AppendMenuW(menu, MF_STRING, kMenuIdShow, L"Show Speakr");
-  AppendMenuW(menu, MF_STRING, kMenuIdStartRecording, L"Start Recording");
+  AppendMenuW(menu, MF_STRING, kMenuIdShow, chinese_ ? L"\u663e\u793a Speakr" : L"Show Speakr");
+  AppendMenuW(menu, MF_STRING, kMenuIdStartRecording, chinese_ ? L"\u5f00\u59cb\u5f55\u97f3" : L"Start Recording");
   AppendMenuW(menu, MF_SEPARATOR, 0, nullptr);
-  AppendMenuW(menu, MF_STRING, kMenuIdExit, L"Exit");
+  AppendMenuW(menu, MF_STRING, kMenuIdExit, chinese_ ? L"\u9000\u51fa" : L"Exit");
 
   // TrackPopupMenu requires the owner window to be foreground or the menu
   // won't dismiss when the user clicks elsewhere.

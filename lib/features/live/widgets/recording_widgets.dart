@@ -1,3 +1,4 @@
+import 'package:speakr_app/l10n/strings.dart';
 import 'package:flutter/material.dart';
 
 import '../../../api/models.dart';
@@ -18,9 +19,10 @@ class LiveIndicator extends StatefulWidget {
 
 class _LiveIndicatorState extends State<LiveIndicator>
     with SingleTickerProviderStateMixin {
-  late final AnimationController _ctrl =
-      AnimationController(vsync: this, duration: const Duration(milliseconds: 1500))
-        ..repeat(reverse: true);
+  late final AnimationController _ctrl = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 1500),
+  )..repeat(reverse: true);
   @override
   void dispose() {
     _ctrl.dispose();
@@ -29,6 +31,7 @@ class _LiveIndicatorState extends State<LiveIndicator>
 
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
@@ -42,7 +45,7 @@ class _LiveIndicatorState extends State<LiveIndicator>
                 ),
           const SizedBox(width: 8),
           Text(
-            widget.paused ? 'PAUSED' : 'LIVE',
+            widget.paused ? tr("PAUSED") : tr("LIVE"),
             style: SpeakrText.mono(
               size: 11,
               color: SpeakrColors.recordingDot,
@@ -59,13 +62,13 @@ class _Dot extends StatelessWidget {
   const _Dot();
   @override
   Widget build(BuildContext context) => Container(
-        width: 8,
-        height: 8,
-        decoration: const BoxDecoration(
-          color: SpeakrColors.recordingDot,
-          shape: BoxShape.circle,
-        ),
-      );
+    width: 8,
+    height: 8,
+    decoration: const BoxDecoration(
+      color: SpeakrColors.recordingDot,
+      shape: BoxShape.circle,
+    ),
+  );
 }
 
 /// Single calm dot that breathes with the captured audio level. Floor
@@ -85,6 +88,7 @@ class BreathingDot extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     final clamped = paused
         ? 0.05
         : (level.isFinite ? level.clamp(0.18, 1.0) : 0.18);
@@ -143,7 +147,7 @@ class BreathingDot extends StatelessWidget {
           ),
           const SizedBox(height: 4),
           Text(
-            paused ? 'NO SIGNAL' : 'AUDIO LEVEL',
+            paused ? tr("NO SIGNAL") : tr("AUDIO LEVEL"),
             style: SpeakrText.mono(
               size: 10,
               color: SpeakrColors.muted,
@@ -163,6 +167,7 @@ class RecordingTimer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     return Column(
       children: [
         Text(
@@ -176,7 +181,7 @@ class RecordingTimer extends StatelessWidget {
         ),
         SizedBox(height: compact ? 6 : 10),
         MonoEyebrow(
-          'New recording · ${_today()}',
+          tr("New recording · {0}", [_today()]),
           size: compact ? 9 : 11,
         ),
       ],
@@ -185,9 +190,19 @@ class RecordingTimer extends StatelessWidget {
 
   static String _today() {
     final d = DateTime.now();
-    const months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+    final months = [
+      tr("Jan"),
+      tr("Feb"),
+      tr("Mar"),
+      tr("Apr"),
+      tr("May"),
+      tr("Jun"),
+      tr("Jul"),
+      tr("Aug"),
+      tr("Sep"),
+      tr("Oct"),
+      tr("Nov"),
+      tr("Dec"),
     ];
     return '${months[d.month - 1]} ${d.day}';
   }
@@ -234,6 +249,7 @@ class MetadataCard extends StatelessWidget {
   final bool systemPending;
   final ValueChanged<bool> onMicChanged;
   final ValueChanged<SystemAudioMode> onSystemModeChanged;
+
   /// When non-null, the System-audio pill *subtitle* mentions this name
   /// (the trigger process). The third "this app" segment additionally
   /// requires [processSourcePid] — without a captured PID the controller
@@ -260,6 +276,7 @@ class MetadataCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     final hPad = compact ? 12.0 : 16.0;
     final vPad = compact ? 10.0 : 12.0;
     final hMargin = compact ? 12.0 : 20.0;
@@ -281,21 +298,21 @@ class MetadataCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const MonoEyebrow('Capture', size: 9),
+                MonoEyebrow(tr("Capture"), size: 9),
                 const SizedBox(height: 10),
                 PillSourceCard<bool>(
-                  label: 'Microphone',
+                  label: tr("Microphone"),
                   sub: micEnabled
-                      ? 'Capturing voice'
-                      : 'Not capturing voice',
+                      ? tr("Capturing voice")
+                      : tr("Not capturing voice"),
                   value: micEnabled,
                   pending: micPending,
                   onChanged: onMicChanged,
-                  options: const [
-                    PillSourceOption(id: false, label: 'Off'),
+                  options: [
+                    PillSourceOption(id: false, label: tr("Off")),
                     PillSourceOption(
                       id: true,
-                      label: 'Mic',
+                      label: tr("Mic"),
                       icon: SpeakrIcon.mic,
                     ),
                   ],
@@ -303,17 +320,19 @@ class MetadataCard extends StatelessWidget {
                 if (systemAudioSupported) ...[
                   const SizedBox(height: 8),
                   PillSourceCard<SystemAudioMode>(
-                    label: 'System audio',
+                    label: tr("System audio"),
                     sub: _systemAudioSubtitle(systemMode, processSourceName),
                     value: systemMode,
                     pending: systemPending,
                     onChanged: onSystemModeChanged,
                     options: [
-                      const PillSourceOption(
-                          id: SystemAudioMode.off, label: 'Off'),
-                      const PillSourceOption(
+                      PillSourceOption(
+                        id: SystemAudioMode.off,
+                        label: tr("Off"),
+                      ),
+                      PillSourceOption(
                         id: SystemAudioMode.allSystem,
-                        label: 'System',
+                        label: tr("System"),
                         icon: SpeakrIcon.speaker,
                       ),
                       if (processSourceName != null &&
@@ -340,22 +359,22 @@ class MetadataCard extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const MonoEyebrow('Speakers', size: 9),
+                      MonoEyebrow(tr("Speakers"), size: 9),
                       const SizedBox(height: 2),
                       Text(
-                        'Helps separate voices.',
+                        tr("Helps separate voices."),
                         style: SpeakrText.sans(
-                            size: 11,
-                            color: SpeakrColors.muted,
-                            weight: FontWeight.w400),
+                          size: 11,
+                          color: SpeakrColors.muted,
+                          weight: FontWeight.w400,
+                        ),
                       ),
                     ],
                   ),
                 ),
                 _StepperButton(
                   child: '−',
-                  onTap: () =>
-                      onSpeakersChanged((speakers - 1).clamp(1, 12)),
+                  onTap: () => onSpeakersChanged((speakers - 1).clamp(1, 12)),
                 ),
                 SizedBox(width: compact ? 10 : 14),
                 SizedBox(
@@ -363,15 +382,17 @@ class MetadataCard extends StatelessWidget {
                   child: Center(
                     child: Text(
                       '$speakers',
-                      style: SpeakrText.serif(size: compact ? 20 : 24, height: 1),
+                      style: SpeakrText.serif(
+                        size: compact ? 20 : 24,
+                        height: 1,
+                      ),
                     ),
                   ),
                 ),
                 SizedBox(width: compact ? 10 : 14),
                 _StepperButton(
                   child: '+',
-                  onTap: () =>
-                      onSpeakersChanged((speakers + 1).clamp(1, 12)),
+                  onTap: () => onSpeakersChanged((speakers + 1).clamp(1, 12)),
                 ),
               ],
             ),
@@ -397,13 +418,13 @@ class MetadataCard extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const MonoEyebrow('Tags', size: 9),
+                    MonoEyebrow(tr("Tags"), size: 9),
                     InkWell(
                       onTap: onToggleEdit,
                       child: Padding(
                         padding: const EdgeInsets.symmetric(vertical: 2),
                         child: MonoEyebrow(
-                          tagPickerOpen ? 'Done' : 'Edit',
+                          tagPickerOpen ? tr("Done") : tr("Edit"),
                           size: 9,
                         ),
                       ),
@@ -417,9 +438,11 @@ class MetadataCard extends StatelessWidget {
                   children: [
                     if (activeTags.isEmpty && !tagPickerOpen)
                       Text(
-                        'None yet',
+                        tr("None yet"),
                         style: SpeakrText.sans(
-                            size: 12, color: SpeakrColors.muted),
+                          size: 12,
+                          color: SpeakrColors.muted,
+                        ),
                       ),
                     for (final name in activeTags)
                       CustomColorTagChip(
@@ -428,12 +451,13 @@ class MetadataCard extends StatelessWidget {
                         filled: true,
                         onTap: tagPickerOpen ? () => onToggleTag(name) : null,
                         trailing: tagPickerOpen
-                            ? Text('×',
+                            ? Text(
+                                '×',
                                 style: SpeakrText.serif(
                                   size: 11,
-                                  color: _colorFor(name)
-                                      .withValues(alpha: 0.6),
-                                ))
+                                  color: _colorFor(name).withValues(alpha: 0.6),
+                                ),
+                              )
                             : null,
                       ),
                   ],
@@ -441,9 +465,12 @@ class MetadataCard extends StatelessWidget {
                 if (tagPickerOpen && suggestable.isNotEmpty) ...[
                   const SizedBox(height: 10),
                   const Divider(
-                      color: SpeakrColors.line, thickness: 1, height: 1),
+                    color: SpeakrColors.line,
+                    thickness: 1,
+                    height: 1,
+                  ),
                   const SizedBox(height: 10),
-                  const MonoEyebrow('Suggested', size: 9),
+                  MonoEyebrow(tr("Suggested"), size: 9),
                   const SizedBox(height: 6),
                   Wrap(
                     spacing: 4,
@@ -487,6 +514,7 @@ class _FolderSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     final selected = folders.firstWhere(
       (f) => f.id == folderId,
       orElse: () => const Folder(id: -1, name: ''),
@@ -503,13 +531,13 @@ class _FolderSection extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const MonoEyebrow('Folder', size: 9),
+              MonoEyebrow(tr("Folder"), size: 9),
               InkWell(
                 onTap: onToggleEdit,
                 child: Padding(
                   padding: const EdgeInsets.symmetric(vertical: 2),
                   child: MonoEyebrow(
-                    pickerOpen ? 'Done' : 'Change',
+                    pickerOpen ? tr("Done") : tr("Change"),
                     size: 9,
                   ),
                 ),
@@ -524,7 +552,7 @@ class _FolderSection extends StatelessWidget {
                     color: parseHexColor(selected.color),
                   )
                 : Text(
-                    'No folder',
+                    tr("No folder"),
                     style: SpeakrText.sans(
                       size: 12,
                       color: SpeakrColors.muted,
@@ -536,7 +564,7 @@ class _FolderSection extends StatelessWidget {
               runSpacing: 4,
               children: [
                 FolderFilterChip(
-                  label: 'None',
+                  label: tr("None"),
                   color: SpeakrColors.muted,
                   selected: folderId == null,
                   onTap: () => onChanged(null),
@@ -563,6 +591,7 @@ class _StepperButton extends StatelessWidget {
   final VoidCallback onTap;
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     return InkWell(
       customBorder: const CircleBorder(),
       onTap: onTap,
@@ -621,15 +650,14 @@ class PillSourceCard<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     final on = _on;
     return AnimatedContainer(
       duration: const Duration(milliseconds: 150),
       padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
       decoration: BoxDecoration(
         color: on ? Colors.white : Colors.transparent,
-        border: Border.all(
-          color: on ? SpeakrColors.line : Colors.transparent,
-        ),
+        border: Border.all(color: on ? SpeakrColors.line : Colors.transparent),
         borderRadius: BorderRadius.circular(5),
       ),
       child: Column(
@@ -664,7 +692,9 @@ class PillSourceCard<T> extends StatelessWidget {
                       Text(
                         sub,
                         style: SpeakrText.sans(
-                            size: 11, color: SpeakrColors.muted),
+                          size: 11,
+                          color: SpeakrColors.muted,
+                        ),
                         overflow: TextOverflow.ellipsis,
                       ),
                     ],
@@ -711,6 +741,7 @@ class _Segments<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     return Semantics(
       label: label,
       container: true,
@@ -725,11 +756,13 @@ class _Segments<T> extends StatelessWidget {
         child: Row(
           children: [
             for (final opt in options)
-              Expanded(child: _Segment<T>(
-                option: opt,
-                active: opt.id == value,
-                onTap: onChanged == null ? null : () => onChanged!(opt.id),
-              )),
+              Expanded(
+                child: _Segment<T>(
+                  option: opt,
+                  active: opt.id == value,
+                  onTap: onChanged == null ? null : () => onChanged!(opt.id),
+                ),
+              ),
           ],
         ),
       ),
@@ -749,6 +782,7 @@ class _Segment<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     final fg = active ? SpeakrColors.bg : SpeakrColors.ink2;
     return Semantics(
       selected: active,
@@ -793,13 +827,13 @@ class _Segment<T> extends StatelessWidget {
 String _systemAudioSubtitle(SystemAudioMode mode, String? processSourceName) {
   switch (mode) {
     case SystemAudioMode.off:
-      return 'Not capturing app audio';
+      return tr("Not capturing app audio");
     case SystemAudioMode.allSystem:
-      return 'All apps · system mix';
+      return tr("All apps · system mix");
     case SystemAudioMode.processOnly:
       return processSourceName != null
-          ? '$processSourceName only'
-          : 'Process-only';
+          ? tr("{0} only", [processSourceName])
+          : tr("Process-only");
   }
 }
 
@@ -820,6 +854,7 @@ class RecordingControls extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     return Padding(
       padding: const EdgeInsets.fromLTRB(28, 24, 28, 0),
       child: Row(
@@ -837,7 +872,7 @@ class RecordingControls extends StatelessWidget {
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  'Discard'.toUpperCase(),
+                  tr("Discard").toUpperCase(),
                   style: SpeakrText.mono(
                     size: 11,
                     color: SpeakrColors.muted,
@@ -875,7 +910,7 @@ class RecordingControls extends StatelessWidget {
                       ),
                       const SizedBox(width: 10),
                       Text(
-                        'Save'.toUpperCase(),
+                        tr("Save").toUpperCase(),
                         style: SpeakrText.mono(
                           size: 11,
                           color: SpeakrColors.ink,

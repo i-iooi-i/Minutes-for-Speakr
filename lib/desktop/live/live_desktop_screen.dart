@@ -1,3 +1,5 @@
+import 'package:speakr_app/l10n/strings.dart';
+
 import 'dart:async';
 import 'dart:io' show Platform;
 
@@ -77,6 +79,7 @@ class _LiveDesktopScreenState extends ConsumerState<LiveDesktopScreen> {
 
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     final state = ref.watch(recordingControllerProvider);
     final controller = ref.read(recordingControllerProvider.notifier);
     final canOpenMini =
@@ -96,8 +99,7 @@ class _LiveDesktopScreenState extends ConsumerState<LiveDesktopScreen> {
         modActivator(LogicalKeyboardKey.numpadEnter): () {
           if (canStop) controller.stopAndUpload();
         },
-        modActivator(LogicalKeyboardKey.comma): () =>
-            context.push('/settings'),
+        modActivator(LogicalKeyboardKey.comma): () => context.push('/settings'),
       },
       child: Focus(
         autofocus: true,
@@ -121,9 +123,9 @@ class _LiveDesktopScreenState extends ConsumerState<LiveDesktopScreen> {
                           child: _LeftPane(
                             state: state,
                             controller: controller,
-                            onDiscard: () => ref
-                                .read(discardArmedProvider.notifier)
-                                .state = true,
+                            onDiscard: () =>
+                                ref.read(discardArmedProvider.notifier).state =
+                                    true,
                           ),
                         ),
                         Container(
@@ -164,6 +166,7 @@ class _TopBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     return Container(
       height: 44,
       decoration: const BoxDecoration(
@@ -173,7 +176,7 @@ class _TopBar extends StatelessWidget {
       child: Row(
         children: [
           _BorderButton(
-            label: 'Minimize',
+            label: tr("Minimize"),
             leading: const SpeakrIconView(
               SpeakrIcon.minimize,
               size: 14,
@@ -188,7 +191,7 @@ class _TopBar extends StatelessWidget {
               _PulseDot(paused: paused),
               const SizedBox(width: 8),
               Text(
-                paused ? 'PAUSED' : 'RECORDING',
+                paused ? tr("PAUSED") : tr("RECORDING"),
                 style: SpeakrText.mono(
                   size: 11,
                   color: SpeakrColors.recordingDot,
@@ -200,7 +203,7 @@ class _TopBar extends StatelessWidget {
           const Spacer(),
           if (onShowMini != null)
             _BorderButton(
-              label: 'Mini window',
+              label: tr("Mini window"),
               leading: const SpeakrIconView(
                 SpeakrIcon.pip,
                 size: 14,
@@ -224,6 +227,7 @@ class _BorderButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     return Material(
       color: Colors.white,
       shape: RoundedRectangleBorder(
@@ -279,6 +283,7 @@ class _PulseDotState extends State<_PulseDot>
 
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     return AnimatedBuilder(
       animation: _c,
       builder: (_, __) => Opacity(
@@ -312,6 +317,7 @@ class _LeftPane extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     final started = state.started;
     final paused = state.paused;
     final uploading = state.uploading;
@@ -353,7 +359,7 @@ class _LeftPane extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               _PillBtn(
-                label: 'Discard',
+                label: tr("Discard"),
                 leading: const Icon(
                   Icons.delete_outline,
                   size: 14,
@@ -368,7 +374,7 @@ class _LeftPane extends StatelessWidget {
               ),
               const SizedBox(width: 18),
               _PillBtn(
-                label: 'Stop & save',
+                label: tr("Stop & save"),
                 leading: Container(
                   width: 10,
                   height: 10,
@@ -396,11 +402,12 @@ class _TitleBlock extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'TITLE',
+          tr("TITLE"),
           style: SpeakrText.mono(
             size: 10,
             color: SpeakrColors.muted,
@@ -415,7 +422,7 @@ class _TitleBlock extends StatelessWidget {
             border: Border(bottom: BorderSide(color: SpeakrColors.line)),
           ),
           child: Text(
-            'Untitled recording',
+            tr("Untitled recording"),
             style: SpeakrText.serif(
               size: 32,
               color: SpeakrColors.muted,
@@ -424,7 +431,9 @@ class _TitleBlock extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         Text(
-          'A title will be generated automatically after the recording is summarized.',
+          tr(
+            "A title will be generated automatically after the recording is summarized.",
+          ),
           style: SpeakrText.sans(
             size: 12,
             color: SpeakrColors.muted,
@@ -441,14 +450,13 @@ class _BigTimer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     final h = elapsedSeconds ~/ 3600;
     final m = (elapsedSeconds ~/ 60) % 60;
     final s = elapsedSeconds % 60;
     final ss = s.toString().padLeft(2, '0');
     final leading = h > 0 ? '$h' : '$m';
-    final trailing = h > 0
-        ? '${m.toString().padLeft(2, '0')}:$ss'
-        : ss;
+    final trailing = h > 0 ? '${m.toString().padLeft(2, '0')}:$ss' : ss;
     // For h>0 we render the inner ':' between mm and ss in the trailing
     // segment as the dimmed separator. We split it ourselves so both
     // colons are dimmed consistently.
@@ -458,9 +466,7 @@ class _BigTimer extends StatelessWidget {
       weight: FontWeight.w300,
       height: 1,
       letterSpacing: -3,
-    ).copyWith(
-      fontFeatures: const [FontFeature.tabularFigures()],
-    );
+    ).copyWith(fontFeatures: const [FontFeature.tabularFigures()]);
     final dimColon = style.copyWith(
       color: SpeakrColors.ink.withValues(alpha: 0.35),
     );
@@ -501,31 +507,35 @@ class _StartedLine extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    LanguageScope.watch(context);
     final String sysLabel;
     switch (systemMode) {
       case SystemAudioMode.off:
         sysLabel = '';
       case SystemAudioMode.allSystem:
-        sysLabel = 'system';
+        sysLabel = tr("System audio");
       case SystemAudioMode.processOnly:
-        sysLabel = processSourceName ?? 'process';
+        sysLabel = processSourceName ?? tr("Process audio");
     }
     final src = mic && sysLabel.isNotEmpty
-        ? 'Mic + $sysLabel'
+        ? tr("Mic + {0}", [sysLabel])
         : mic
-        ? 'Mic only'
+        ? tr("Mic only")
         : sysLabel.isNotEmpty
-        ? '$sysLabel only'
-        : 'No source';
-    final startedAt = DateTime.now().subtract(Duration(seconds: elapsedSeconds));
-    final pref = ref.watch(timeFormatPreferenceProvider).asData?.value
-        ?? TimeFormatPreference.system;
+        ? tr("{0} only", [sysLabel])
+        : tr("No source");
+    final startedAt = DateTime.now().subtract(
+      Duration(seconds: elapsedSeconds),
+    );
+    final pref =
+        ref.watch(timeFormatPreferenceProvider).asData?.value ??
+        TimeFormatPreference.system;
     final timeStr = formatHourMinute(
       startedAt,
       use24Hour: resolveUse24Hour(pref, context),
     ).toUpperCase();
     return Text(
-      'STARTED $timeStr   ·   ${src.toUpperCase()}',
+      tr("STARTED {0}   ·   {1}", [timeStr, src.toUpperCase()]),
       style: SpeakrText.mono(
         size: 11,
         color: SpeakrColors.muted,
@@ -546,6 +556,7 @@ class _BreathingDot extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     final clamped = paused
         ? 0.05
         : (level.isFinite ? level.clamp(0.18, 1.0) : 0.18);
@@ -601,7 +612,7 @@ class _BreathingDot extends StatelessWidget {
           ),
           const SizedBox(height: 4),
           Text(
-            paused ? 'NO SIGNAL' : 'AUDIO LEVEL',
+            paused ? tr("NO SIGNAL") : tr("AUDIO LEVEL"),
             style: SpeakrText.mono(
               size: 10,
               color: SpeakrColors.muted,
@@ -622,6 +633,7 @@ class _PillBtn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     return Material(
       color: Colors.white,
       shape: const StadiumBorder(side: BorderSide(color: SpeakrColors.line)),
@@ -657,6 +669,7 @@ class _BigPauseButton extends StatelessWidget {
   final VoidCallback? onTap;
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     return SizedBox(
       width: 84,
       height: 84,
@@ -697,32 +710,33 @@ class _CapturePanel extends ConsumerStatefulWidget {
 class _CapturePanelState extends ConsumerState<_CapturePanel> {
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     final state = widget.state;
     final controller = widget.controller;
     final tags = ref.watch(tagsProvider).value ?? const <Tag>[];
     final folders = ref.watch(foldersProvider).value ?? const <Folder>[];
-    final activeTagSet = {
-      for (final n in state.activeTags) n.toLowerCase(),
-    };
+    final activeTagSet = {for (final n in state.activeTags) n.toLowerCase()};
 
     return SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(22, 24, 22, 24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _SectionHeading('Capture'),
+          _SectionHeading(tr("Capture")),
           const SizedBox(height: 14),
           PillSourceCard<bool>(
-            label: 'Microphone',
-            sub: state.micEnabled ? 'Default device' : 'Not capturing voice',
+            label: tr("Microphone"),
+            sub: state.micEnabled
+                ? tr("Default device")
+                : tr("Not capturing voice"),
             value: state.micEnabled,
             pending: state.micPending,
             onChanged: controller.setMicEnabled,
-            options: const [
-              PillSourceOption(id: false, label: 'Off'),
+            options: [
+              PillSourceOption(id: false, label: tr("Off")),
               PillSourceOption(
                 id: true,
-                label: 'Mic',
+                label: tr("Mic"),
                 icon: SpeakrIcon.mic,
               ),
             ],
@@ -730,20 +744,16 @@ class _CapturePanelState extends ConsumerState<_CapturePanel> {
           const SizedBox(height: 8),
           if (state.systemAudioSupported)
             PillSourceCard<SystemAudioMode>(
-              label: 'System audio',
-              sub: _desktopSystemSub(
-                state.systemMode,
-                state.processSourceName,
-              ),
+              label: tr("System audio"),
+              sub: _desktopSystemSub(state.systemMode, state.processSourceName),
               value: state.systemMode,
               pending: state.systemPending,
               onChanged: controller.setSystemMode,
               options: [
-                const PillSourceOption(
-                    id: SystemAudioMode.off, label: 'Off'),
-                const PillSourceOption(
+                PillSourceOption(id: SystemAudioMode.off, label: tr("Off")),
+                PillSourceOption(
                   id: SystemAudioMode.allSystem,
-                  label: 'System',
+                  label: tr("System"),
                   icon: SpeakrIcon.speaker,
                 ),
                 if (state.processSourceName != null &&
@@ -759,7 +769,7 @@ class _CapturePanelState extends ConsumerState<_CapturePanel> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 12),
               child: Text(
-                'System audio not supported on this device.',
+                tr("System audio not supported on this device."),
                 style: SpeakrText.sans(size: 11, color: SpeakrColors.muted),
               ),
             ),
@@ -771,14 +781,15 @@ class _CapturePanelState extends ConsumerState<_CapturePanel> {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 12),
                 child: Text(
-                  'Video is off for this recording. Turn on "Record video" '
-                  'in Settings to record the meeting window.',
+                  tr(
+                    "Video is off for this recording. Turn on \"Record video\" in Settings to record the meeting window.",
+                  ),
                   style: SpeakrText.sans(size: 11, color: SpeakrColors.muted),
                 ),
               ),
           ],
           const SizedBox(height: 22),
-          _SectionHeading('Speakers'),
+          _SectionHeading(tr("Speakers")),
           const SizedBox(height: 8),
           _SpeakerStepper(
             value: state.speakers,
@@ -786,7 +797,7 @@ class _CapturePanelState extends ConsumerState<_CapturePanel> {
             onPlus: () => controller.setSpeakers(state.speakers + 1),
           ),
           const SizedBox(height: 22),
-          _SectionHeading('Folder'),
+          _SectionHeading(tr("Folder")),
           const SizedBox(height: 8),
           Wrap(
             spacing: 4,
@@ -807,11 +818,11 @@ class _CapturePanelState extends ConsumerState<_CapturePanel> {
             ],
           ),
           const SizedBox(height: 22),
-          _SectionHeading('Tags'),
+          _SectionHeading(tr("Tags")),
           const SizedBox(height: 8),
           if (tags.isEmpty)
             Text(
-              'No tags yet',
+              tr("No tags yet"),
               style: SpeakrText.sans(
                 size: 12,
                 color: SpeakrColors.muted,
@@ -850,6 +861,7 @@ class _VideoSourceCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     final title = state.videoWindowTitle;
     return Container(
       padding: const EdgeInsets.fromLTRB(12, 8, 4, 8),
@@ -876,7 +888,7 @@ class _VideoSourceCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Video',
+                  tr("Video"),
                   style: SpeakrText.sans(
                     size: 13,
                     weight: FontWeight.w500,
@@ -885,7 +897,7 @@ class _VideoSourceCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  title ?? 'No window · recording black',
+                  title ?? tr("No window · recording black"),
                   style: SpeakrText.sans(size: 11, color: SpeakrColors.muted),
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -895,7 +907,7 @@ class _VideoSourceCard extends StatelessWidget {
           TextButton(
             onPressed: () => _pickWindow(context),
             child: Text(
-              'Change',
+              tr("Change"),
               style: SpeakrText.sans(size: 12, color: SpeakrColors.ink),
             ),
           ),
@@ -919,9 +931,9 @@ class _VideoSourceCard extends StatelessWidget {
         origin.dy,
       ),
       items: [
-        const PopupMenuItem(
+        PopupMenuItem(
           value: _WindowChoice(null),
-          child: Text('No window (black)'),
+          child: Text(tr("No window (black)")),
         ),
         for (final w in windows)
           PopupMenuItem(
@@ -947,6 +959,7 @@ class _SectionHeading extends StatelessWidget {
   final String text;
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     return Text(
       text.toUpperCase(),
       style: SpeakrText.mono(
@@ -961,13 +974,13 @@ class _SectionHeading extends StatelessWidget {
 String _desktopSystemSub(SystemAudioMode mode, String? processSourceName) {
   switch (mode) {
     case SystemAudioMode.off:
-      return 'Not capturing app audio';
+      return tr("Not capturing app audio");
     case SystemAudioMode.allSystem:
-      return 'All apps · system mix';
+      return tr("All apps · system mix");
     case SystemAudioMode.processOnly:
       return processSourceName != null
-          ? '$processSourceName only'
-          : 'Process-only';
+          ? tr("{0} only", [processSourceName])
+          : tr("Process-only");
   }
 }
 
@@ -982,6 +995,7 @@ class _SpeakerStepper extends StatelessWidget {
   final VoidCallback onPlus;
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
@@ -993,7 +1007,7 @@ class _SpeakerStepper extends StatelessWidget {
         children: [
           Expanded(
             child: Text(
-              'How many voices?',
+              tr("How many voices?"),
               style: SpeakrText.sans(
                 size: 12,
                 color: SpeakrColors.muted,
@@ -1022,6 +1036,7 @@ class _StepButton extends StatelessWidget {
   final VoidCallback onTap;
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     return Material(
       color: SpeakrColors.bg,
       shape: const CircleBorder(side: BorderSide(color: SpeakrColors.line)),
@@ -1054,6 +1069,7 @@ class _FolderChipBtn extends StatelessWidget {
   final VoidCallback onTap;
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     final c = parseHexColor(folder.color);
     return InkWell(
       borderRadius: BorderRadius.circular(3),
@@ -1103,6 +1119,7 @@ class _TagChipBtn extends StatelessWidget {
   final VoidCallback onTap;
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     final c = parseHexColor(tag.color);
     return InkWell(
       borderRadius: BorderRadius.circular(3),
@@ -1133,6 +1150,7 @@ class _NoneFolderChip extends StatelessWidget {
   final VoidCallback onTap;
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     final c = SpeakrColors.muted;
     return InkWell(
       borderRadius: BorderRadius.circular(3),
@@ -1145,7 +1163,7 @@ class _NoneFolderChip extends StatelessWidget {
           borderRadius: BorderRadius.circular(3),
         ),
         child: Text(
-          'NONE',
+          tr("NONE"),
           style: SpeakrText.mono(
             size: 10,
             color: selected ? Colors.white : c,
@@ -1160,9 +1178,10 @@ class _NoneFolderChip extends StatelessWidget {
 class _ShortcutsHint extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     final rows = [
-      ['Pause / resume', '$modLabel.'],
-      ['Stop & save', '$modLabel$returnKeyLabel'],
+      [tr("Pause / resume"), '$modLabel.'],
+      [tr("Stop & save"), '$modLabel$returnKeyLabel'],
     ];
     return Container(
       padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
@@ -1204,4 +1223,3 @@ class _ShortcutsHint extends StatelessWidget {
     );
   }
 }
-

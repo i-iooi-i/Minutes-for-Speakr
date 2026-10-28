@@ -1,3 +1,4 @@
+import 'package:speakr_app/l10n/strings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -29,6 +30,7 @@ class RecordingMiniPlayer extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    LanguageScope.watch(context);
     final state = ref.watch(recordingControllerProvider);
     final coord = ref.watch(autoRecordCoordinatorProvider);
     final isRecording = state.started || state.uploading;
@@ -90,14 +92,15 @@ class _Bar extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    LanguageScope.watch(context);
     final controller = ref.read(recordingControllerProvider.notifier);
     final coord = ref.read(autoRecordCoordinatorProvider);
     final paused = state.paused;
     final uploading = state.uploading;
 
     final eyebrow = isAutoSession
-        ? 'AUTO-RECORDING · ${triggerLabel ?? 'Recording'}'
-        : (paused ? 'PAUSED' : 'RECORDING');
+        ? tr("AUTO-RECORDING · {0}", [triggerLabel ?? 'Recording'])
+        : (paused ? tr("PAUSED") : tr("RECORDING"));
 
     void handleDiscard() {
       // Arm the global discard provider; the DiscardOverlay mounted in
@@ -158,17 +161,20 @@ class _Bar extends ConsumerWidget {
                                 const SizedBox(height: 2),
                                 Text(
                                   state.formattedElapsed,
-                                  style: SpeakrText.mono(
-                                    size: 14,
-                                    color: paused
-                                        ? SpeakrColors.bg.withValues(alpha: 0.55)
-                                        : SpeakrColors.bg,
-                                    letterSpacing: 0.4,
-                                  ).copyWith(
-                                    fontFeatures: const [
-                                      FontFeature.tabularFigures(),
-                                    ],
-                                  ),
+                                  style:
+                                      SpeakrText.mono(
+                                        size: 14,
+                                        color: paused
+                                            ? SpeakrColors.bg.withValues(
+                                                alpha: 0.55,
+                                              )
+                                            : SpeakrColors.bg,
+                                        letterSpacing: 0.4,
+                                      ).copyWith(
+                                        fontFeatures: const [
+                                          FontFeature.tabularFigures(),
+                                        ],
+                                      ),
                                 ),
                               ],
                             ),
@@ -203,8 +209,7 @@ class _Bar extends ConsumerWidget {
               ),
               const SizedBox(width: 9),
               _PillButton(
-                background:
-                    SpeakrColors.recordingDot.withValues(alpha: 0.95),
+                background: SpeakrColors.recordingDot.withValues(alpha: 0.95),
                 onTap: uploading ? null : handleStop,
                 child: uploading
                     ? const SizedBox(
@@ -261,6 +266,7 @@ class _PillButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     final enabled = onTap != null;
     return Opacity(
       opacity: enabled ? 1.0 : 0.4,
@@ -270,11 +276,7 @@ class _PillButton extends StatelessWidget {
         child: InkWell(
           customBorder: const CircleBorder(),
           onTap: onTap,
-          child: SizedBox(
-            width: 26,
-            height: 26,
-            child: Center(child: child),
-          ),
+          child: SizedBox(width: 26, height: 26, child: Center(child: child)),
         ),
       ),
     );
@@ -288,11 +290,8 @@ class _Hairline extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 1,
-      height: 16,
-      color: const Color(0x3DFFFFFF),
-    );
+    LanguageScope.watch(context);
+    return Container(width: 1, height: 16, color: const Color(0x3DFFFFFF));
   }
 }
 
@@ -315,8 +314,10 @@ class _PulsingDotState extends State<_PulsingDot>
     duration: const Duration(milliseconds: 1400),
   )..repeat(reverse: true);
 
-  late final Animation<double> _opacity =
-      Tween(begin: 1.0, end: 0.35).animate(_ctrl);
+  late final Animation<double> _opacity = Tween(
+    begin: 1.0,
+    end: 0.35,
+  ).animate(_ctrl);
 
   @override
   void dispose() {
@@ -326,6 +327,7 @@ class _PulsingDotState extends State<_PulsingDot>
 
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     if (widget.paused) {
       return Container(
         width: 6,

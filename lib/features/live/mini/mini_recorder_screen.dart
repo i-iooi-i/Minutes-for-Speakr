@@ -1,3 +1,5 @@
+import 'package:speakr_app/l10n/strings.dart';
+
 import 'dart:async';
 
 import 'package:flutter/gestures.dart';
@@ -57,6 +59,7 @@ class _MiniRecorderScreenState extends ConsumerState<MiniRecorderScreen> {
 
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     final state = ref.watch(recordingMirrorProvider);
     final mirror = ref.read(recordingMirrorProvider.notifier);
 
@@ -107,6 +110,7 @@ class _Pill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     final paused = state.paused;
     final uploading = state.uploading;
     final timerText = state.formattedElapsed;
@@ -212,6 +216,7 @@ class _MeetingEndedPill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     // Main pushes whole seconds; animate each step to the *next* second's
     // value over one second so the bar drains continuously, not in jumps.
     final target =
@@ -258,7 +263,7 @@ class _MeetingEndedPill extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Meeting ended',
+                  tr("Meeting ended"),
                   style: SpeakrText.sans(
                     size: 12,
                     weight: FontWeight.w600,
@@ -266,7 +271,9 @@ class _MeetingEndedPill extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  secondsLeft > 0 ? 'Stopping in ${secondsLeft}s' : 'Stopping…',
+                  secondsLeft > 0
+                      ? tr("Stopping in {0}s", [secondsLeft])
+                      : tr("Stopping…"),
                   style:
                       SpeakrText.mono(
                         size: 10,
@@ -299,7 +306,7 @@ class _MeetingEndedPill extends StatelessWidget {
                   ),
                   const SizedBox(width: 6),
                   Text(
-                    'Resume',
+                    tr("Resume"),
                     style: SpeakrText.sans(
                       size: 12,
                       weight: FontWeight.w600,
@@ -336,13 +343,14 @@ class _LeftCluster extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     return SizedBox(
       width: _slotWidth,
       child: armed
           ? Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                'Discard?',
+                tr("Discard?"),
                 style: SpeakrText.sans(
                   size: 12,
                   weight: FontWeight.w600,
@@ -360,15 +368,16 @@ class _LeftCluster extends StatelessWidget {
                   child: Text(
                     timerText,
                     textAlign: TextAlign.left,
-                    style: SpeakrText.mono(
-                      size: 11,
-                      color: paused
-                          ? SpeakrColors.bg.withValues(alpha: 0.55)
-                          : SpeakrColors.bg,
-                      letterSpacing: 0.4,
-                    ).copyWith(
-                      fontFeatures: const [FontFeature.tabularFigures()],
-                    ),
+                    style:
+                        SpeakrText.mono(
+                          size: 11,
+                          color: paused
+                              ? SpeakrColors.bg.withValues(alpha: 0.55)
+                              : SpeakrColors.bg,
+                          letterSpacing: 0.4,
+                        ).copyWith(
+                          fontFeatures: const [FontFeature.tabularFigures()],
+                        ),
                   ),
                 ),
               ],
@@ -384,11 +393,8 @@ class _Hairline extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 1,
-      height: 16,
-      color: const Color(0x24FFFFFF),
-    );
+    LanguageScope.watch(context);
+    return Container(width: 1, height: 16, color: const Color(0x24FFFFFF));
   }
 }
 
@@ -409,8 +415,10 @@ class _PulsingDotState extends State<_PulsingDot>
     duration: const Duration(milliseconds: 1400),
   )..repeat(reverse: true);
 
-  late final Animation<double> _opacity =
-      Tween(begin: 1.0, end: 0.35).animate(_ctrl);
+  late final Animation<double> _opacity = Tween(
+    begin: 1.0,
+    end: 0.35,
+  ).animate(_ctrl);
 
   @override
   void dispose() {
@@ -420,6 +428,7 @@ class _PulsingDotState extends State<_PulsingDot>
 
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     if (widget.paused) {
       return Container(
         width: 6,
@@ -464,6 +473,7 @@ class _PillButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     final enabled = onTap != null;
     return Opacity(
       opacity: enabled ? 1.0 : 0.4,
@@ -473,11 +483,7 @@ class _PillButton extends StatelessWidget {
         child: InkWell(
           customBorder: const CircleBorder(),
           onTap: onTap,
-          child: SizedBox(
-            width: 26,
-            height: 26,
-            child: Center(child: child),
-          ),
+          child: SizedBox(width: 26, height: 26, child: Center(child: child)),
         ),
       ),
     );
@@ -493,6 +499,7 @@ class _PillDrag extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     return MouseRegion(
       cursor: SystemMouseCursors.move,
       child: Listener(

@@ -1,3 +1,4 @@
+import 'package:speakr_app/l10n/strings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -58,19 +59,21 @@ class _SpeakerReviewScreenState extends ConsumerState<SpeakerReviewScreen> {
       }
       _rows
         ..clear()
-        ..addAll(parsed.map((s) {
-          // Pre-fill the editable name with whatever the server already
-          // suggests/has assigned. The label is shown read-only above the
-          // field so the user can map it back to the transcript.
-          final initial = s.identifiedName ?? '';
-          return _SpeakerRow(
-            label: s.label,
-            identifiedName: s.identifiedName,
-            segmentCount: s.segmentCount,
-            controller: TextEditingController(text: initial),
-            focusNode: FocusNode(),
-          );
-        }));
+        ..addAll(
+          parsed.map((s) {
+            // Pre-fill the editable name with whatever the server already
+            // suggests/has assigned. The label is shown read-only above the
+            // field so the user can map it back to the transcript.
+            final initial = s.identifiedName ?? '';
+            return _SpeakerRow(
+              label: s.label,
+              identifiedName: s.identifiedName,
+              segmentCount: s.segmentCount,
+              controller: TextEditingController(text: initial),
+              focusNode: FocusNode(),
+            );
+          }),
+        );
       setState(() => _loading = false);
     } on SpeakrApiException catch (e) {
       if (!mounted) return;
@@ -101,12 +104,15 @@ class _SpeakerReviewScreenState extends ConsumerState<SpeakerReviewScreen> {
       if (label == null || label.isEmpty) continue;
       final identified = entry['identified_name'];
       final segCount = entry['segment_count'];
-      out.add(_ParsedSpeaker(
-        label: label,
-        identifiedName:
-            (identified is String && identified.isNotEmpty) ? identified : null,
-        segmentCount: segCount is int ? segCount : null,
-      ));
+      out.add(
+        _ParsedSpeaker(
+          label: label,
+          identifiedName: (identified is String && identified.isNotEmpty)
+              ? identified
+              : null,
+          segmentCount: segCount is int ? segCount : null,
+        ),
+      );
     }
     // Stable order: by descending segment count, then label.
     out.sort((a, b) {
@@ -132,7 +138,7 @@ class _SpeakerReviewScreenState extends ConsumerState<SpeakerReviewScreen> {
     }
     if (speakerMap.isEmpty) {
       messenger.showSnackBar(
-        const SnackBar(content: Text('No name changes to apply')),
+        SnackBar(content: Text(tr("No name changes to apply"))),
       );
       return;
     }
@@ -156,8 +162,8 @@ class _SpeakerReviewScreenState extends ConsumerState<SpeakerReviewScreen> {
           SnackBar(
             content: Text(
               regenerateSummary
-                  ? 'Speakers assigned — summary regenerating'
-                  : 'Speakers assigned',
+                  ? tr("Speakers assigned — summary regenerating")
+                  : tr("Speakers assigned"),
             ),
           ),
         );
@@ -175,6 +181,7 @@ class _SpeakerReviewScreenState extends ConsumerState<SpeakerReviewScreen> {
 
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     return Scaffold(
       backgroundColor: SpeakrColors.bg,
       body: SafeArea(
@@ -189,9 +196,9 @@ class _SpeakerReviewScreenState extends ConsumerState<SpeakerReviewScreen> {
                     icon: SpeakrIcon.back,
                     onTap: () => Navigator.of(context).pop(),
                   ),
-                  const Expanded(
+                  Expanded(
                     child: Center(
-                      child: MonoEyebrow('Edit speakers', size: 10),
+                      child: MonoEyebrow(tr("Edit speakers"), size: 10),
                     ),
                   ),
                   const SizedBox(width: 36), // balance the back button
@@ -209,7 +216,9 @@ class _SpeakerReviewScreenState extends ConsumerState<SpeakerReviewScreen> {
     if (_loading) {
       return const Center(
         child: CircularProgressIndicator(
-            color: SpeakrColors.ink, strokeWidth: 2),
+          color: SpeakrColors.ink,
+          strokeWidth: 2,
+        ),
       );
     }
     if (_error != null) {
@@ -218,17 +227,20 @@ class _SpeakerReviewScreenState extends ConsumerState<SpeakerReviewScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const MonoEyebrow('Couldn’t load speakers'),
+            MonoEyebrow(tr("Couldn’t load speakers")),
             const SizedBox(height: 8),
             Text(_error!, style: SpeakrText.sans(size: 14)),
             const SizedBox(height: 16),
             TextButton(
               onPressed: _load,
-              child: Text('Retry',
-                  style: SpeakrText.sans(
-                      size: 13,
-                      weight: FontWeight.w600,
-                      color: SpeakrColors.ink)),
+              child: Text(
+                tr("Retry"),
+                style: SpeakrText.sans(
+                  size: 13,
+                  weight: FontWeight.w600,
+                  color: SpeakrColors.ink,
+                ),
+              ),
             ),
           ],
         ),
@@ -238,7 +250,7 @@ class _SpeakerReviewScreenState extends ConsumerState<SpeakerReviewScreen> {
       return Padding(
         padding: const EdgeInsets.all(24),
         child: Text(
-          'No speakers were detected in this recording.',
+          tr("No speakers were detected in this recording."),
           style: SpeakrText.sans(size: 14, color: SpeakrColors.muted),
         ),
       );
@@ -250,7 +262,9 @@ class _SpeakerReviewScreenState extends ConsumerState<SpeakerReviewScreen> {
             padding: const EdgeInsets.fromLTRB(24, 12, 24, 24),
             children: [
               Text(
-                'Rename each speaker as you’d like them to appear in the transcript, then apply.',
+                tr(
+                  "Rename each speaker as you’d like them to appear in the transcript, then apply.",
+                ),
                 style: SpeakrText.serif(
                   size: 14.5,
                   height: 1.45,
@@ -270,12 +284,13 @@ class _SpeakerReviewScreenState extends ConsumerState<SpeakerReviewScreen> {
                 onChanged: _saving
                     ? null
                     : (v) => setState(() => _regenerateSummary = v),
-                title: Text('Regenerate summary',
-                    style: SpeakrText.sans(size: 14)),
+                title: Text(
+                  tr("Regenerate summary"),
+                  style: SpeakrText.sans(size: 14),
+                ),
                 subtitle: Text(
-                  'Rewrites the summary using the new names.',
-                  style:
-                      SpeakrText.sans(size: 12, color: SpeakrColors.muted),
+                  tr("Rewrites the summary using the new names."),
+                  style: SpeakrText.sans(size: 12, color: SpeakrColors.muted),
                 ),
                 activeThumbColor: SpeakrColors.ink,
               ),
@@ -312,7 +327,7 @@ class _SpeakerReviewScreenState extends ConsumerState<SpeakerReviewScreen> {
                         ),
                       )
                     : Text(
-                        'Apply',
+                        tr("Apply"),
                         style: SpeakrText.sans(
                           size: 14,
                           weight: FontWeight.w600,
@@ -363,16 +378,17 @@ class _SpeakerField extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    LanguageScope.watch(context);
     final segs = row.segmentCount;
-    final speakers = ref.watch(allSpeakersProvider).maybeWhen(
-          data: (list) => list,
-          orElse: () => const <Speaker>[],
+    final speakers = ref
+        .watch(allSpeakersProvider)
+        .maybeWhen(data: (list) => list, orElse: () => const <Speaker>[]);
+    final suggestions = ref
+        .watch(speakerSuggestionsProvider(recordingId))
+        .maybeWhen(
+          data: (map) => map[row.label] ?? const <SpeakerSuggestion>[],
+          orElse: () => const <SpeakerSuggestion>[],
         );
-    final suggestions =
-        ref.watch(speakerSuggestionsProvider(recordingId)).maybeWhen(
-              data: (map) => map[row.label] ?? const <SpeakerSuggestion>[],
-              orElse: () => const <SpeakerSuggestion>[],
-            );
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -383,7 +399,7 @@ class _SpeakerField extends ConsumerWidget {
             if (segs != null) ...[
               const SizedBox(width: 8),
               Text(
-                segs == 1 ? '1 segment' : '$segs segments',
+                segs == 1 ? tr("1 segment") : tr("{0} segments", [segs]),
                 style: SpeakrText.sans(size: 11, color: SpeakrColors.muted),
               ),
             ],
@@ -401,11 +417,9 @@ class _SpeakerField extends ConsumerWidget {
                 if (speakers.isEmpty) return const Iterable<Speaker>.empty();
                 final q = value.text.trim().toLowerCase();
                 if (q.isEmpty) return speakers;
-                return speakers
-                    .where((s) => s.name.toLowerCase().contains(q));
+                return speakers.where((s) => s.name.toLowerCase().contains(q));
               },
-              fieldViewBuilder:
-                  (context, controller, focusNode, onSubmitted) {
+              fieldViewBuilder: (context, controller, focusNode, onSubmitted) {
                 return TextField(
                   controller: controller,
                   focusNode: focusNode,
@@ -414,10 +428,14 @@ class _SpeakerField extends ConsumerWidget {
                   decoration: InputDecoration(
                     isDense: true,
                     hintText: row.identifiedName ?? row.label,
-                    hintStyle:
-                        SpeakrText.sans(size: 14, color: SpeakrColors.muted),
+                    hintStyle: SpeakrText.sans(
+                      size: 14,
+                      color: SpeakrColors.muted,
+                    ),
                     contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 14, vertical: 12),
+                      horizontal: 14,
+                      vertical: 12,
+                    ),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(4),
                       borderSide: const BorderSide(color: SpeakrColors.line),
@@ -429,7 +447,9 @@ class _SpeakerField extends ConsumerWidget {
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(4),
                       borderSide: const BorderSide(
-                          color: SpeakrColors.ink, width: 1.2),
+                        color: SpeakrColors.ink,
+                        width: 1.2,
+                      ),
                     ),
                   ),
                 );
@@ -462,7 +482,9 @@ class _SpeakerField extends ConsumerWidget {
                                   onTap: () => onSelected(option),
                                   child: Padding(
                                     padding: const EdgeInsets.symmetric(
-                                        horizontal: 14, vertical: 10),
+                                      horizontal: 14,
+                                      vertical: 10,
+                                    ),
                                     child: Text(
                                       option.name,
                                       style: SpeakrText.sans(size: 14),
@@ -526,11 +548,15 @@ class _SuggestionChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     final bg = highlighted ? SpeakrColors.ink : SpeakrColors.bg;
     final fg = highlighted ? SpeakrColors.bg : SpeakrColors.ink;
     return Tooltip(
-      message:
-          'similarity ${suggestion.similarity.toStringAsFixed(0)}% · ${suggestion.embeddingCount} clip${suggestion.embeddingCount == 1 ? '' : 's'}',
+      message: tr("similarity {0}% · {1} clip{2}", [
+        suggestion.similarity.toStringAsFixed(0),
+        suggestion.embeddingCount,
+        appLanguage.value == 'zh' || suggestion.embeddingCount == 1 ? '' : 's',
+      ]),
       child: Material(
         color: bg,
         borderRadius: BorderRadius.circular(4),

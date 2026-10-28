@@ -23,16 +23,16 @@ class SpeakrText {
     Color color = SpeakrColors.ink,
     double height = 1.2,
     double letterSpacing = 0,
-  }) =>
-      TextStyle(
-        fontFamily: kSerifFamily,
-        fontSize: size,
-        fontWeight: weight,
-        fontStyle: style,
-        color: color,
-        height: height,
-        letterSpacing: letterSpacing,
-      );
+  }) => TextStyle(
+    fontFamily: kSerifFamily,
+    fontFamilyFallback: const ['Noto Serif SC', 'SimSun', 'Microsoft YaHei'],
+    fontSize: size,
+    fontWeight: weight,
+    fontStyle: style,
+    color: color,
+    height: height,
+    letterSpacing: letterSpacing,
+  );
 
   static TextStyle sans({
     double? size,
@@ -40,29 +40,37 @@ class SpeakrText {
     Color color = SpeakrColors.ink,
     double height = 1.4,
     double letterSpacing = 0,
-  }) =>
-      TextStyle(
-        fontFamily: kSansFamily,
-        fontSize: size,
-        fontWeight: weight,
-        color: color,
-        height: height,
-        letterSpacing: letterSpacing,
-      );
+  }) => TextStyle(
+    fontFamily: kSansFamily,
+    fontFamilyFallback: const [
+      'Microsoft YaHei',
+      'PingFang SC',
+      'Noto Sans CJK SC',
+    ],
+    fontSize: size,
+    fontWeight: weight,
+    color: color,
+    height: height,
+    letterSpacing: letterSpacing,
+  );
 
   static TextStyle mono({
     double size = 11,
     FontWeight weight = FontWeight.w500,
     Color color = SpeakrColors.muted,
     double letterSpacing = 1.5,
-  }) =>
-      TextStyle(
-        fontFamily: kMonoFamily,
-        fontSize: size,
-        fontWeight: weight,
-        color: color,
-        letterSpacing: letterSpacing,
-      );
+  }) => TextStyle(
+    fontFamily: kMonoFamily,
+    fontFamilyFallback: const [
+      'Microsoft YaHei',
+      'PingFang SC',
+      'Noto Sans CJK SC',
+    ],
+    fontSize: size,
+    fontWeight: weight,
+    color: color,
+    letterSpacing: letterSpacing,
+  );
 }
 
 ThemeData buildSpeakrTheme() {
@@ -98,7 +106,11 @@ ThemeData buildSpeakrTheme() {
       ),
       bodyLarge: SpeakrText.serif(size: 14.5, height: 1.45),
       bodyMedium: SpeakrText.sans(size: 14, height: 1.4),
-      bodySmall: SpeakrText.sans(size: 13, height: 1.4, color: SpeakrColors.ink2),
+      bodySmall: SpeakrText.sans(
+        size: 13,
+        height: 1.4,
+        color: SpeakrColors.ink2,
+      ),
       labelLarge: SpeakrText.sans(
         size: 13,
         weight: FontWeight.w500,

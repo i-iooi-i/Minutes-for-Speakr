@@ -9,6 +9,7 @@ import 'package:just_audio_media_kit/just_audio_media_kit.dart';
 import 'package:workmanager/workmanager.dart';
 
 import 'app.dart';
+import 'l10n/strings.dart';
 import 'features/auto_upload/auto_upload_worker.dart';
 import 'features/auto_upload/workmanager_callback.dart';
 import 'features/library/library_controller.dart';
@@ -28,80 +29,84 @@ Future<void> main(List<String> args) async {
   //
   // ensureInitialized and runApp must share a zone — Flutter asserts on a
   // mismatch — so the entire main body runs inside this zone, not just runApp.
-  await runZoned<Future<void>>(() async {
-    WidgetsFlutterBinding.ensureInitialized();
+  await runZoned<Future<void>>(
+    () async {
+      WidgetsFlutterBinding.ensureInitialized();
+      await loadLanguage();
 
-    // Windows-only: when invoked as a child engine by desktop_multi_window
-    // the args are ['multi_window', '<int windowId>', '<jsonArgs>'].
-    if (!kIsWeb && Platform.isWindows && _isMiniWindowLaunch(args)) {
-      final windowId = int.tryParse(args[1]) ?? -1;
-      String role = MiniIpc.argRoleMini;
-      try {
-        final parsed = jsonDecode(args.length > 2 ? args[2] : '{}');
-        if (parsed is Map && parsed['role'] is String) {
-          role = parsed['role'] as String;
+      // Windows-only: when invoked as a child engine by desktop_multi_window
+      // the args are ['multi_window', '<int windowId>', '<jsonArgs>'].
+      if (!kIsWeb && Platform.isWindows && _isMiniWindowLaunch(args)) {
+        final windowId = int.tryParse(args[1]) ?? -1;
+        String role = MiniIpc.argRoleMini;
+        try {
+          final parsed = jsonDecode(args.length > 2 ? args[2] : '{}');
+          if (parsed is Map && parsed['role'] is String) {
+            role = parsed['role'] as String;
+          }
+        } catch (_) {}
+        if (role == MiniIpc.argRoleMini && windowId > 0) {
+          runApp(ProviderScope(child: MiniRecorderApp(windowId: windowId)));
+          return;
         }
-      } catch (_) {}
-      if (role == MiniIpc.argRoleMini && windowId > 0) {
-        runApp(
-          ProviderScope(
-            child: MiniRecorderApp(windowId: windowId),
-          ),
-        );
-        return;
       }
-    }
 
-    if (!kIsWeb && (Platform.isWindows || Platform.isLinux)) {
-      JustAudioMediaKit.ensureInitialized();
-    }
+      if (!kIsWeb && (Platform.isWindows || Platform.isLinux)) {
+        JustAudioMediaKit.ensureInitialized();
+      }
 
-    if (!kIsWeb && Platform.isAndroid) {
-      await Workmanager().initialize(autoUploadCallbackDispatcher);
-      await Workmanager().registerPeriodicTask(
-        AutoUploadTaskNames.periodic,
-        AutoUploadTaskNames.periodic,
-        frequency: const Duration(minutes: 15),
-        constraints: Constraints(networkType: NetworkType.connected),
-        existingWorkPolicy: ExistingPeriodicWorkPolicy.keep,
+      if (!kIsWeb && Platform.isAndroid) {
+        await Workmanager().initialize(autoUploadCallbackDispatcher);
+        await Workmanager().registerPeriodicTask(
+          AutoUploadTaskNames.periodic,
+          AutoUploadTaskNames.periodic,
+          frequency: const Duration(minutes: 15),
+          constraints: Constraints(networkType: NetworkType.connected),
+          existingWorkPolicy: ExistingPeriodicWorkPolicy.keep,
+        );
+      }
+
+      // Build the provider container ourselves so the auto-record bootstrap
+      // and the UI share state. Without this, ProviderScope would create
+      // its own container and the bootstrap couldn't reach into it.
+      final container = ProviderContainer();
+
+      if (!kIsWeb &&
+          (Platform.isWindows || Platform.isLinux || Platform.isMacOS)) {
+        // No WorkManager on desktop — run a foreground polling loop. The
+        // worker bails internally when the feature is disabled, so this is
+        // cheap when not configured. After each scan, bump the kick so the
+        // Library list reflects any uploads/deletions promptly.
+        Timer.periodic(const Duration(minutes: 5), (_) async {
+          await runAutoUploadScan(trigger: 'desktop_timer');
+          container.read(uploadKickProvider.notifier).state++;
+        });
+      }
+
+      if (!kIsWeb && Platform.isWindows) {
+        // Fire and forget — the bootstrap is only relevant on Windows and
+        // failures are non-fatal (the rest of the app works without it).
+        unawaited(AutoRecordBootstrap.start(container));
+        unawaited(applyDevBranchTitleIfDebug());
+        installTrayBridge(container);
+        appLanguage.addListener(() => unawaited(syncTrayLanguage()));
+        await syncTrayLanguage();
+      }
+
+      runApp(
+        UncontrolledProviderScope(
+          container: container,
+          child: const SpeakrApp(),
+        ),
       );
-    }
-
-    // Build the provider container ourselves so the auto-record bootstrap
-    // and the UI share state. Without this, ProviderScope would create
-    // its own container and the bootstrap couldn't reach into it.
-    final container = ProviderContainer();
-
-    if (!kIsWeb &&
-        (Platform.isWindows || Platform.isLinux || Platform.isMacOS)) {
-      // No WorkManager on desktop — run a foreground polling loop. The
-      // worker bails internally when the feature is disabled, so this is
-      // cheap when not configured. After each scan, bump the kick so the
-      // Library list reflects any uploads/deletions promptly.
-      Timer.periodic(const Duration(minutes: 5), (_) async {
-        await runAutoUploadScan(trigger: 'desktop_timer');
-        container.read(uploadKickProvider.notifier).state++;
-      });
-    }
-
-    if (!kIsWeb && Platform.isWindows) {
-      // Fire and forget — the bootstrap is only relevant on Windows and
-      // failures are non-fatal (the rest of the app works without it).
-      unawaited(AutoRecordBootstrap.start(container));
-      unawaited(applyDevBranchTitleIfDebug());
-      installTrayBridge(container);
-    }
-
-    runApp(UncontrolledProviderScope(
-      container: container,
-      child: const SpeakrApp(),
-    ));
-  }, zoneSpecification: ZoneSpecification(
-    print: (self, parent, zone, line) {
-      if (line.startsWith('MPV: [error]')) return;
-      parent.print(zone, line);
     },
-  ));
+    zoneSpecification: ZoneSpecification(
+      print: (self, parent, zone, line) {
+        if (line.startsWith('MPV: [error]')) return;
+        parent.print(zone, line);
+      },
+    ),
+  );
 }
 
 bool _isMiniWindowLaunch(List<String> args) {

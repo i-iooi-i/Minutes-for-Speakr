@@ -1,3 +1,4 @@
+import 'package:speakr_app/l10n/strings.dart';
 import 'package:intl/intl.dart';
 
 /// "Today" / "Yesterday" / weekday / "Mon D" — matches `fmtDate`
@@ -8,8 +9,8 @@ String formatRelativeDay(DateTime when, {DateTime? today}) {
   final tDay = DateTime(now.year, now.month, now.day);
   final wDay = DateTime(w.year, w.month, w.day);
   final diff = tDay.difference(wDay).inDays;
-  if (diff <= 0) return 'Today';
-  if (diff == 1) return 'Yesterday';
+  if (diff <= 0) return tr("Today");
+  if (diff == 1) return tr("Yesterday");
   if (diff < 7) return DateFormat.EEEE().format(w);
   return DateFormat.MMMd().format(w);
 }
@@ -17,7 +18,11 @@ String formatRelativeDay(DateTime when, {DateTime? today}) {
 /// Clock-time. `use24Hour: false` (default) → `9:41 AM`;
 /// `use24Hour: true` → `09:41`.
 String formatHourMinute(DateTime when, {bool use24Hour = false}) {
-  final fmt = use24Hour ? DateFormat.Hm() : DateFormat.jm();
+  final fmt = use24Hour
+      ? DateFormat.Hm()
+      : (appLanguage.value == 'zh'
+            ? DateFormat('a h:mm', 'zh_CN')
+            : DateFormat('h:mm a', 'en_US'));
   return fmt.format(when.toLocal());
 }
 
@@ -41,5 +46,7 @@ String formatBytes(int? bytes) {
     v /= 1024;
     i++;
   }
-  return v >= 10 ? '${v.toStringAsFixed(0)} ${units[i]}' : '${v.toStringAsFixed(1)} ${units[i]}';
+  return v >= 10
+      ? '${v.toStringAsFixed(0)} ${units[i]}'
+      : '${v.toStringAsFixed(1)} ${units[i]}';
 }

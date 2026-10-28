@@ -1,3 +1,5 @@
+import 'package:speakr_app/l10n/strings.dart';
+
 import 'dart:async';
 import 'dart:io';
 
@@ -82,12 +84,11 @@ class _LiveScreenState extends ConsumerState<LiveScreen> {
 
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     final state = ref.watch(recordingControllerProvider);
     final controller = ref.read(recordingControllerProvider.notifier);
-    final canOpenMini = !kIsWeb &&
-        Platform.isWindows &&
-        state.started &&
-        !state.miniOpen;
+    final canOpenMini =
+        !kIsWeb && Platform.isWindows && state.started && !state.miniOpen;
 
     return Scaffold(
       backgroundColor: SpeakrColors.bg,
@@ -161,15 +162,13 @@ class _LiveScreenState extends ConsumerState<LiveScreen> {
 }
 
 class _TopBar extends StatelessWidget {
-  const _TopBar({
-    required this.onMinimize,
-    this.onShowMini,
-  });
+  const _TopBar({required this.onMinimize, this.onShowMini});
   final VoidCallback onMinimize;
   final Future<void> Function()? onShowMini;
 
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     return Padding(
       padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
       child: Row(
@@ -185,11 +184,10 @@ class _TopBar extends StatelessWidget {
                 ),
             ],
           ),
-          const MonoEyebrow('Recording', size: 10),
+          MonoEyebrow(tr("Recording"), size: 10),
           const SizedBox(width: 36, height: 36),
         ],
       ),
     );
   }
 }
-

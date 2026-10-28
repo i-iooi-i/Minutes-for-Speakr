@@ -1,3 +1,4 @@
+import 'package:speakr_app/l10n/strings.dart';
 // Hand-rolled domain models for the Speakr REST API v1.
 // Source of truth: openapi/speakr-openapi.json (info.version 1.0.0).
 // Regenerate manually if the API gains new shapes.
@@ -17,7 +18,7 @@ DateTime? _parseFlexibleDate(Object? raw) {
   if (parsed == null) {
     final normalized = raw.replaceAll(' ', ' ').replaceAll(' ', ' ');
     try {
-      parsed = DateFormat("MMM d, yyyy, h:mm:ss a").parse(normalized);
+      parsed = DateFormat("MMM d, yyyy, h:mm:ss a", "en_US").parse(normalized);
     } catch (_) {
       return null;
     }
@@ -61,13 +62,13 @@ enum RecordingStatus {
       this == RecordingStatus.summarizing;
 
   String get displayLabel => switch (this) {
-        RecordingStatus.pending => 'Pending',
-        RecordingStatus.queued => 'Queued',
-        RecordingStatus.processing => 'Processing',
-        RecordingStatus.summarizing => 'Summarizing',
-        RecordingStatus.completed => 'Completed',
-        RecordingStatus.failed => 'Failed',
-      };
+    RecordingStatus.pending => tr("Pending"),
+    RecordingStatus.queued => tr("Queued"),
+    RecordingStatus.processing => tr("Processing"),
+    RecordingStatus.summarizing => tr("Summarizing"),
+    RecordingStatus.completed => tr("Completed"),
+    RecordingStatus.failed => tr("Failed"),
+  };
 }
 
 // Tolerant decoder so an unknown server-side status (e.g. a future addition
@@ -108,8 +109,7 @@ sealed class Folder with _$Folder {
     @JsonKey(name: 'recording_count') int? recordingCount,
   }) = _Folder;
 
-  factory Folder.fromJson(Map<String, dynamic> json) =>
-      _$FolderFromJson(json);
+  factory Folder.fromJson(Map<String, dynamic> json) => _$FolderFromJson(json);
 }
 
 @freezed

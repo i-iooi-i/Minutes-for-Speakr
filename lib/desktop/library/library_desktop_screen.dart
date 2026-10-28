@@ -1,3 +1,5 @@
+import 'package:speakr_app/l10n/strings.dart';
+
 import 'dart:async';
 
 import 'package:collection/collection.dart';
@@ -74,6 +76,7 @@ class _LibraryDesktopScreenState extends ConsumerState<LibraryDesktopScreen> {
 
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     final filter = ref.watch(libraryFilterProvider);
     final folders = ref.watch(foldersProvider).value ?? const <Folder>[];
     final asyncItems = ref.watch(libraryItemsProvider);
@@ -139,9 +142,7 @@ List<LibraryItem> _applySort(List<LibraryItem> items, _SortMode mode) {
         if (i is RemoteLibraryItem) {
           return (i.recording.title ?? '').toLowerCase();
         }
-        return (i is PendingLibraryItem
-                ? i.pending.file.name
-                : '')
+        return (i is PendingLibraryItem ? i.pending.file.name : '')
             .toLowerCase();
       }
       sorted.sort((a, b) => t(a).compareTo(t(b)));
@@ -175,6 +176,7 @@ class _Header extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     final totalSecs = items.fold<double>(0, (acc, it) {
       if (it is RemoteLibraryItem) {
         return acc + (it.recording.audioDuration ?? 0);
@@ -224,7 +226,7 @@ class _Header extends StatelessWidget {
                   const SizedBox(height: 8),
                 ],
                 Text(
-                  folder?.name ?? 'Recordings',
+                  folder?.name ?? tr("Recordings"),
                   style: SpeakrText.serif(
                     size: 44,
                     height: 1,
@@ -234,8 +236,13 @@ class _Header extends StatelessWidget {
                 const SizedBox(height: 10),
                 Text(
                   items.isEmpty
-                      ? 'No recordings yet'
-                      : '${items.length} ${items.length == 1 ? "recording" : "recordings"} · ${hrs}h ${mins}m of audio',
+                      ? tr("No recordings yet")
+                      : tr("{0} {1} · {2}h {3}m of audio", [
+                          items.length,
+                          tr(items.length == 1 ? "recording" : "recordings"),
+                          hrs,
+                          mins,
+                        ]),
                   style: SpeakrText.sans(size: 13, color: SpeakrColors.muted),
                 ),
               ],
@@ -243,7 +250,7 @@ class _Header extends StatelessWidget {
           ),
           DesktopToolButton(
             icon: SpeakrIcon.refresh,
-            tooltip: 'Refresh',
+            tooltip: tr("Refresh"),
             onTap: onRefresh,
           ),
           const DesktopDivider(),
@@ -254,7 +261,7 @@ class _Header extends StatelessWidget {
               child: Align(
                 alignment: Alignment.center,
                 child: Text(
-                  'SORT',
+                  tr("SORT"),
                   style: SpeakrText.mono(
                     size: 10,
                     color: SpeakrColors.muted,
@@ -267,11 +274,11 @@ class _Header extends StatelessWidget {
           DesktopDropdown<_SortMode>(
             value: sort,
             onChanged: onSort,
-            options: const [
-              DropdownOption(value: _SortMode.newest, label: 'Newest'),
-              DropdownOption(value: _SortMode.oldest, label: 'Oldest'),
-              DropdownOption(value: _SortMode.longest, label: 'Longest'),
-              DropdownOption(value: _SortMode.title, label: 'Title'),
+            options: [
+              DropdownOption(value: _SortMode.newest, label: tr("Newest")),
+              DropdownOption(value: _SortMode.oldest, label: tr("Oldest")),
+              DropdownOption(value: _SortMode.longest, label: tr("Longest")),
+              DropdownOption(value: _SortMode.title, label: tr("Title")),
             ],
           ),
           const DesktopDivider(),
@@ -293,6 +300,7 @@ class _ListIcon extends StatelessWidget {
   const _ListIcon();
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     return CustomPaint(
       size: const Size(14, 14),
       painter: _StrokeIconPainter((c) {
@@ -320,6 +328,7 @@ class _GridIcon extends StatelessWidget {
   const _GridIcon();
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     return CustomPaint(
       size: const Size(14, 14),
       painter: _StrokeIconPainter((c) {
@@ -370,6 +379,7 @@ class _ListView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     final groups = groupBy<LibraryItem, String>(
       items,
       (i) => formatRelativeDay(i.when),
@@ -415,6 +425,7 @@ class _ColumnHeader extends StatelessWidget {
   const _ColumnHeader();
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     return Container(
       decoration: const BoxDecoration(
         color: SpeakrColors.bg,
@@ -425,15 +436,15 @@ class _ColumnHeader extends StatelessWidget {
         children: [
           const SizedBox(width: 32),
           const SizedBox(width: 16),
-          Expanded(child: _ColH('Title')),
+          Expanded(child: _ColH(tr("Title"))),
           const SizedBox(width: 16),
-          SizedBox(width: 160, child: _ColH('Folder')),
+          SizedBox(width: 160, child: _ColH(tr("Folder"))),
           const SizedBox(width: 16),
-          SizedBox(width: 220, child: _ColH('Tags')),
+          SizedBox(width: 220, child: _ColH(tr("Tags"))),
           const SizedBox(width: 16),
-          SizedBox(width: 90, child: _ColH('Duration', alignRight: true)),
+          SizedBox(width: 90, child: _ColH(tr("Duration"), alignRight: true)),
           const SizedBox(width: 16),
-          SizedBox(width: 90, child: _ColH('Date', alignRight: true)),
+          SizedBox(width: 90, child: _ColH(tr("Date"), alignRight: true)),
         ],
       ),
     );
@@ -446,6 +457,7 @@ class _ColH extends StatelessWidget {
   final bool alignRight;
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     return Align(
       alignment: alignRight ? Alignment.centerRight : Alignment.centerLeft,
       child: Text(
@@ -474,14 +486,16 @@ class _ListRowState extends ConsumerState<_ListRow> {
 
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     final r = widget.recording;
     final completed = r.status == RecordingStatus.completed;
     final enterable = completed || r.status == RecordingStatus.failed;
     final folder = widget.folders.firstWhereOrNull((f) => f.id == r.folderId);
     final folderColor = folder == null ? null : parseHexColor(folder.color);
     final date = r.meetingDate ?? r.createdAt ?? DateTime.now();
-    final pref = ref.watch(timeFormatPreferenceProvider).asData?.value
-        ?? TimeFormatPreference.system;
+    final pref =
+        ref.watch(timeFormatPreferenceProvider).asData?.value ??
+        TimeFormatPreference.system;
     final use24 = resolveUse24Hour(pref, context);
 
     return MouseRegion(
@@ -519,7 +533,7 @@ class _ListRowState extends ConsumerState<_ListRow> {
                     Text(
                       r.title?.isNotEmpty == true
                           ? r.title!
-                          : 'Untitled recording',
+                          : tr("Untitled recording"),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: SpeakrText.serif(size: 17, height: 1.2),
@@ -633,23 +647,24 @@ mixin _PendingActionsMixin<T extends ConsumerStatefulWidget>
         builder: (_) => AlertDialog(
           backgroundColor: SpeakrColors.bg,
           title: Text(
-            'Upload this recording?',
+            tr("Upload this recording?"),
             style: SpeakrText.serif(size: 20),
           ),
           content: Text(
-            '${pendingFile.file.name}\n\n'
-            'The file will be uploaded to your Speakr server and removed '
-            'from this device.',
+            tr(
+              "{0}\n\nThe file will be uploaded to your Speakr server and removed from this device.",
+              [pendingFile.file.name],
+            ),
             style: SpeakrText.sans(size: 13, color: SpeakrColors.ink2),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, false),
-              child: const Text('Cancel'),
+              child: Text(tr("Cancel")),
             ),
             TextButton(
               onPressed: () => Navigator.pop(context, true),
-              child: const Text('Upload'),
+              child: Text(tr("Upload")),
             ),
           ],
         ),
@@ -686,7 +701,7 @@ mixin _PendingActionsMixin<T extends ConsumerStatefulWidget>
       builder: (dialogCtx) => AlertDialog(
         backgroundColor: SpeakrColors.bg,
         title: Text(
-          "Couldn't process recording",
+          tr("Couldn't process recording"),
           style: SpeakrText.serif(size: 20),
         ),
         content: Text(
@@ -700,18 +715,18 @@ mixin _PendingActionsMixin<T extends ConsumerStatefulWidget>
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogCtx),
-            child: const Text('Cancel'),
+            child: Text(tr("Cancel")),
           ),
           TextButton(
             onPressed: () =>
                 Navigator.pop(dialogCtx, _PendingErrorAction.delete),
             style: TextButton.styleFrom(foregroundColor: SpeakrColors.danger),
-            child: const Text('Delete file'),
+            child: Text(tr("Delete file")),
           ),
           TextButton(
             onPressed: () =>
                 Navigator.pop(dialogCtx, _PendingErrorAction.forceUpload),
-            child: const Text('Force upload'),
+            child: Text(tr("Force upload")),
           ),
         ],
       ),
@@ -732,7 +747,9 @@ mixin _PendingActionsMixin<T extends ConsumerStatefulWidget>
     if (deleteError != null) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Could not delete file: $deleteError')),
+        SnackBar(
+          content: Text(tr("Could not delete file: {0}", [deleteError])),
+        ),
       );
       return;
     }
@@ -768,6 +785,7 @@ class _PendingListRowState extends ConsumerState<_PendingListRow>
 
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     final name = widget.pending.file.name;
     final errors =
         ref.watch(pendingFileErrorsProvider).asData?.value ??
@@ -860,16 +878,14 @@ class _PendingListRowState extends ConsumerState<_PendingListRow>
 }
 
 class _PendingStatusBadge extends StatelessWidget {
-  const _PendingStatusBadge({
-    required this.uploading,
-    required this.hasError,
-  });
+  const _PendingStatusBadge({required this.uploading, required this.hasError});
 
   final bool uploading;
   final bool hasError;
 
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     if (uploading) {
       return Row(
         mainAxisSize: MainAxisSize.min,
@@ -884,7 +900,7 @@ class _PendingStatusBadge extends StatelessWidget {
           ),
           const SizedBox(width: 8),
           Text(
-            'UPLOADING',
+            tr("UPLOADING"),
             style: SpeakrText.mono(
               size: 9,
               color: SpeakrColors.ink2,
@@ -911,12 +927,8 @@ class _PendingStatusBadge extends StatelessWidget {
           ),
           const SizedBox(width: 6),
           Text(
-            hasError ? 'ERROR' : 'NOT UPLOADED',
-            style: SpeakrText.mono(
-              size: 9,
-              letterSpacing: 1,
-              color: color,
-            ),
+            hasError ? tr("ERROR") : tr("NOT UPLOADED"),
+            style: SpeakrText.mono(size: 9, letterSpacing: 1, color: color),
           ),
         ],
       ),
@@ -932,6 +944,7 @@ class _StatusChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     final failed = status == RecordingStatus.failed;
     final color = failed ? SpeakrColors.danger : SpeakrColors.recordingDot;
     return Row(
@@ -983,6 +996,7 @@ class _PulsingDotState extends State<_PulsingDot>
 
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     return AnimatedBuilder(
       animation: _c,
       builder: (_, __) => Opacity(
@@ -1002,19 +1016,19 @@ class _PulsingDotState extends State<_PulsingDot>
 
 String _shortDate(DateTime when) {
   final w = when.toLocal();
-  const months = [
-    'Jan',
-    'Feb',
-    'Mar',
-    'Apr',
-    'May',
-    'Jun',
-    'Jul',
-    'Aug',
-    'Sep',
-    'Oct',
-    'Nov',
-    'Dec',
+  final months = [
+    tr("Jan"),
+    tr("Feb"),
+    tr("Mar"),
+    tr("Apr"),
+    tr("May"),
+    tr("Jun"),
+    tr("Jul"),
+    tr("Aug"),
+    tr("Sep"),
+    tr("Oct"),
+    tr("Nov"),
+    tr("Dec"),
   ];
   return '${months[w.month - 1]} ${w.day}';
 }
@@ -1030,6 +1044,7 @@ class _GridView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     return LayoutBuilder(
       builder: (context, constraints) {
         const minTile = 280.0;
@@ -1079,14 +1094,16 @@ class _GridCardState extends ConsumerState<_GridCard> {
   bool _hovered = false;
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     final r = widget.recording;
     final completed = r.status == RecordingStatus.completed;
     final enterable = completed || r.status == RecordingStatus.failed;
     final folder = widget.folders.firstWhereOrNull((f) => f.id == r.folderId);
     final folderColor = folder == null ? null : parseHexColor(folder.color);
     final date = r.meetingDate ?? r.createdAt ?? DateTime.now();
-    final pref = ref.watch(timeFormatPreferenceProvider).asData?.value
-        ?? TimeFormatPreference.system;
+    final pref =
+        ref.watch(timeFormatPreferenceProvider).asData?.value ??
+        TimeFormatPreference.system;
     final use24 = resolveUse24Hour(pref, context);
 
     return MouseRegion(
@@ -1147,7 +1164,9 @@ class _GridCardState extends ConsumerState<_GridCard> {
               ),
               const SizedBox(height: 10),
               Text(
-                r.title?.isNotEmpty == true ? r.title! : 'Untitled recording',
+                r.title?.isNotEmpty == true
+                    ? r.title!
+                    : tr("Untitled recording"),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 style: SpeakrText.serif(size: 17, height: 1.25),
@@ -1214,6 +1233,7 @@ class _PendingGridCardState extends ConsumerState<_PendingGridCard>
 
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     final name = widget.pending.file.name;
     final errors =
         ref.watch(pendingFileErrorsProvider).asData?.value ??
@@ -1224,10 +1244,10 @@ class _PendingGridCardState extends ConsumerState<_PendingGridCard>
     final tappable = onTap != null;
     final eyebrowColor = hasError ? SpeakrColors.danger : SpeakrColors.muted;
     final eyebrow = _uploading
-        ? 'UPLOADING'
+        ? tr("UPLOADING")
         : hasError
-        ? 'ERROR'
-        : 'NOT UPLOADED';
+        ? tr("ERROR")
+        : tr("NOT UPLOADED");
 
     return MouseRegion(
       cursor: tappable ? SystemMouseCursors.click : SystemMouseCursors.basic,
@@ -1313,6 +1333,7 @@ class _Loading extends StatelessWidget {
   const _Loading();
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     return const Center(
       child: CircularProgressIndicator(color: SpeakrColors.ink, strokeWidth: 2),
     );
@@ -1323,13 +1344,14 @@ class _Empty extends StatelessWidget {
   const _Empty();
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     return Padding(
       padding: const EdgeInsets.all(40),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'EMPTY',
+            tr("EMPTY"),
             style: SpeakrText.mono(
               size: 10,
               color: SpeakrColors.muted,
@@ -1338,14 +1360,19 @@ class _Empty extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           Text(
-            'Nothing to show yet.',
+            tr("Nothing to show yet."),
             style: SpeakrText.serif(size: 26, height: 1.15),
           ),
           const SizedBox(height: 14),
           Text(
             supportsKeyboardShortcuts
-                ? 'Use ${modLabel}R or the New recording button in the sidebar to make your first recording.'
-                : 'Use the New recording button in the sidebar to make your first recording.',
+                ? tr(
+                    "Use {0}R or the New recording button in the sidebar to make your first recording.",
+                    [modLabel],
+                  )
+                : tr(
+                    "Use the New recording button in the sidebar to make your first recording.",
+                  ),
             style: SpeakrText.sans(
               size: 15,
               height: 1.5,
@@ -1364,13 +1391,14 @@ class _ErrorView extends StatelessWidget {
   final VoidCallback onRetry;
   @override
   Widget build(BuildContext context) {
+    LanguageScope.watch(context);
     return Padding(
       padding: const EdgeInsets.all(40),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'COULDN\'T LOAD',
+            tr("COULDN'T LOAD"),
             style: SpeakrText.mono(
               size: 10,
               color: SpeakrColors.danger,
@@ -1380,7 +1408,7 @@ class _ErrorView extends StatelessWidget {
           const SizedBox(height: 8),
           Text(message, style: SpeakrText.sans(size: 14)),
           const SizedBox(height: 16),
-          OutlinedButton(onPressed: onRetry, child: const Text('Retry')),
+          OutlinedButton(onPressed: onRetry, child: Text(tr("Retry"))),
         ],
       ),
     );
