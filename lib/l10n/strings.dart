@@ -80,25 +80,32 @@ class LanguagePicker extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
-    return DropdownButton<String>(
-      value: appLanguage.value,
-      underline: const SizedBox.shrink(),
-      items: const [
-        DropdownMenuItem(value: 'zh', child: Text('简体中文')),
-        DropdownMenuItem(value: 'en', child: Text('English')),
-      ],
-      onChanged: (value) async {
-        if (value == null) return;
-        try {
-          await setLanguage(value);
-        } catch (_) {
-          if (context.mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(tr('Could not save language preference'))),
-            );
+    return Align(
+      alignment: Alignment.centerLeft,
+      widthFactor: 1,
+      child: DropdownButton<String>(
+        menuWidth: 180,
+        value: appLanguage.value,
+        underline: const SizedBox.shrink(),
+        items: const [
+          DropdownMenuItem(value: 'zh', child: Text('简体中文')),
+          DropdownMenuItem(value: 'en', child: Text('English')),
+        ],
+        onChanged: (value) async {
+          if (value == null) return;
+          try {
+            await setLanguage(value);
+          } catch (_) {
+            if (context.mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(tr('Could not save language preference')),
+                ),
+              );
+            }
           }
-        }
-      },
+        },
+      ),
     );
   }
 }
