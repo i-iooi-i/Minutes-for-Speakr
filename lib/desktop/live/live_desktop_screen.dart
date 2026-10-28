@@ -651,7 +651,7 @@ class _BigPauseButton extends StatelessWidget {
           child: Center(
             child: SpeakrIconView(
               paused ? SpeakrIcon.play : SpeakrIcon.pause,
-              size: 28,
+              size: 38,
               color: SpeakrColors.bg,
             ),
           ),

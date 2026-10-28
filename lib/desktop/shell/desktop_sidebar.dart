@@ -5,7 +5,6 @@ import 'package:go_router/go_router.dart';
 
 import '../../api/models.dart';
 import '../../features/library/library_controller.dart';
-import '../../services/credentials_store.dart';
 import '../../theme/colors.dart';
 import '../../theme/typography.dart';
 import '../../widgets/speakr_icons.dart';
@@ -59,14 +58,9 @@ class DesktopSidebar extends ConsumerWidget {
         color: SpeakrColors.bg,
         child: Column(
           children: [
-            // Record CTA
-            Padding(
-              padding: const EdgeInsets.fromLTRB(14, 16, 14, 12),
-              child: _RecordButton(onTap: () => context.push('/live')),
-            ),
             // Search field — pushes back to the library filter provider
             const Padding(
-              padding: EdgeInsets.fromLTRB(14, 0, 14, 12),
+              padding: EdgeInsets.fromLTRB(14, 20, 14, 12),
               child: _SidebarSearch(),
             ),
             Expanded(
@@ -169,61 +163,6 @@ class DesktopSidebar extends ConsumerWidget {
   void _goLibrary(BuildContext context) {
     final loc = GoRouterState.of(context).uri.path;
     if (loc != '/library') context.go('/library');
-  }
-}
-
-class _RecordButton extends StatelessWidget {
-  const _RecordButton({required this.onTap});
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    LanguageScope.watch(context);
-    return InkWell(
-      borderRadius: BorderRadius.circular(10),
-      onTap: onTap,
-      child: Container(
-        height: 40,
-        decoration: BoxDecoration(
-          color: SpeakrColors.ink,
-          borderRadius: BorderRadius.circular(10),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              width: 8,
-              height: 8,
-              decoration: const BoxDecoration(
-                color: SpeakrColors.recordingDot,
-                shape: BoxShape.circle,
-              ),
-            ),
-            const SizedBox(width: 9),
-            Text(
-              tr("New recording"),
-              style: SpeakrText.sans(
-                size: 13,
-                weight: FontWeight.w500,
-                color: SpeakrColors.bg,
-                letterSpacing: 0.2,
-              ),
-            ),
-            if (supportsKeyboardShortcuts) ...[
-              const SizedBox(width: 8),
-              Text(
-                '${modLabel}R',
-                style: SpeakrText.mono(
-                  size: 10,
-                  color: SpeakrColors.bg,
-                  letterSpacing: 0.5,
-                ).copyWith(color: SpeakrColors.bg.withValues(alpha: 0.6)),
-              ),
-            ],
-          ],
-        ),
-      ),
-    );
   }
 }
 
@@ -332,62 +271,70 @@ class _NavItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
-    return InkWell(
-      onTap: onTap,
-      child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
-        padding: const EdgeInsets.fromLTRB(12, 11, 12, 11),
-        decoration: BoxDecoration(
-          color: active ? SpeakrColors.bgAlt : Colors.transparent,
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
+      child: Material(
+        color: active ? SpeakrColors.bgAlt : Colors.transparent,
+        borderRadius: BorderRadius.circular(9),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
           borderRadius: BorderRadius.circular(9),
-        ),
-        child: Row(
-          children: [
-            if (dot == null) ...[
-              Icon(
-                label == tr("All recordings")
-                    ? Icons.library_music_outlined
-                    : label == tr("Highlighted")
-                    ? Icons.star_border_rounded
-                    : Icons.graphic_eq_rounded,
-                size: 17,
-                color: SpeakrColors.ink2,
-              ),
-              const SizedBox(width: 10),
-            ],
-            if (dot != null) ...[
-              Container(
-                width: 8,
-                height: 8,
-                decoration: BoxDecoration(
-                  color: dot,
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-              const SizedBox(width: 10),
-            ],
-            Expanded(
-              child: Text(
-                label,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: SpeakrText.sans(
-                  size: 13,
-                  weight: active ? FontWeight.w500 : FontWeight.w400,
-                  color: active ? SpeakrColors.ink : SpeakrColors.ink2,
-                ),
-              ),
+          onTap: onTap,
+          child: Container(
+            padding: const EdgeInsets.fromLTRB(12, 11, 12, 11),
+            decoration: BoxDecoration(
+              color: active ? SpeakrColors.bgAlt : Colors.transparent,
+              borderRadius: BorderRadius.circular(9),
             ),
-            if (count != null)
-              Text(
-                '$count',
-                style: SpeakrText.mono(
-                  size: 10,
-                  color: SpeakrColors.muted,
-                  letterSpacing: 0,
+            child: Row(
+              children: [
+                if (dot == null) ...[
+                  Icon(
+                    label == tr("All recordings")
+                        ? Icons.library_music_outlined
+                        : label == tr("Highlighted")
+                        ? Icons.star_border_rounded
+                        : Icons.graphic_eq_rounded,
+                    size: 17,
+                    color: SpeakrColors.ink2,
+                  ),
+                  const SizedBox(width: 10),
+                ],
+                if (dot != null) ...[
+                  Container(
+                    width: 8,
+                    height: 8,
+                    decoration: BoxDecoration(
+                      color: dot,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                ],
+                Expanded(
+                  child: Text(
+                    label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: SpeakrText.sans(
+                      size: 13,
+                      weight: active ? FontWeight.w500 : FontWeight.w400,
+                      color: active ? SpeakrColors.ink : SpeakrColors.ink2,
+                    ),
+                  ),
                 ),
-              ),
-          ],
+                if (count != null)
+                  Text(
+                    '$count',
+                    style: SpeakrText.mono(
+                      size: 10,
+                      color: SpeakrColors.muted,
+                      letterSpacing: 0,
+                    ),
+                  ),
+              ],
+            ),
+          ),
         ),
       ),
     );
@@ -458,9 +405,6 @@ class _UserChip extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     LanguageScope.watch(context);
-    final asyncCreds = ref.watch(currentCredentialsProvider);
-    final baseUrl = asyncCreds.value?.baseUrl ?? '';
-    final host = _hostOf(baseUrl);
     return Material(
       color: SpeakrColors.surface,
       child: InkWell(
@@ -503,20 +447,6 @@ class _UserChip extends ConsumerWidget {
                         height: 1.2,
                       ),
                     ),
-                    if (host.isNotEmpty)
-                      Padding(
-                        padding: const EdgeInsets.only(top: 2),
-                        child: Text(
-                          host,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: SpeakrText.mono(
-                            size: 10,
-                            color: SpeakrColors.muted,
-                            letterSpacing: 0,
-                          ),
-                        ),
-                      ),
                   ],
                 ),
               ),
@@ -530,17 +460,5 @@ class _UserChip extends ConsumerWidget {
         ),
       ),
     );
-  }
-
-  static String _hostOf(String url) {
-    if (url.isEmpty) return '';
-    try {
-      final u = Uri.parse(url);
-      if (u.host.isEmpty) return url;
-      final port = u.hasPort ? ':${u.port}' : '';
-      return '${u.host}$port';
-    } catch (_) {
-      return url;
-    }
   }
 }

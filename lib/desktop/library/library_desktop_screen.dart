@@ -22,6 +22,7 @@ import '../../widgets/tag_chip.dart';
 import '../shell/desktop_shortcuts.dart';
 import '../widgets/desktop_controls.dart';
 import '../widgets/desktop_wave.dart';
+import '../widgets/desktop_record_button.dart';
 
 enum _SortMode { newest, oldest, longest, title }
 
@@ -193,104 +194,108 @@ class _Header extends StatelessWidget {
         border: Border(bottom: BorderSide(color: SpeakrColors.line)),
       ),
       padding: const EdgeInsets.fromLTRB(40, 28, 40, 18),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                if (folder != null && folderColor != null) ...[
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Container(
-                        width: 9,
-                        height: 9,
-                        decoration: BoxDecoration(
-                          color: folderColor,
-                          borderRadius: BorderRadius.circular(2),
-                        ),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final title = Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (folder != null && folderColor != null) ...[
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 9,
+                      height: 9,
+                      decoration: BoxDecoration(
+                        color: folderColor,
+                        borderRadius: BorderRadius.circular(2),
                       ),
-                      const SizedBox(width: 8),
-                      Text(
-                        folder.name.toUpperCase(),
-                        style: SpeakrText.mono(
-                          size: 10,
-                          color: folderColor,
-                          letterSpacing: 1.5,
-                        ),
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      folder.name.toUpperCase(),
+                      style: SpeakrText.mono(
+                        size: 10,
+                        color: folderColor,
+                        letterSpacing: 1.5,
                       ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                ],
-                Text(
-                  folder?.name ?? tr("Recordings"),
-                  style: SpeakrText.serif(
-                    size: 32,
-                    height: 1,
-                    weight: FontWeight.w400,
-                  ),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 10),
-                Text(
-                  items.isEmpty
-                      ? tr("No recordings yet")
-                      : tr("{0} {1} · {2}h {3}m of audio", [
-                          items.length,
-                          tr(items.length == 1 ? "recording" : "recordings"),
-                          hrs,
-                          mins,
-                        ]),
-                  style: SpeakrText.sans(size: 13, color: SpeakrColors.muted),
-                ),
+                const SizedBox(height: 8),
               ],
-            ),
-          ),
-          DesktopToolButton(
-            icon: SpeakrIcon.refresh,
-            tooltip: tr("Refresh"),
-            onTap: onRefresh,
-          ),
-          const DesktopDivider(),
-          SizedBox(
-            height: 30,
-            child: Padding(
-              padding: const EdgeInsets.only(right: 6),
-              child: Align(
-                alignment: Alignment.center,
-                child: Text(
-                  tr("SORT"),
-                  style: SpeakrText.mono(
-                    size: 10,
-                    color: SpeakrColors.muted,
-                    letterSpacing: 1.4,
-                  ),
+              Text(
+                folder?.name ?? tr("Recordings"),
+                style: SpeakrText.serif(
+                  size: 32,
+                  height: 1,
+                  weight: FontWeight.w400,
                 ),
               ),
-            ),
-          ),
-          DesktopDropdown<_SortMode>(
-            value: sort,
-            onChanged: onSort,
-            options: [
-              DropdownOption(value: _SortMode.newest, label: tr("Newest")),
-              DropdownOption(value: _SortMode.oldest, label: tr("Oldest")),
-              DropdownOption(value: _SortMode.longest, label: tr("Longest")),
-              DropdownOption(value: _SortMode.title, label: tr("Title")),
+              const SizedBox(height: 10),
+              Text(
+                items.isEmpty
+                    ? tr("No recordings yet")
+                    : tr("{0} {1} · {2}h {3}m of audio", [
+                        items.length,
+                        tr(items.length == 1 ? "recording" : "recordings"),
+                        hrs,
+                        mins,
+                      ]),
+                style: SpeakrText.sans(size: 13, color: SpeakrColors.muted),
+              ),
             ],
-          ),
-          const DesktopDivider(),
-          DesktopSegment<_ViewMode>(
-            value: view,
-            onChanged: onView,
-            options: [
-              SegmentOption(value: _ViewMode.list, icon: const _ListIcon()),
-              SegmentOption(value: _ViewMode.grid, icon: const _GridIcon()),
+          );
+          final controls = Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: [
+              DesktopRecordButton(onTap: () => context.push('/live')),
+              DesktopToolButton(
+                icon: SpeakrIcon.refresh,
+                tooltip: tr("Refresh"),
+                onTap: onRefresh,
+              ),
+              const DesktopDivider(),
+              DesktopDropdown<_SortMode>(
+                value: sort,
+                onChanged: onSort,
+                options: [
+                  DropdownOption(value: _SortMode.newest, label: tr("Newest")),
+                  DropdownOption(value: _SortMode.oldest, label: tr("Oldest")),
+                  DropdownOption(
+                    value: _SortMode.longest,
+                    label: tr("Longest"),
+                  ),
+                  DropdownOption(value: _SortMode.title, label: tr("Title")),
+                ],
+              ),
+              const DesktopDivider(),
+              DesktopSegment<_ViewMode>(
+                value: view,
+                onChanged: onView,
+                options: [
+                  SegmentOption(value: _ViewMode.list, icon: const _ListIcon()),
+                  SegmentOption(value: _ViewMode.grid, icon: const _GridIcon()),
+                ],
+              ),
             ],
-          ),
-        ],
+          );
+          return constraints.maxWidth >= 800
+              ? Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Expanded(child: title),
+                    const SizedBox(width: 20),
+                    controls,
+                  ],
+                )
+              : Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [title, const SizedBox(height: 20), controls],
+                );
+        },
       ),
     );
   }
@@ -535,8 +540,11 @@ class _ListRowState extends ConsumerState<_ListRow> {
                       const SizedBox(width: 24),
                       ExcludeSemantics(
                         child: SizedBox(
-                          width: 112,
-                          child: DesktopWave(seed: r.id, height: 28),
+                          width: (constraints.maxWidth * .22).clamp(
+                            140.0,
+                            300.0,
+                          ),
+                          child: DesktopWave(seed: r.id, height: 34),
                         ),
                       ),
                       const SizedBox(width: 24),

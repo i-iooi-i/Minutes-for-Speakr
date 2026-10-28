@@ -8,9 +8,7 @@ import '../../features/detail/widgets/transcript_copy_menu.dart';
 import '../../theme/colors.dart';
 import '../../theme/typography.dart';
 
-/// Desktop transcript layout: 88 px right-aligned speaker rail + timestamp,
-/// then a serif body column with a colored left border on the segment that
-/// matches the current playback position.
+/// Compact timestamp, speaker and transcript columns.
 class DesktopTranscriptPane extends ConsumerWidget {
   const DesktopTranscriptPane({
     super.key,
@@ -108,7 +106,7 @@ class DesktopTranscriptPane extends ConsumerWidget {
             return ListView.separated(
               padding: const EdgeInsets.fromLTRB(12, 12, 12, 40),
               itemCount: segments.length,
-              separatorBuilder: (_, __) => const SizedBox(height: 6),
+              separatorBuilder: (_, __) => const SizedBox(height: 2),
               itemBuilder: (context, i) {
                 final s = segments[i];
                 final speakerName = s.speaker;
@@ -143,7 +141,7 @@ class DesktopTranscriptPane extends ConsumerWidget {
                     child: Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 14,
-                        vertical: 12,
+                        vertical: 8,
                       ),
                       decoration: BoxDecoration(
                         color: active
@@ -155,33 +153,34 @@ class DesktopTranscriptPane extends ConsumerWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           SizedBox(
-                            width: 88,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  (speakerName ?? '—').toUpperCase(),
-                                  textAlign: TextAlign.left,
-                                  style: SpeakrText.sans(
-                                    size: 12,
-                                    color: color,
-                                    weight: FontWeight.w600,
-                                    letterSpacing: 0.8,
-                                  ),
-                                ),
-                                const SizedBox(height: 3),
-                                Text(
-                                  '$mm:$ss',
-                                  style: SpeakrText.mono(
-                                    size: 10,
-                                    color: SpeakrColors.muted,
-                                    letterSpacing: 0,
-                                  ),
-                                ),
-                              ],
+                            width: 42,
+                            child: Text(
+                              '$mm:$ss',
+                              style: SpeakrText.mono(
+                                size: 11,
+                                color: SpeakrColors.muted,
+                                letterSpacing: 0,
+                              ),
                             ),
                           ),
-                          const SizedBox(width: 18),
+                          const SizedBox(width: 12),
+                          SizedBox(
+                            width: 84,
+                            child: Tooltip(
+                              message: speakerName ?? '—',
+                              child: Text(
+                                speakerName ?? '—',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: SpeakrText.sans(
+                                  size: 11.5,
+                                  color: color,
+                                  weight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 14),
                           Expanded(
                             child: Container(
                               padding: const EdgeInsets.fromLTRB(0, 1, 0, 1),
@@ -196,8 +195,8 @@ class DesktopTranscriptPane extends ConsumerWidget {
                               child: Text(
                                 s.sentence ?? '',
                                 style: SpeakrText.serif(
-                                  size: 15,
-                                  height: 1.6,
+                                  size: 13.5,
+                                  height: 1.5,
                                   color: active
                                       ? SpeakrColors.ink
                                       : SpeakrColors.ink2,

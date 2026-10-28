@@ -248,7 +248,7 @@ class _Message extends StatelessWidget {
               child: Text(
                 message.text,
                 style: SpeakrText.serif(
-                  size: 14.5,
+                  size: 13.5,
                   height: 1.5,
                   color: isUser ? SpeakrColors.bg : SpeakrColors.ink,
                 ),

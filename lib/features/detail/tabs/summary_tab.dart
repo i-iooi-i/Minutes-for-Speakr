@@ -49,7 +49,7 @@ class SummaryTab extends ConsumerWidget {
                 Text(
                   tr("No summary yet. Run summarize from the menu."),
                   style: SpeakrText.serif(
-                    size: 15,
+                    size: 13.5,
                     color: SpeakrColors.ink2,
                     height: 1.5,
                   ),
@@ -75,23 +75,23 @@ class SummaryTab extends ConsumerWidget {
   MarkdownStyleSheet _markdownStyles(BuildContext context) {
     final base = MarkdownStyleSheet.fromTheme(Theme.of(context));
     return base.copyWith(
-      p: SpeakrText.serif(size: 15.5, height: 1.55, color: SpeakrColors.ink),
-      h1: SpeakrText.serif(size: 26, height: 1.2, weight: FontWeight.w500),
-      h2: SpeakrText.serif(size: 20, height: 1.3, weight: FontWeight.w500),
-      h3: SpeakrText.serif(size: 17, height: 1.3, weight: FontWeight.w600),
+      p: SpeakrText.serif(size: 13.5, height: 1.55, color: SpeakrColors.ink),
+      h1: SpeakrText.serif(size: 20, height: 1.2, weight: FontWeight.w500),
+      h2: SpeakrText.serif(size: 17, height: 1.3, weight: FontWeight.w500),
+      h3: SpeakrText.serif(size: 13.5, height: 1.3, weight: FontWeight.w600),
       blockquote: SpeakrText.serif(
-        size: 15,
+        size: 13.5,
         color: SpeakrColors.ink2,
         style: FontStyle.italic,
       ),
-      listBullet: SpeakrText.sans(size: 14, color: SpeakrColors.ink),
+      listBullet: SpeakrText.sans(size: 13.5, color: SpeakrColors.ink),
       code: SpeakrText.mono(size: 12, color: SpeakrColors.ink2),
       codeblockDecoration: BoxDecoration(
         color: SpeakrColors.bgAlt,
         borderRadius: BorderRadius.circular(4),
       ),
       a: SpeakrText.sans(
-        size: 14,
+        size: 13.5,
         color: SpeakrColors.ink,
         weight: FontWeight.w500,
       ),

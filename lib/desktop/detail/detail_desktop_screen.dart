@@ -24,6 +24,7 @@ import '../../theme/typography.dart';
 import '../../utils/formatters.dart';
 import '../../widgets/speakr_icons.dart';
 import '../widgets/desktop_controls.dart';
+import '../widgets/desktop_record_button.dart';
 import '../widgets/desktop_wave.dart';
 import 'desktop_transcript_pane.dart';
 
@@ -308,6 +309,8 @@ class _BreadcrumbBar extends ConsumerWidget {
             ),
           ),
           const Spacer(),
+          DesktopRecordButton(onTap: () => context.push('/live')),
+          const SizedBox(width: 12),
           DesktopToolButton(
             icon: SpeakrIcon.star,
             tooltip: highlighted ? tr("Highlighted") : tr("Highlight"),
@@ -609,7 +612,7 @@ class _PlayerBar extends StatelessWidget {
                       child: Center(
                         child: SpeakrIconView(
                           playing ? SpeakrIcon.pause : SpeakrIcon.play,
-                          size: 20,
+                          size: 32,
                           color: SpeakrColors.bg,
                         ),
                       ),
