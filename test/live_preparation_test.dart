@@ -15,8 +15,21 @@ class TestRecorder extends StateNotifier<RecordingState>
   int starts = 0;
   bool? requestedMic;
   SystemAudioMode? requestedSystem;
+  final navigation = StreamController<RecordingNav>.broadcast();
   @override
-  Stream<RecordingNav> get navStream => const Stream.empty();
+  Stream<RecordingNav> get navStream => navigation.stream;
+  @override
+  Future<void> cancel() async {
+    state = const RecordingState();
+    navigation.add(RecordingNav.pop);
+  }
+
+  @override
+  void dispose() {
+    navigation.close();
+    super.dispose();
+  }
+
   @override
   Future<void> start({
     bool? micEnabled,
@@ -123,4 +136,22 @@ void main() {
     expect(find.byType(FilledButton), findsNothing);
     expect(tester.takeException(), isNull);
   });
+  testWidgets(
+    'discard stays on recorder preparation without starting capture',
+    (tester) async {
+      final recorder = TestRecorder(
+        const RecordingState(started: true, paused: true, elapsedSeconds: 17),
+      );
+      await show(tester, recorder, const Size(900, 650));
+      await recorder.cancel();
+      await tester.pump();
+      expect(find.byType(LiveDesktopScreen), findsOneWidget);
+      expect(find.byType(FilledButton), findsOneWidget);
+      expect(find.byIcon(Icons.arrow_back_rounded), findsNothing);
+      expect(recorder.current.started, false);
+      expect(recorder.current.elapsedSeconds, 0);
+      expect(recorder.starts, 0);
+      expect(tester.takeException(), isNull);
+    },
+  );
 }

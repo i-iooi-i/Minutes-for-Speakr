@@ -13,11 +13,11 @@ class TagChip extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = parseHexColor(tag.color);
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 2),
       decoration: BoxDecoration(
         color: filled ? c.withValues(alpha: 0.06) : null,
         border: Border.all(color: c.withValues(alpha: 0.33)),
-        borderRadius: BorderRadius.circular(7),
+        borderRadius: BorderRadius.circular(100),
       ),
       child: Text(
         tag.name.toUpperCase(),
@@ -49,7 +49,7 @@ class CustomColorTagChip extends StatelessWidget {
       decoration: BoxDecoration(
         color: filled ? color.withValues(alpha: 0.06) : null,
         border: Border.all(color: color.withValues(alpha: 0.33)),
-        borderRadius: BorderRadius.circular(7),
+        borderRadius: BorderRadius.circular(100),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -67,7 +67,7 @@ class CustomColorTagChip extends StatelessWidget {
         ? inner
         : InkWell(
             onTap: onTap,
-            borderRadius: BorderRadius.circular(7),
+            borderRadius: BorderRadius.circular(100),
             child: inner,
           );
   }
@@ -88,7 +88,7 @@ class DashedTagChip extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(7),
+      borderRadius: BorderRadius.circular(100),
       child: CustomPaint(
         painter: _DashedBorderPainter(color: color.withValues(alpha: 0.33)),
         child: Padding(
@@ -117,7 +117,7 @@ class _DashedBorderPainter extends CustomPainter {
     const gap = 2.0;
     final rrect = RRect.fromRectAndRadius(
       Rect.fromLTWH(0.5, 0.5, size.width - 1, size.height - 1),
-      const Radius.circular(3),
+      Radius.circular(size.height / 2),
     );
     final path = Path()..addRRect(rrect);
     final metrics = path.computeMetrics();

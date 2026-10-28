@@ -1,3 +1,4 @@
+import '../../widgets/tag_chip.dart';
 import 'package:speakr_app/l10n/strings.dart';
 
 import 'dart:async';
@@ -323,13 +324,12 @@ class _TitleBlock extends ConsumerWidget {
                   label: formatDuration(recording.audioDuration!),
                 ),
               if (folder != null)
-                _MetadataItem(icon: Icons.folder_outlined, label: folder.name),
-              for (final t in recording.tags)
                 _MetadataItem(
-                  icon: Icons.sell_outlined,
-                  label: t.name,
-                  color: parseHexColor(t.color),
+                  icon: Icons.folder_outlined,
+                  label: folder.name,
+                  color: parseHexColor(folder.color),
                 ),
+              for (final t in recording.tags) TagChip(tag: t, filled: true),
               if ((recording.participants ?? '').isNotEmpty)
                 _MetadataItem(
                   icon: Icons.people_outline,

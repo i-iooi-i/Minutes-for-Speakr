@@ -1,5 +1,6 @@
 // UI copy only. Keep API values, user content and diagnostic logs unchanged.
 const zhCN = <String, String>{
+  'Transcribing': '转录中',
   'Start recording': '开始录音',
   'Prepare recording': '准备录音',
   'Choose your audio sources and speakers below, then start recording.':

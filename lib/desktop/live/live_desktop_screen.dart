@@ -62,19 +62,8 @@ class _LiveDesktopScreenState extends ConsumerState<LiveDesktopScreen> {
       case RecordingNav.toLibrary:
         context.go('/library');
       case RecordingNav.pop:
-        if (context.canPop()) {
-          context.pop();
-        } else {
-          context.go('/library');
-        }
-    }
-  }
-
-  void _minimize() {
-    if (context.canPop()) {
-      context.pop();
-    } else {
-      context.go('/library');
+        // Discard resets this top-level recorder to its preparation state.
+        break;
     }
   }
 
@@ -118,7 +107,6 @@ class _LiveDesktopScreenState extends ConsumerState<LiveDesktopScreen> {
                 children: [
                   _TopBar(
                     state: state,
-                    onMinimize: _minimize,
                     onShowMini: canOpenMini ? controller.openMini : null,
                   ),
                   Expanded(
@@ -174,13 +162,8 @@ class _LiveDesktopScreenState extends ConsumerState<LiveDesktopScreen> {
 }
 
 class _TopBar extends StatelessWidget {
-  const _TopBar({
-    required this.state,
-    required this.onMinimize,
-    this.onShowMini,
-  });
+  const _TopBar({required this.state, this.onShowMini});
   final RecordingState state;
-  final VoidCallback onMinimize;
   final VoidCallback? onShowMini;
   @override
   Widget build(BuildContext context) => Container(
@@ -190,12 +173,6 @@ class _TopBar extends StatelessWidget {
     ),
     child: Row(
       children: [
-        IconButton(
-          tooltip: tr('Recordings'),
-          onPressed: onMinimize,
-          icon: const Icon(Icons.arrow_back_rounded),
-        ),
-        const SizedBox(width: 8),
         Icon(
           Icons.circle,
           size: 9,
@@ -298,7 +275,7 @@ class _LeftPane extends StatelessWidget {
               children: [
                 _PillBtn(
                   label: tr('Discard'),
-                  leading: const Icon(Icons.delete_outline, size: 16),
+                  leading: const Icon(Icons.delete_outline, size: 22),
                   onTap: uploading ? null : onDiscard,
                 ),
                 const SizedBox(width: 28),
@@ -311,7 +288,7 @@ class _LeftPane extends StatelessWidget {
                   label: tr('Stop & save'),
                   leading: const Icon(
                     Icons.stop_rounded,
-                    size: 18,
+                    size: 24,
                     color: SpeakrColors.recordRed,
                   ),
                   onTap: uploading ? null : controller.stopAndUpload,
@@ -450,7 +427,7 @@ class _PillBtn extends StatelessWidget {
               if (leading != null) ...[leading!, const SizedBox(width: 9)],
               Text(
                 label,
-                style: SpeakrText.sans(size: 13, color: SpeakrColors.ink),
+                style: SpeakrText.sans(size: 14, color: SpeakrColors.ink),
               ),
             ],
           ),
@@ -540,7 +517,7 @@ class _RecordingIdentity extends ConsumerWidget {
               ))
                 InkWell(
                   onTap: () => controller.toggleTag(tag.name),
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(100),
                   child: _IdentityChip(
                     icon: Icons.sell_outlined,
                     label: tag.name,
@@ -584,7 +561,7 @@ class _IdentityChip extends StatelessWidget {
       color: icon == Icons.folder_outlined
           ? Colors.transparent
           : color.withValues(alpha: .10),
-      borderRadius: BorderRadius.circular(10),
+      borderRadius: BorderRadius.circular(100),
     ),
     child: Row(
       mainAxisSize: MainAxisSize.min,
@@ -723,17 +700,6 @@ class _CapturePanel extends StatelessWidget {
                 ),
               ],
             ),
-            if (!state.started)
-              Padding(
-                padding: const EdgeInsets.only(top: 18),
-                child: Text(
-                  tr(
-                    'Choose your audio sources and speakers below, then start recording.',
-                  ),
-                  textAlign: TextAlign.center,
-                  style: SpeakrText.sans(size: 11, color: SpeakrColors.muted),
-                ),
-              ),
             if (state.videoSupported && state.videoRecording)
               Padding(
                 padding: const EdgeInsets.only(top: 12),
