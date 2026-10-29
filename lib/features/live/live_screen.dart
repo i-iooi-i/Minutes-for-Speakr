@@ -1,3 +1,4 @@
+import 'package:speakr_app/theme/appearance.dart';
 import 'package:speakr_app/l10n/strings.dart';
 
 import 'dart:async';
@@ -85,6 +86,7 @@ class _LiveScreenState extends ConsumerState<LiveScreen> {
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     final state = ref.watch(recordingControllerProvider);
     final controller = ref.read(recordingControllerProvider.notifier);
     final canOpenMini =
@@ -169,6 +171,7 @@ class _TopBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     return Padding(
       padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
       child: Row(

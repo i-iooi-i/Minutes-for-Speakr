@@ -18,7 +18,7 @@ sealed class SpeakrCredentials with _$SpeakrCredentials {
 
 class CredentialsStore {
   CredentialsStore([FlutterSecureStorage? storage])
-      : _storage = storage ?? const FlutterSecureStorage();
+    : _storage = storage ?? const FlutterSecureStorage();
 
   static const _kBaseUrl = 'speakr.baseUrl';
   static const _kToken = 'speakr.token';
@@ -48,7 +48,8 @@ final credentialsStoreProvider = Provider<CredentialsStore>((ref) {
 });
 
 /// Cached credentials, refreshed when [credentialsControllerProvider] writes.
-final currentCredentialsProvider =
-    FutureProvider<SpeakrCredentials?>((ref) async {
+final currentCredentialsProvider = FutureProvider<SpeakrCredentials?>((
+  ref,
+) async {
   return ref.watch(credentialsStoreProvider).read();
 });

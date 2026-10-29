@@ -7,8 +7,9 @@ final timeFormatStoreProvider = FutureProvider<TimeFormatStore>((ref) async {
   return TimeFormatStore.open();
 });
 
-final timeFormatPreferenceProvider =
-    FutureProvider<TimeFormatPreference>((ref) async {
+final timeFormatPreferenceProvider = FutureProvider<TimeFormatPreference>((
+  ref,
+) async {
   final store = await ref.watch(timeFormatStoreProvider.future);
   return store.read();
 });
@@ -24,5 +25,6 @@ class TimeFormatController {
   }
 }
 
-final timeFormatControllerProvider =
-    Provider<TimeFormatController>((ref) => TimeFormatController(ref));
+final timeFormatControllerProvider = Provider<TimeFormatController>(
+  (ref) => TimeFormatController(ref),
+);

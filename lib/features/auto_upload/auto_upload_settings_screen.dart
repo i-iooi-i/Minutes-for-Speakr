@@ -1,3 +1,4 @@
+import 'package:speakr_app/theme/appearance.dart';
 import 'package:speakr_app/l10n/strings.dart';
 
 import 'dart:async';
@@ -104,14 +105,14 @@ class _AutoUploadSettingsScreenState
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     final configsAsync = ref.watch(folderConfigsProvider);
     return Scaffold(
       backgroundColor: SpeakrColors.bg,
       body: SafeArea(
         child: configsAsync.when(
-          loading: () => const Center(
-            child: CircularProgressIndicator(color: SpeakrColors.ink),
-          ),
+          loading: () =>
+              Center(child: CircularProgressIndicator(color: SpeakrColors.ink)),
           error: (e, _) =>
               Center(child: Text(tr("Could not load settings: {0}", [e]))),
           data: (configs) {
@@ -163,7 +164,7 @@ class _AutoUploadSettingsScreenState
                     for (final c in configs) _FolderListRow(c, _openEditor),
                     SettingsRow(
                       label: tr("Add folder…"),
-                      trailing: const Icon(
+                      trailing: Icon(
                         Icons.add,
                         size: 20,
                         color: SpeakrColors.ink,
@@ -178,7 +179,7 @@ class _AutoUploadSettingsScreenState
                     SettingsRow(
                       label: _scanning ? tr("Scanning…") : tr("Scan now"),
                       trailing: _scanning
-                          ? const SizedBox(
+                          ? SizedBox(
                               width: 18,
                               height: 18,
                               child: CircularProgressIndicator(
@@ -237,6 +238,7 @@ class _FolderListRow extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     final access =
         !config.hasFolder ||
         (ref.watch(folderAccessProvider(config.treeUri)).asData?.value ?? true);
@@ -354,14 +356,14 @@ class _FolderUploadEditScreenState
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     final configsAsync = ref.watch(folderConfigsProvider);
     return Scaffold(
       backgroundColor: SpeakrColors.bg,
       body: SafeArea(
         child: configsAsync.when(
-          loading: () => const Center(
-            child: CircularProgressIndicator(color: SpeakrColors.ink),
-          ),
+          loading: () =>
+              Center(child: CircularProgressIndicator(color: SpeakrColors.ink)),
           error: (e, _) =>
               Center(child: Text(tr("Could not load settings: {0}", [e]))),
           data: (configs) {
@@ -454,7 +456,7 @@ class _FolderUploadEditScreenState
                     if (!Platform.isAndroid)
                       SettingsRow(
                         label: tr("Type folder path manually"),
-                        trailing: const Icon(
+                        trailing: Icon(
                           Icons.edit_outlined,
                           size: 18,
                           color: SpeakrColors.muted,
@@ -536,7 +538,7 @@ class _FolderUploadEditScreenState
                     SettingsRow(
                       label: tr("Delete folder"),
                       valueColor: SpeakrColors.danger,
-                      trailing: const Icon(
+                      trailing: Icon(
                         Icons.delete_outline,
                         size: 20,
                         color: SpeakrColors.danger,
@@ -694,6 +696,7 @@ class _MissingConfigView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     return Padding(
       padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
       child: Column(
@@ -772,6 +775,7 @@ class _PermissionsBannerState extends State<_PermissionsBanner> {
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     if (!_checked || _missing.isEmpty) return const SizedBox.shrink();
     return Container(
       margin: const EdgeInsets.fromLTRB(24, 4, 24, 14),
@@ -842,6 +846,7 @@ class _FolderAccessBanner extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     if (!config.hasFolder) return const SizedBox.shrink();
     final access = ref.watch(folderAccessProvider(config.treeUri));
     if (access.asData?.value != false) return const SizedBox.shrink();
@@ -869,10 +874,10 @@ class _FolderAccessBanner extends ConsumerWidget {
           Text(
             legacy
                 ? tr(
-                    "Minutes now reads this folder through Android's folder picker instead of \"All files access\". Re-select the folder once to keep auto-upload running; your upload history is kept.",
+                    "Mimio now reads this folder through Android's folder picker instead of \"All files access\". Re-select the folder once to keep auto-upload running; your upload history is kept.",
                   )
                 : tr(
-                    "Minutes no longer has permission to read this folder. Re-select it to grant access again.",
+                    "Mimio no longer has permission to read this folder. Re-select it to grant access again.",
                   ),
             style: SpeakrText.sans(
               size: 12,
@@ -912,6 +917,7 @@ class _Stepper extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -944,6 +950,7 @@ class _StepperBtn extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     return InkWell(
       customBorder: const CircleBorder(),
       onTap: onTap,
@@ -974,6 +981,7 @@ class _LastScanRow extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     final storeAsync = ref.watch(autoUploadStoreProvider);
     final pref =
         ref.watch(timeFormatPreferenceProvider).asData?.value ??
@@ -1016,6 +1024,7 @@ class _LastPhoneStateRow extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     final storeAsync = ref.watch(autoUploadStoreProvider);
     final pref =
         ref.watch(timeFormatPreferenceProvider).asData?.value ??
@@ -1049,6 +1058,7 @@ class _LastPhoneStateDecisionRow extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     final storeAsync = ref.watch(autoUploadStoreProvider);
     return storeAsync.maybeWhen(
       data: (store) {
@@ -1070,6 +1080,7 @@ class _LastCallEndEnqueueRow extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     final storeAsync = ref.watch(autoUploadStoreProvider);
     final pref =
         ref.watch(timeFormatPreferenceProvider).asData?.value ??
@@ -1167,6 +1178,7 @@ class _PresetSheetState extends ConsumerState<_PresetSheet> {
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     return Padding(
       padding: EdgeInsets.only(
         bottom: MediaQuery.of(context).viewInsets.bottom,
@@ -1283,11 +1295,12 @@ class _PresetTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     return InkWell(
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.fromLTRB(24, 12, 24, 12),
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           border: Border(top: BorderSide(color: SpeakrColors.line)),
         ),
         child: Row(
@@ -1327,6 +1340,7 @@ class _CustomField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -1369,6 +1383,7 @@ class _TagSheet extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     final tagsAsync = ref.watch(tagsProvider);
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 14),
@@ -1382,7 +1397,7 @@ class _TagSheet extends ConsumerWidget {
           ),
           const SizedBox(height: 12),
           tagsAsync.when(
-            loading: () => const Padding(
+            loading: () => Padding(
               padding: EdgeInsets.symmetric(vertical: 24),
               child: Center(
                 child: CircularProgressIndicator(color: SpeakrColors.ink),
@@ -1451,6 +1466,7 @@ class _FolderSheet extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     final foldersAsync = ref.watch(foldersProvider);
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 14),
@@ -1467,7 +1483,7 @@ class _FolderSheet extends ConsumerWidget {
           ),
           const SizedBox(height: 12),
           foldersAsync.when(
-            loading: () => const Padding(
+            loading: () => Padding(
               padding: EdgeInsets.symmetric(vertical: 24),
               child: Center(
                 child: CircularProgressIndicator(color: SpeakrColors.ink),
@@ -1528,11 +1544,12 @@ class _TagOption extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     return InkWell(
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.fromLTRB(24, 12, 24, 12),
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           border: Border(top: BorderSide(color: SpeakrColors.line)),
         ),
         child: Row(
@@ -1546,8 +1563,7 @@ class _TagOption extends StatelessWidget {
               const SizedBox(width: 8),
             ],
             Expanded(child: Text(label, style: SpeakrText.sans(size: 14))),
-            if (selected)
-              const Icon(Icons.check, size: 18, color: SpeakrColors.ink),
+            if (selected) Icon(Icons.check, size: 18, color: SpeakrColors.ink),
           ],
         ),
       ),

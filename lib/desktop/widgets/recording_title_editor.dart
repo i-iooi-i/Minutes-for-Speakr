@@ -1,3 +1,4 @@
+import 'package:speakr_app/theme/appearance.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../api/models.dart';
@@ -87,6 +88,7 @@ class _RecordingTitleEditorState extends ConsumerState<RecordingTitleEditor> {
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     return Row(
       children: [
         Expanded(

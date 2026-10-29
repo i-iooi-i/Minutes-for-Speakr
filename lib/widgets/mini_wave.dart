@@ -4,6 +4,7 @@
 import 'package:flutter/material.dart';
 
 import '../theme/colors.dart';
+import '../theme/appearance.dart';
 
 class MiniWave extends StatelessWidget {
   const MiniWave({
@@ -11,7 +12,7 @@ class MiniWave extends StatelessWidget {
     this.width = 110,
     this.height = 22,
     this.seed = 1,
-    this.color = SpeakrColors.ink,
+    this.color,
     this.progress = 0,
     this.bars = 36,
   });
@@ -19,19 +20,20 @@ class MiniWave extends StatelessWidget {
   final double width;
   final double height;
   final int seed;
-  final Color color;
+  final Color? color;
   final double progress;
   final int bars;
 
   @override
   Widget build(BuildContext context) {
+    AppearanceScope.watch(context);
     return SizedBox(
       width: width,
       height: height,
       child: CustomPaint(
         painter: _MiniWavePainter(
           seed: seed,
-          color: color,
+          color: color ?? SpeakrColors.ink,
           progress: progress,
           bars: bars,
         ),
@@ -57,8 +59,7 @@ class _MiniWavePainter extends CustomPainter {
     // Mirrors the JS hash:  sin(i*12.9898 + seed*78.233)*43758.5453 → fract
     final raw =
         (12.9898 * i + 78.233 * seed) * 43758.5453 + 12.345; // arbitrary salt
-    final s =
-        ((raw % 1) - (raw % 1).floor()).abs(); // fractional part
+    final s = ((raw % 1) - (raw % 1).floor()).abs(); // fractional part
     return s.clamp(0.0, 1.0);
   }
 

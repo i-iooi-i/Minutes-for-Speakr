@@ -1,3 +1,4 @@
+import 'package:speakr_app/theme/appearance.dart';
 import 'package:speakr_app/l10n/strings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
@@ -32,6 +33,7 @@ class RecordingMiniPlayer extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     final state = ref.watch(recordingControllerProvider);
     final coord = ref.watch(autoRecordCoordinatorProvider);
     final isRecording = state.started || state.uploading;
@@ -101,6 +103,7 @@ class _Bar extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     final controller = ref.read(recordingControllerProvider.notifier);
     final coord = ref.read(autoRecordCoordinatorProvider);
     final paused = state.paused;
@@ -198,7 +201,9 @@ class _Bar extends ConsumerWidget {
               const _Hairline(),
               const SizedBox(width: 9),
               _PillButton(
-                background: const Color(0x14FFFFFF), // ~8% white — ghost
+                background: SpeakrColors.ink.withValues(
+                  alpha: .08,
+                ), // ~8% white — ghost
                 onTap: uploading ? null : handleDiscard,
                 child: SpeakrIconView(
                   SpeakrIcon.trash,
@@ -208,7 +213,9 @@ class _Bar extends ConsumerWidget {
               ),
               const SizedBox(width: 9),
               _PillButton(
-                background: const Color(0x29FFFFFF), // ~16% white — primary
+                background: SpeakrColors.ink.withValues(
+                  alpha: .16,
+                ), // ~16% white — primary
                 onTap: uploading ? null : controller.togglePause,
                 child: SpeakrIconView(
                   paused ? SpeakrIcon.play : SpeakrIcon.pause,
@@ -221,7 +228,7 @@ class _Bar extends ConsumerWidget {
                 background: SpeakrColors.recordingDot.withValues(alpha: 0.95),
                 onTap: uploading ? null : handleStop,
                 child: uploading
-                    ? const SizedBox(
+                    ? SizedBox(
                         width: 12,
                         height: 12,
                         child: CircularProgressIndicator(
@@ -242,7 +249,7 @@ class _Bar extends ConsumerWidget {
               const _Hairline(),
               const SizedBox(width: 9),
               _PillButton(
-                background: const Color(0x14FFFFFF),
+                background: SpeakrColors.ink.withValues(alpha: .08),
                 onTap: () => router.go('/live'),
                 child: SpeakrIconView(
                   SpeakrIcon.expand,
@@ -276,6 +283,7 @@ class _PillButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     final enabled = onTap != null;
     return Opacity(
       opacity: enabled ? 1.0 : 0.4,
@@ -300,7 +308,12 @@ class _Hairline extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
-    return Container(width: 1, height: 16, color: const Color(0x3DFFFFFF));
+    AppearanceScope.watch(context);
+    return Container(
+      width: 1,
+      height: 16,
+      color: SpeakrColors.ink.withValues(alpha: .24),
+    );
   }
 }
 
@@ -337,11 +350,12 @@ class _PulsingDotState extends State<_PulsingDot>
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     if (widget.paused) {
       return Container(
         width: 6,
         height: 6,
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           color: SpeakrColors.muted,
           shape: BoxShape.circle,
         ),

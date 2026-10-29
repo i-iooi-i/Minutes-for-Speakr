@@ -1,3 +1,6 @@
+import 'package:speakr_app/widgets/avatar_settings.dart';
+import 'package:speakr_app/widgets/appearance_picker.dart';
+import 'package:speakr_app/theme/appearance.dart';
 import 'package:speakr_app/l10n/strings.dart';
 
 import 'dart:io';
@@ -169,6 +172,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     return Scaffold(
       backgroundColor: SpeakrColors.bg,
       body: SafeArea(
@@ -189,48 +193,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 ],
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
-              child: Row(
-                children: [
-                  Container(
-                    width: 56,
-                    height: 56,
-                    alignment: Alignment.center,
-                    decoration: const BoxDecoration(
-                      color: SpeakrColors.ink,
-                      shape: BoxShape.circle,
-                    ),
-                    child: Text(
-                      tr("ME"),
-                      style: SpeakrText.serif(size: 22, color: SpeakrColors.bg),
-                    ),
-                  ),
-                  const SizedBox(width: 14),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          tr("Connected user"),
-                          style: SpeakrText.serif(size: 20),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          _baseUrl.isEmpty ? '—' : _baseUrl,
-                          style: SpeakrText.mono(
-                            size: 11,
-                            color: SpeakrColors.muted,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
+            const Padding(padding: EdgeInsets.all(20), child: AvatarSettings()),
             SettingsGroup(
               label: tr("Server"),
               children: [
@@ -370,6 +333,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   label: tr("Interface language"),
                   trailing: const LanguagePicker(),
                 ),
+                const Padding(
+                  padding: EdgeInsets.all(20),
+                  child: AppearancePicker(),
+                ),
                 const _TimeFormatRow(),
               ],
             ),
@@ -383,7 +350,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       SettingsRow(
                         label: tr("Start with Windows"),
                         subtitle: tr(
-                          "Launches Minutes minimized to the tray when you sign in.",
+                          "Launches Mimio minimized to the tray when you sign in.",
                         ),
                         toggleValue: enabled.maybeWhen(
                           data: (v) => v,
@@ -474,6 +441,7 @@ class _TimeFormatRow extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     final pref =
         ref.watch(timeFormatPreferenceProvider).asData?.value ??
         TimeFormatPreference.system;
@@ -507,6 +475,7 @@ class _TimeFormatSegments extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     return DecoratedBox(
       decoration: BoxDecoration(
         border: Border.all(color: SpeakrColors.line),

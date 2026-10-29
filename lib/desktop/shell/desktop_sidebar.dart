@@ -1,3 +1,5 @@
+import 'package:speakr_app/widgets/user_avatar.dart';
+import 'package:speakr_app/theme/appearance.dart';
 import 'package:speakr_app/l10n/strings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -9,18 +11,10 @@ import '../../features/library/library_controller.dart';
 import '../../theme/colors.dart';
 import '../../theme/typography.dart';
 import '../../widgets/speakr_icons.dart';
+import '../../widgets/mimio_logo.dart';
 import 'desktop_shell.dart';
-import 'desktop_shortcuts.dart';
 
 final sidebarCollapsedProvider = StateProvider<bool>((ref) => false);
-
-/// FocusNode for the sidebar search field. Hoisted to a provider so the
-/// desktop shell can request focus from a global Ctrl/⌘+K shortcut.
-final sidebarSearchFocusProvider = Provider<FocusNode>((ref) {
-  final node = FocusNode(debugLabel: 'sidebarSearch');
-  ref.onDispose(node.dispose);
-  return node;
-});
 
 /// Persistent sidebar: search, nav items, folders, tags,
 /// user chip. Reads the same Library providers the main list uses and writes
@@ -33,6 +27,7 @@ class DesktopSidebar extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     final filter = ref.watch(libraryFilterProvider);
     final folders = ref.watch(foldersProvider).value ?? const <Folder>[];
     final tags = ref.watch(tagsProvider).value ?? const <Tag>[];
@@ -61,12 +56,31 @@ class DesktopSidebar extends ConsumerWidget {
       onPressed: () =>
           ref.read(sidebarCollapsedProvider.notifier).state = !collapsed,
     );
+    ButtonStyle navStyle(bool selected) => ButtonStyle(
+      backgroundColor: WidgetStateProperty.resolveWith(
+        (states) => selected
+            ? SpeakrColors.navSelected
+            : states.contains(WidgetState.hovered) ||
+                  states.contains(WidgetState.focused)
+            ? SpeakrColors.navHover
+            : Colors.transparent,
+      ),
+      foregroundColor: WidgetStateProperty.resolveWith(
+        (states) =>
+            selected ||
+                states.contains(WidgetState.hovered) ||
+                states.contains(WidgetState.focused)
+            ? SpeakrColors.accent
+            : SpeakrColors.ink2,
+      ),
+    );
     if (collapsed) {
       return SizedBox(
         width: 56,
         child: Column(
           children: [
-            const SizedBox(height: 8),
+            const SizedBox(height: 12),
+            const MimioLogo(compact: true, height: 27),
             toggle(),
             const SizedBox(height: 12),
             IconButton(
@@ -75,11 +89,7 @@ class DesktopSidebar extends ConsumerWidget {
                 Icons.mic_none_rounded,
                 color: SpeakrColors.recordRed,
               ),
-              style: IconButton.styleFrom(
-                backgroundColor: !onLibrary
-                    ? SpeakrColors.bgAlt
-                    : Colors.transparent,
-              ),
+              style: navStyle(!onLibrary),
               onPressed: () => context.go('/live'),
             ),
             for (final entry in [
@@ -92,10 +102,11 @@ class DesktopSidebar extends ConsumerWidget {
                 padding: const EdgeInsets.only(bottom: 6),
                 child: IconButton(
                   tooltip: tr(entry.$2),
-                  style: IconButton.styleFrom(
-                    backgroundColor: onLibrary && filter.statusKey == entry.$1
-                        ? SpeakrColors.bgAlt
-                        : Colors.transparent,
+                  style: navStyle(
+                    onLibrary &&
+                        filter.statusKey == entry.$1 &&
+                        filter.folderId == null &&
+                        filter.tagId == null,
                   ),
                   icon: Icon(entry.$3, size: 19),
                   onPressed: () => entry.$1 == 'all'
@@ -124,26 +135,13 @@ class DesktopSidebar extends ConsumerWidget {
               padding: const EdgeInsets.fromLTRB(16, 4, 6, 0),
               child: Row(
                 children: [
-                  const Icon(
-                    Icons.graphic_eq_rounded,
-                    size: 18,
-                    color: SpeakrColors.accent,
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    'Minutes',
-                    style: SpeakrText.sans(size: 13, weight: FontWeight.w600),
-                  ),
+                  const MimioLogo(height: 30),
                   const Spacer(),
                   toggle(),
                 ],
               ),
             ),
-            // Search field — pushes back to the library filter provider
-            const Padding(
-              padding: EdgeInsets.fromLTRB(10, 4, 10, 12),
-              child: _SidebarSearch(),
-            ),
+            const SizedBox(height: 12),
             Expanded(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.only(bottom: 12),
@@ -179,11 +177,12 @@ class DesktopSidebar extends ConsumerWidget {
                     _NavItem(
                       label: tr("Archived"),
                       icon: Icons.archive_outlined,
+                      count: recs?.where((r) => r.isArchived).length,
                       active: onLibrary && filter.statusKey == 'archived',
                       onTap: () => _selectStatus(ref, context, 'archived'),
                     ),
                     if (folders.isNotEmpty) ...[
-                      const Padding(
+                      Padding(
                         padding: EdgeInsets.symmetric(
                           horizontal: 16,
                           vertical: 12,
@@ -196,13 +195,15 @@ class DesktopSidebar extends ConsumerWidget {
                           label: f.name,
                           count: countForFolder(f.id),
                           icon: Icons.folder_outlined,
-                          iconColor: parseHexColor(f.color),
+                          iconColor: onLibrary && filter.folderId == f.id
+                              ? parseHexColor(f.color)
+                              : null,
                           active: onLibrary && filter.folderId == f.id,
                           onTap: () => _selectFolder(ref, context, f.id),
                         ),
                     ],
                     if (tags.isNotEmpty) ...[
-                      const Padding(
+                      Padding(
                         padding: EdgeInsets.symmetric(
                           horizontal: 16,
                           vertical: 12,
@@ -267,114 +268,7 @@ class DesktopSidebar extends ConsumerWidget {
   }
 }
 
-class _SidebarSearch extends ConsumerStatefulWidget {
-  const _SidebarSearch();
-
-  @override
-  ConsumerState<_SidebarSearch> createState() => _SidebarSearchState();
-}
-
-class _SidebarSearchState extends ConsumerState<_SidebarSearch> {
-  final _ctrl = TextEditingController();
-
-  @override
-  void dispose() {
-    _ctrl.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    LanguageScope.watch(context);
-    ref.listen(libraryFilterProvider.select((f) => f.query), (previous, next) {
-      if (previous != next && _ctrl.text != (next ?? '')) {
-        _ctrl.text = next ?? '';
-        setState(() {});
-      }
-    });
-    final focus = ref.watch(sidebarSearchFocusProvider);
-    return Container(
-      height: 38,
-      decoration: BoxDecoration(
-        color: SpeakrColors.bgAlt,
-        border: Border.all(color: SpeakrColors.line),
-        borderRadius: BorderRadius.circular(10),
-      ),
-      padding: const EdgeInsets.symmetric(horizontal: 10),
-      child: Row(
-        children: [
-          const SpeakrIconView(
-            SpeakrIcon.search,
-            size: 14,
-            color: SpeakrColors.muted,
-          ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: TextField(
-              controller: _ctrl,
-              focusNode: focus,
-              style: SpeakrText.sans(size: 12, color: SpeakrColors.ink),
-              decoration: InputDecoration(
-                isCollapsed: true,
-                isDense: true,
-                filled: false,
-                border: InputBorder.none,
-                enabledBorder: InputBorder.none,
-                focusedBorder: InputBorder.none,
-                hintText: tr("Search recordings, press Enter"),
-                hintStyle: SpeakrText.sans(size: 12, color: SpeakrColors.muted),
-              ),
-              onChanged: (_) => setState(() {}),
-              onSubmitted: (v) {
-                final n = ref.read(libraryFilterProvider.notifier);
-                n.setStatus('all');
-                n.setFolder(null);
-                n.setTag(null);
-                n.setQuery(v.trim());
-                if (GoRouterState.of(context).uri.path != '/library') {
-                  context.go('/library');
-                }
-              },
-            ),
-          ),
-          if (_ctrl.text.isNotEmpty)
-            SizedBox(
-              width: 24,
-              child: IconButton(
-                padding: EdgeInsets.zero,
-                iconSize: 14,
-                tooltip: tr('Clear search'),
-                icon: const Icon(Icons.close),
-                onPressed: () {
-                  _ctrl.clear();
-                  ref.read(libraryFilterProvider.notifier).setQuery(null);
-                  setState(() {});
-                },
-              ),
-            ),
-          if (supportsKeyboardShortcuts && _ctrl.text.isEmpty)
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
-              decoration: BoxDecoration(
-                border: Border.all(color: SpeakrColors.line),
-                borderRadius: BorderRadius.circular(3),
-              ),
-              child: Text(
-                '${modLabel}K',
-                style: SpeakrText.mono(
-                  size: 9,
-                  color: SpeakrColors.muted,
-                  letterSpacing: 0.5,
-                ),
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-}
-
-class _NavItem extends StatelessWidget {
+class _NavItem extends StatefulWidget {
   const _NavItem({
     required this.label,
     this.count,
@@ -394,23 +288,44 @@ class _NavItem extends StatelessWidget {
   final VoidCallback onTap;
 
   @override
+  State<_NavItem> createState() => _NavItemState();
+}
+
+class _NavItemState extends State<_NavItem> {
+  bool hovered = false;
+  bool focused = false;
+  @override
   Widget build(BuildContext context) {
+    final label = widget.label;
+    final count = widget.count;
+    final dot = widget.dot;
+    final icon = widget.icon;
+    final iconColor = widget.iconColor;
+    final active = widget.active;
+    final onTap = widget.onTap;
+    final emphasized = active || hovered || focused;
+
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
       child: Material(
-        color: active ? SpeakrColors.bgAlt : Colors.transparent,
+        color: active
+            ? SpeakrColors.navSelected
+            : (hovered || focused)
+            ? SpeakrColors.navHover
+            : Colors.transparent,
         borderRadius: BorderRadius.circular(9),
         clipBehavior: Clip.antiAlias,
         child: InkWell(
           borderRadius: BorderRadius.circular(9),
           onTap: onTap,
+          onHover: (value) => setState(() => hovered = value),
+          onFocusChange: (value) => setState(() => focused = value),
+          hoverColor: Colors.transparent,
+          focusColor: Colors.transparent,
           child: Container(
             padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
-            decoration: BoxDecoration(
-              color: active ? SpeakrColors.bgAlt : Colors.transparent,
-              borderRadius: BorderRadius.circular(9),
-            ),
             child: Row(
               children: [
                 if (dot == null) ...[
@@ -422,7 +337,9 @@ class _NavItem extends StatelessWidget {
                             ? Icons.star_border_rounded
                             : Icons.graphic_eq_rounded),
                     size: 17,
-                    color: iconColor ?? SpeakrColors.ink2,
+                    color:
+                        iconColor ??
+                        (emphasized ? SpeakrColors.accent : SpeakrColors.ink2),
                   ),
                   const SizedBox(width: 10),
                 ],
@@ -445,7 +362,9 @@ class _NavItem extends StatelessWidget {
                     style: SpeakrText.sans(
                       size: 13,
                       weight: active ? FontWeight.w500 : FontWeight.w400,
-                      color: active ? SpeakrColors.ink : SpeakrColors.ink2,
+                      color: emphasized
+                          ? SpeakrColors.accent
+                          : SpeakrColors.ink2,
                     ),
                   ),
                 ),
@@ -454,7 +373,9 @@ class _NavItem extends StatelessWidget {
                     '$count',
                     style: SpeakrText.mono(
                       size: 10,
-                      color: SpeakrColors.muted,
+                      color: emphasized
+                          ? SpeakrColors.accent
+                          : SpeakrColors.muted,
                       letterSpacing: 0,
                     ),
                   ),
@@ -473,6 +394,7 @@ class _SectionLabel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     return Padding(
       padding: const EdgeInsets.fromLTRB(14, 0, 14, 4),
       child: Text(
@@ -493,41 +415,26 @@ class _UserChip extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     return Material(
       color: SpeakrColors.surface,
       child: InkWell(
         onTap: () => context.push('/settings'),
         child: Container(
-          decoration: const BoxDecoration(
+          decoration: BoxDecoration(
             border: Border(top: BorderSide(color: SpeakrColors.line)),
           ),
           padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
           child: Row(
             children: [
-              Container(
-                width: 30,
-                height: 30,
-                decoration: const BoxDecoration(
-                  color: SpeakrColors.ink,
-                  shape: BoxShape.circle,
-                ),
-                alignment: Alignment.center,
-                child: Text(
-                  tr("ME"),
-                  style: SpeakrText.serif(
-                    size: 11,
-                    color: SpeakrColors.bg,
-                    weight: FontWeight.w500,
-                  ),
-                ),
-              ),
+              const UserAvatar(),
               const SizedBox(width: 10),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Minutes',
+                      'Mimio',
                       style: SpeakrText.sans(
                         size: 12.5,
                         weight: FontWeight.w500,
@@ -538,7 +445,7 @@ class _UserChip extends ConsumerWidget {
                   ],
                 ),
               ),
-              const SpeakrIconView(
+              SpeakrIconView(
                 SpeakrIcon.settings,
                 size: 16,
                 color: SpeakrColors.ink2,

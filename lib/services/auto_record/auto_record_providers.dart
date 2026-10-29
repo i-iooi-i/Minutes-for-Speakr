@@ -9,15 +9,17 @@ import 'mic_user.dart';
 import 'output_meter.dart';
 
 /// Async — opens shared_preferences. Cached for the app's lifetime.
-final autoRecordStoreProvider =
-    FutureProvider<AutoRecordSettingsStore>((ref) async {
+final autoRecordStoreProvider = FutureProvider<AutoRecordSettingsStore>((
+  ref,
+) async {
   return AutoRecordSettingsStore.open();
 });
 
 /// Reactive view of the persisted settings. Re-read after every write
 /// via `ref.invalidate(autoRecordSettingsProvider)`.
-final autoRecordSettingsProvider =
-    FutureProvider<AutoRecordSettings>((ref) async {
+final autoRecordSettingsProvider = FutureProvider<AutoRecordSettings>((
+  ref,
+) async {
   final store = await ref.watch(autoRecordStoreProvider.future);
   return store.read();
 });
@@ -124,13 +126,13 @@ class AutoRecordSettingsController {
             tagIds: tagIds ?? e.tagIds,
             folderId: clearFolder ? null : (folderId ?? e.folderId),
             micEnabled: clearMic ? null : (micEnabled ?? e.micEnabled),
-            systemEnabled:
-                clearSystem ? null : (systemEnabled ?? e.systemEnabled),
+            systemEnabled: clearSystem
+                ? null
+                : (systemEnabled ?? e.systemEnabled),
             systemScope: clearSystemScope
                 ? null
                 : (systemScope ?? e.systemScope),
-            videoEnabled:
-                clearVideo ? null : (videoEnabled ?? e.videoEnabled),
+            videoEnabled: clearVideo ? null : (videoEnabled ?? e.videoEnabled),
           )
         else
           e,
@@ -191,5 +193,5 @@ class AutoRecordSettingsController {
 
 final autoRecordSettingsControllerProvider =
     Provider<AutoRecordSettingsController>(
-  (ref) => AutoRecordSettingsController(ref),
-);
+      (ref) => AutoRecordSettingsController(ref),
+    );

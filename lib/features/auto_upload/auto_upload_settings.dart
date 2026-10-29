@@ -105,22 +105,22 @@ class FolderUploadConfig {
       Platform.isAndroid && hasFolder && treeUri == null;
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'enabled': enabled,
-        if (folderPath != null) 'folderPath': folderPath,
-        if (treeUri != null) 'treeUri': treeUri,
-        if (parsePresetId != null) 'parsePresetId': parsePresetId,
-        if (customRegex != null) 'customRegex': customRegex,
-        if (customCaptureGroup != null) 'customCaptureGroup': customCaptureGroup,
-        if (customFormat != null) 'customFormat': customFormat,
-        if (tagId != null) 'tagId': tagId,
-        if (folderId != null) 'folderId': folderId,
-        if (language != null) 'language': language,
-        if (minSpeakers != null) 'minSpeakers': minSpeakers,
-        if (maxSpeakers != null) 'maxSpeakers': maxSpeakers,
-        if (autoDeleteShorterThanSeconds != null)
-          'autoDeleteShorterThanSeconds': autoDeleteShorterThanSeconds,
-      };
+    'id': id,
+    'enabled': enabled,
+    if (folderPath != null) 'folderPath': folderPath,
+    if (treeUri != null) 'treeUri': treeUri,
+    if (parsePresetId != null) 'parsePresetId': parsePresetId,
+    if (customRegex != null) 'customRegex': customRegex,
+    if (customCaptureGroup != null) 'customCaptureGroup': customCaptureGroup,
+    if (customFormat != null) 'customFormat': customFormat,
+    if (tagId != null) 'tagId': tagId,
+    if (folderId != null) 'folderId': folderId,
+    if (language != null) 'language': language,
+    if (minSpeakers != null) 'minSpeakers': minSpeakers,
+    if (maxSpeakers != null) 'maxSpeakers': maxSpeakers,
+    if (autoDeleteShorterThanSeconds != null)
+      'autoDeleteShorterThanSeconds': autoDeleteShorterThanSeconds,
+  };
 
   FolderUploadConfig copyWith({
     String? id,

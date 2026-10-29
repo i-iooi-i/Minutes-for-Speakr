@@ -1,3 +1,4 @@
+import 'package:speakr_app/theme/appearance.dart';
 import 'package:speakr_app/l10n/strings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -32,9 +33,10 @@ class TranscriptTab extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     final async = ref.watch(transcriptProvider(recordingId));
     return async.when(
-      loading: () => const Center(
+      loading: () => Center(
         child: Padding(
           padding: EdgeInsets.all(32),
           child: CircularProgressIndicator(
@@ -127,6 +129,7 @@ class _Bubble extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     final align = isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start;
     final timestamp = segment.startTime == null
         ? ''

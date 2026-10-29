@@ -33,8 +33,7 @@ class AutoRecordBootstrap {
     try {
       // Force the providers to materialize so the singletons live for
       // the app's lifetime, not just while a widget watches them.
-      final store =
-          await container.read(autoRecordStoreProvider.future);
+      final store = await container.read(autoRecordStoreProvider.future);
       final monitor = container.read(micMonitorProvider);
       final meter = container.read(outputMeterProvider);
       final recording = container.read(recordingControllerProvider.notifier);
@@ -49,54 +48,54 @@ class AutoRecordBootstrap {
         micMonitor: monitor,
         outputMeter: meter,
         recording: recording,
-        startRecording: ({
-          bool? micEnabled,
-          SystemAudioMode? systemMode,
-          String? processSourceName,
-          int? processSourcePid,
-          bool? videoEnabled,
-          List<int>? videoPids,
-        }) =>
-            recording.start(
-          micEnabled: micEnabled,
-          systemMode: systemMode,
-          processSourceName: processSourceName,
-          processSourcePid: processSourcePid,
-          videoEnabled: videoEnabled,
-          videoPids: videoPids,
-        ),
-        findProcessPids: ({
-          String? exePath,
-          required String matchKey,
-          required AllowlistKind kind,
-        }) =>
-            recording.findProcessPids(
-          exePath: exePath,
-          matchKey: matchKey,
-          kind: kind,
-        ),
+        startRecording:
+            ({
+              bool? micEnabled,
+              SystemAudioMode? systemMode,
+              String? processSourceName,
+              int? processSourcePid,
+              bool? videoEnabled,
+              List<int>? videoPids,
+            }) => recording.start(
+              micEnabled: micEnabled,
+              systemMode: systemMode,
+              processSourceName: processSourceName,
+              processSourcePid: processSourcePid,
+              videoEnabled: videoEnabled,
+              videoPids: videoPids,
+            ),
+        findProcessPids:
+            ({
+              String? exePath,
+              required String matchKey,
+              required AllowlistKind kind,
+            }) => recording.findProcessPids(
+              exePath: exePath,
+              matchKey: matchKey,
+              kind: kind,
+            ),
         stopAndUpload: recording.stopAndUpload,
         cancelRecording: recording.cancel,
         store: store,
         onStopCountdown: recording.setAutoStopCountdown,
         onSettingsChanged: () =>
             container.invalidate(autoRecordSettingsProvider),
-        applyTriggerMetadata: (
-            {required speakers, required tagIds, required folderId}) {
-          recording.setSpeakers(speakers);
-          // Resolve tag IDs to names against the cached server tag list.
-          // If `tagsProvider` hasn't loaded yet (rare; usually warm by
-          // the time mic activity is detected), apply what we can — the
-          // user can always edit before stopping.
-          final knownTags = container.read(tagsProvider).value ?? const [];
-          final names = <String>[
-            for (final id in tagIds)
-              for (final t in knownTags)
-                if (t.id == id) t.name,
-          ];
-          recording.setActiveTags(names);
-          recording.setFolder(folderId);
-        },
+        applyTriggerMetadata:
+            ({required speakers, required tagIds, required folderId}) {
+              recording.setSpeakers(speakers);
+              // Resolve tag IDs to names against the cached server tag list.
+              // If `tagsProvider` hasn't loaded yet (rare; usually warm by
+              // the time mic activity is detected), apply what we can — the
+              // user can always edit before stopping.
+              final knownTags = container.read(tagsProvider).value ?? const [];
+              final names = <String>[
+                for (final id in tagIds)
+                  for (final t in knownTags)
+                    if (t.id == id) t.name,
+              ];
+              recording.setActiveTags(names);
+              recording.setFolder(folderId);
+            },
       );
       recording.onResumeAutoStop = coordinator.resumeFromStopCountdown;
       coordinator.start();
@@ -125,8 +124,9 @@ final autoRecordCoordinatorProvider = Provider<AutoRecordCoordinator?>((ref) {
 
 /// Stop-prompt stream the app shell listens to. Empty stream when
 /// bootstrap hasn't run.
-final autoRecordPromptsProvider =
-    StreamProvider<StopPromptRequest>((ref) async* {
+final autoRecordPromptsProvider = StreamProvider<StopPromptRequest>((
+  ref,
+) async* {
   final coord = ref.watch(autoRecordCoordinatorProvider);
   if (coord == null) {
     yield* const Stream<StopPromptRequest>.empty();

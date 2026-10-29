@@ -67,7 +67,8 @@ class _WindowsMicMonitor implements MicMonitor {
   List<MicUser> _last = const [];
   bool _running = false;
 
-  static const _rootPath = r'Software\Microsoft\Windows\CurrentVersion'
+  static const _rootPath =
+      r'Software\Microsoft\Windows\CurrentVersion'
       r'\CapabilityAccessManager\ConsentStore\microphone';
 
   @override
@@ -137,13 +138,15 @@ class _WindowsMicMonitor implements MicMonitor {
       final start = _readFiletime(key, 'LastUsedTimeStart');
       final stop = _readFiletime(key, 'LastUsedTimeStop');
       if (start == null && stop == null) return;
-      out.add(MicUser(
-        key: subName,
-        displayName: _packageDisplayName(subName),
-        kind: AllowlistKind.packagedPrefix,
-        lastStart: start ?? DateTime.fromMillisecondsSinceEpoch(0),
-        lastStop: stop ?? DateTime.fromMillisecondsSinceEpoch(0),
-      ));
+      out.add(
+        MicUser(
+          key: subName,
+          displayName: _packageDisplayName(subName),
+          kind: AllowlistKind.packagedPrefix,
+          lastStart: start ?? DateTime.fromMillisecondsSinceEpoch(0),
+          lastStop: stop ?? DateTime.fromMillisecondsSinceEpoch(0),
+        ),
+      );
     } finally {
       key.close();
     }
@@ -179,14 +182,16 @@ class _WindowsMicMonitor implements MicMonitor {
           // Subkey name is `C:#Program Files#...#Teams.exe`.
           final exePath = subName.replaceAll('#', '\\');
           final basename = _basename(exePath);
-          out.add(MicUser(
-            key: basename,
-            displayName: basename,
-            kind: AllowlistKind.exeBasename,
-            exePath: exePath,
-            lastStart: start ?? DateTime.fromMillisecondsSinceEpoch(0),
-            lastStop: stop ?? DateTime.fromMillisecondsSinceEpoch(0),
-          ));
+          out.add(
+            MicUser(
+              key: basename,
+              displayName: basename,
+              kind: AllowlistKind.exeBasename,
+              exePath: exePath,
+              lastStart: start ?? DateTime.fromMillisecondsSinceEpoch(0),
+              lastStop: stop ?? DateTime.fromMillisecondsSinceEpoch(0),
+            ),
+          );
         } finally {
           key.close();
         }

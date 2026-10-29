@@ -1,3 +1,5 @@
+import 'package:speakr_app/theme/appearance.dart';
+import 'package:speakr_app/widgets/mimio_menu.dart';
 import 'package:speakr_app/l10n/strings.dart';
 
 import 'dart:async';
@@ -76,6 +78,7 @@ class _LiveDesktopScreenState extends ConsumerState<LiveDesktopScreen> {
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     final state = ref.watch(recordingControllerProvider);
     final controller = ref.read(recordingControllerProvider.notifier);
     final canOpenMini =
@@ -167,8 +170,8 @@ class _TopBar extends StatelessWidget {
   final VoidCallback? onShowMini;
   @override
   Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-    decoration: const BoxDecoration(
+    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+    decoration: BoxDecoration(
       border: Border(bottom: BorderSide(color: SpeakrColors.line)),
     ),
     child: Row(
@@ -187,7 +190,7 @@ class _TopBar extends StatelessWidget {
                 ? (state.paused ? 'Paused' : 'Recording')
                 : 'Prepare recording',
           ),
-          style: SpeakrText.sans(size: 14, weight: FontWeight.w500),
+          style: SpeakrText.serif(size: 28, height: 1, weight: FontWeight.w400),
         ),
         const Spacer(),
         if (onShowMini != null)
@@ -222,6 +225,7 @@ class _LeftPane extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     final started = state.started;
     final paused = state.paused;
     final uploading = state.uploading;
@@ -308,6 +312,7 @@ class _BigTimer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     final h = elapsedSeconds ~/ 3600;
     final m = (elapsedSeconds ~/ 60) % 60;
     final s = elapsedSeconds % 60;
@@ -412,9 +417,10 @@ class _PillBtn extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     return Material(
       color: SpeakrColors.surface,
-      shape: const StadiumBorder(side: BorderSide(color: SpeakrColors.line)),
+      shape: StadiumBorder(side: BorderSide(color: SpeakrColors.line)),
       child: InkWell(
         customBorder: const StadiumBorder(),
         onTap: onTap,
@@ -444,6 +450,7 @@ class _BigPauseButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     return SizedBox(
       width: 108,
       height: 108,
@@ -496,13 +503,24 @@ class _RecordingIdentity extends ConsumerWidget {
             runSpacing: 8,
             crossAxisAlignment: WrapCrossAlignment.center,
             children: [
-              PopupMenuButton<int>(
+              MimioMenuButton<int>(
                 tooltip: tr('Folder'),
                 onSelected: (id) => controller.setFolder(id == -1 ? null : id),
                 itemBuilder: (_) => [
-                  PopupMenuItem(value: -1, child: Text(tr('No folder'))),
+                  MimioMenuItem(
+                    value: -1,
+                    label: tr('No folder'),
+                    icon: Icons.folder_outlined,
+                    selected: state.folderId == null,
+                  ),
                   for (final f in folders)
-                    PopupMenuItem(value: f.id, child: Text(f.name)),
+                    MimioMenuItem(
+                      value: f.id,
+                      label: f.name,
+                      icon: Icons.folder_outlined,
+                      iconColor: parseHexColor(f.color),
+                      selected: state.folderId == f.id,
+                    ),
                 ],
                 child: _IdentityChip(
                   icon: Icons.folder_outlined,
@@ -524,16 +542,18 @@ class _RecordingIdentity extends ConsumerWidget {
                     color: parseHexColor(tag.color),
                   ),
                 ),
-              PopupMenuButton<String>(
+              MimioMenuButton<String>(
                 tooltip: tr('Tags'),
                 icon: const Icon(Icons.add_circle_outline_rounded, size: 20),
                 onSelected: controller.toggleTag,
                 itemBuilder: (_) => [
                   for (final t in tags)
-                    CheckedPopupMenuItem(
+                    MimioMenuItem(
                       value: t.name,
-                      checked: state.activeTags.contains(t.name),
-                      child: Text(t.name),
+                      selected: state.activeTags.contains(t.name),
+                      label: t.name,
+                      icon: Icons.sell_outlined,
+                      iconColor: parseHexColor(t.color),
                     ),
                 ],
               ),
@@ -592,10 +612,10 @@ class _CapturePanel extends StatelessWidget {
               height: 88,
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                gradient: const LinearGradient(
+                gradient: LinearGradient(
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
-                  colors: [Color(0xFF1C2024), Color(0xFF171B1E)],
+                  colors: [SpeakrColors.surface, SpeakrColors.bg],
                 ),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(color: SpeakrColors.line),
@@ -638,9 +658,13 @@ class _CapturePanel extends StatelessWidget {
                     child: Transform.scale(
                       scale: .72,
                       child: Switch(
+                        overlayColor: const WidgetStatePropertyAll(
+                          Colors.transparent,
+                        ),
+                        splashRadius: 0,
                         value: state.micEnabled,
-                        activeThumbColor: Colors.white,
-                        activeTrackColor: const Color(0xFF00BA94),
+                        activeThumbColor: SpeakrColors.bg,
+                        activeTrackColor: SpeakrColors.accent,
                         materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                         onChanged: state.micPending || state.uploading
                             ? null
@@ -658,9 +682,13 @@ class _CapturePanel extends StatelessWidget {
                     child: Transform.scale(
                       scale: .72,
                       child: Switch(
+                        overlayColor: const WidgetStatePropertyAll(
+                          Colors.transparent,
+                        ),
+                        splashRadius: 0,
                         value: state.systemMode != SystemAudioMode.off,
-                        activeThumbColor: Colors.white,
-                        activeTrackColor: const Color(0xFF00BA94),
+                        activeThumbColor: SpeakrColors.bg,
+                        activeTrackColor: SpeakrColors.accent,
                         materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                         onChanged:
                             !state.systemAudioSupported ||
@@ -730,6 +758,7 @@ class _VideoSourceCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     final title = state.videoWindowTitle;
     return Container(
       padding: const EdgeInsets.fromLTRB(12, 8, 4, 8),
@@ -792,6 +821,7 @@ class _VideoSourceCard extends StatelessWidget {
     // Wrapped so "no window" (null) is distinguishable from dismissal.
     final picked = await showMenu<_WindowChoice>(
       context: context,
+      constraints: mimioMenuConstraints,
       position: RelativeRect.fromLTRB(
         origin.dx,
         origin.dy,
@@ -799,17 +829,16 @@ class _VideoSourceCard extends StatelessWidget {
         origin.dy,
       ),
       items: [
-        PopupMenuItem(
+        MimioMenuItem(
           value: _WindowChoice(null),
-          child: Text(tr("No window (black)")),
+          label: tr('No window (black)'),
+          icon: Icons.videocam_off_outlined,
         ),
         for (final w in windows)
-          PopupMenuItem(
+          MimioMenuItem(
             value: _WindowChoice(w),
-            child: SizedBox(
-              width: 280,
-              child: Text(w.title, overflow: TextOverflow.ellipsis),
-            ),
+            label: w.title,
+            icon: Icons.window_outlined,
           ),
       ],
     );
@@ -842,9 +871,10 @@ class _StepButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     return Material(
       color: SpeakrColors.bg,
-      shape: const CircleBorder(side: BorderSide(color: SpeakrColors.line)),
+      shape: CircleBorder(side: BorderSide(color: SpeakrColors.line)),
       child: InkWell(
         customBorder: const CircleBorder(),
         onTap: onTap,

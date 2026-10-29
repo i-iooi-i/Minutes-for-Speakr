@@ -1,3 +1,7 @@
+import '../widgets/library_search.dart';
+import '../../widgets/playback_button.dart';
+import 'package:speakr_app/theme/appearance.dart';
+import 'package:speakr_app/widgets/mimio_menu.dart';
 import 'package:speakr_app/l10n/strings.dart';
 
 import 'dart:async';
@@ -76,6 +80,7 @@ class _LibraryDesktopScreenState extends ConsumerState<LibraryDesktopScreen> {
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     final filter = ref.watch(libraryFilterProvider);
     final folders = ref.watch(foldersProvider).value ?? const <Folder>[];
     final asyncItems = ref.watch(libraryItemsProvider);
@@ -176,6 +181,7 @@ class _Header extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     final totalSecs = items.fold<double>(0, (acc, it) {
       if (it is RemoteLibraryItem) {
         return acc + (it.recording.audioDuration ?? 0);
@@ -189,7 +195,7 @@ class _Header extends ConsumerWidget {
     final folderColor = folder == null ? null : parseHexColor(folder.color);
 
     return Container(
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         border: Border(bottom: BorderSide(color: SpeakrColors.line)),
       ),
       padding: const EdgeInsets.fromLTRB(28, 22, 28, 18),
@@ -202,10 +208,13 @@ class _Header extends ConsumerWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   if (folder != null) ...[
-                    Icon(
-                      Icons.graphic_eq_rounded,
-                      color: folderColor ?? SpeakrColors.ink2,
-                      size: 26,
+                    Container(
+                      width: 12,
+                      height: 12,
+                      decoration: BoxDecoration(
+                        color: folderColor ?? SpeakrColors.ink2,
+                        shape: BoxShape.circle,
+                      ),
                     ),
                     const SizedBox(width: 10),
                   ],
@@ -247,15 +256,12 @@ class _Header extends ConsumerWidget {
             runSpacing: 8,
             crossAxisAlignment: WrapCrossAlignment.center,
             children: [
-              PopupMenuButton<String>(
+              const LibrarySearch(),
+              MimioMenuButton<String>(
                 tooltip: tr('More'),
                 surfaceTintColor: Colors.transparent,
                 position: PopupMenuPosition.under,
                 color: SpeakrColors.bgAlt,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  side: const BorderSide(color: SpeakrColors.line),
-                ),
                 icon: const Icon(Icons.more_vert_rounded),
                 onSelected: (value) {
                   if (value == 'refresh') {
@@ -268,30 +274,53 @@ class _Header extends ConsumerWidget {
                     onSort(_SortMode.values.byName(value));
                   }
                 },
-                itemBuilder: (_) => [
-                  PopupMenuItem(value: 'refresh', child: Text(tr('Refresh'))),
-                  for (final option in [
-                    (_SortMode.newest, 'Newest'),
-                    (_SortMode.oldest, 'Oldest'),
-                    (_SortMode.longest, 'Longest'),
-                    (_SortMode.title, 'Title'),
-                  ])
-                    CheckedPopupMenuItem(
-                      value: option.$1.name,
-                      checked: sort == option.$1,
-                      child: Text(tr(option.$2)),
+                constraints: const BoxConstraints(minWidth: 224, maxWidth: 224),
+                itemBuilder: (_) {
+                  PopupMenuItem<String> item(
+                    String value,
+                    String label,
+                    IconData icon, {
+                    bool selected = false,
+                  }) => MimioMenuItem<String>(
+                    value: value,
+                    label: tr(label),
+                    icon: icon,
+                    selected: selected,
+                  );
+                  return [
+                    item('refresh', 'Refresh', Icons.refresh_rounded),
+                    MimioMenuDivider<String>(),
+                    for (final option in [
+                      (
+                        _SortMode.newest,
+                        'Newest',
+                        Icons.arrow_downward_rounded,
+                      ),
+                      (_SortMode.oldest, 'Oldest', Icons.arrow_upward_rounded),
+                      (_SortMode.longest, 'Longest', Icons.schedule_rounded),
+                      (_SortMode.title, 'Title', Icons.sort_by_alpha_rounded),
+                    ])
+                      item(
+                        option.$1.name,
+                        option.$2,
+                        option.$3,
+                        selected: sort == option.$1,
+                      ),
+                    MimioMenuDivider<String>(),
+                    item(
+                      'list',
+                      'List view',
+                      Icons.view_list_outlined,
+                      selected: view == _ViewMode.list,
                     ),
-                  CheckedPopupMenuItem(
-                    value: 'list',
-                    checked: view == _ViewMode.list,
-                    child: Text(tr('List view')),
-                  ),
-                  CheckedPopupMenuItem(
-                    value: 'grid',
-                    checked: view == _ViewMode.grid,
-                    child: Text(tr('Grid view')),
-                  ),
-                ],
+                    item(
+                      'grid',
+                      'Grid view',
+                      Icons.grid_view_rounded,
+                      selected: view == _ViewMode.grid,
+                    ),
+                  ];
+                },
               ),
             ],
           );
@@ -320,6 +349,7 @@ class _ListView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     final groups = groupBy<LibraryItem, String>(
       items,
       (i) => formatRelativeDay(i.when),
@@ -373,6 +403,7 @@ class _ListRowState extends ConsumerState<_ListRow> {
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     final r = widget.recording;
     final completed = r.status == RecordingStatus.completed;
     final enterable = completed || r.status == RecordingStatus.failed;
@@ -388,7 +419,7 @@ class _ListRowState extends ConsumerState<_ListRow> {
         color: SpeakrColors.surface,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
-          side: const BorderSide(color: SpeakrColors.line),
+          side: BorderSide(color: SpeakrColors.line),
         ),
         clipBehavior: Clip.antiAlias,
         child: InkWell(
@@ -400,25 +431,11 @@ class _ListRowState extends ConsumerState<_ListRow> {
                 final wide = constraints.maxWidth > 700;
                 return Row(
                   children: [
-                    SizedBox(
-                      width: 44,
-                      height: 44,
-                      child: IconButton.outlined(
-                        tooltip: tr('Play'),
-                        onPressed: completed
-                            ? () => context.push('/recording/${r.id}?play=1')
-                            : null,
-                        icon: Icon(
-                          completed
-                              ? Icons.play_arrow_rounded
-                              : Icons.graphic_eq_rounded,
-                          size: 24,
-                        ),
-                        style: IconButton.styleFrom(
-                          foregroundColor: SpeakrColors.ink,
-                          side: const BorderSide(color: SpeakrColors.muted),
-                        ),
-                      ),
+                    PlaybackButton(
+                      label: tr('Play'),
+                      onPressed: completed
+                          ? () => context.push('/recording/${r.id}?play=1')
+                          : null,
                     ),
                     const SizedBox(width: 18),
                     Expanded(
@@ -686,6 +703,7 @@ class _PendingListRowState extends ConsumerState<_PendingListRow>
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     final name = widget.pending.file.name;
     final errors =
         ref.watch(pendingFileErrorsProvider).asData?.value ??
@@ -705,7 +723,7 @@ class _PendingListRowState extends ConsumerState<_PendingListRow>
             color: _hovered && tappable
                 ? SpeakrColors.bgAlt
                 : Colors.transparent,
-            border: const Border(top: BorderSide(color: SpeakrColors.line)),
+            border: Border(top: BorderSide(color: SpeakrColors.line)),
           ),
           padding: const EdgeInsets.fromLTRB(40, 14, 40, 14),
           child: Row(
@@ -786,11 +804,12 @@ class _PendingStatusBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     if (uploading) {
       return Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const SizedBox(
+          SizedBox(
             width: 12,
             height: 12,
             child: CircularProgressIndicator(
@@ -845,6 +864,7 @@ class _StatusChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     final failed = status == RecordingStatus.failed;
     final color = failed ? SpeakrColors.danger : SpeakrColors.recordingDot;
     return Row(
@@ -897,6 +917,7 @@ class _PulsingDotState extends State<_PulsingDot>
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     return AnimatedBuilder(
       animation: _c,
       builder: (_, __) => Opacity(
@@ -945,6 +966,7 @@ class _GridView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     return LayoutBuilder(
       builder: (context, constraints) {
         const minTile = 280.0;
@@ -995,6 +1017,7 @@ class _GridCardState extends ConsumerState<_GridCard> {
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     final r = widget.recording;
     final completed = r.status == RecordingStatus.completed;
     final enterable = completed || r.status == RecordingStatus.failed;
@@ -1135,6 +1158,7 @@ class _PendingGridCardState extends ConsumerState<_PendingGridCard>
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     final name = widget.pending.file.name;
     final errors =
         ref.watch(pendingFileErrorsProvider).asData?.value ??
@@ -1176,7 +1200,7 @@ class _PendingGridCardState extends ConsumerState<_PendingGridCard>
               Row(
                 children: [
                   if (_uploading)
-                    const Padding(
+                    Padding(
                       padding: EdgeInsets.only(right: 6),
                       child: SizedBox(
                         width: 10,
@@ -1235,7 +1259,8 @@ class _Loading extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
-    return const Center(
+    AppearanceScope.watch(context);
+    return Center(
       child: CircularProgressIndicator(color: SpeakrColors.ink, strokeWidth: 2),
     );
   }
@@ -1248,6 +1273,7 @@ class _ErrorView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     return Padding(
       padding: const EdgeInsets.all(40),
       child: Column(

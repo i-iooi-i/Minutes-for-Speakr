@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../theme/colors.dart';
 import '../../theme/typography.dart';
 import '../../widgets/speakr_icons.dart';
+import '../../widgets/mimio_menu.dart';
 
 /// A small bordered icon button used in the desktop header toolbars
 /// (refresh, copy, etc.). 30 × 30 with a 1 px line border.
@@ -69,7 +70,8 @@ class DropdownOption<T> {
   final String label;
 }
 
-class DesktopDropdown<T> extends StatefulWidget {
+/// Compatibility wrapper; all selectors use the common menu implementation.
+class DesktopDropdown<T> extends StatelessWidget {
   const DesktopDropdown({
     super.key,
     required this.value,
@@ -77,176 +79,20 @@ class DesktopDropdown<T> extends StatefulWidget {
     required this.onChanged,
     this.minWidth = 100,
   });
-
   final T value;
   final List<DropdownOption<T>> options;
   final ValueChanged<T> onChanged;
   final double minWidth;
-
   @override
-  State<DesktopDropdown<T>> createState() => _DesktopDropdownState<T>();
-}
-
-class _DesktopDropdownState<T> extends State<DesktopDropdown<T>> {
-  final GlobalKey _key = GlobalKey();
-  OverlayEntry? _overlay;
-
-  String _labelFor(T v) => widget.options.firstWhere((o) => o.value == v).label;
-
-  void _toggle() {
-    if (_overlay != null) {
-      _close();
-      return;
-    }
-    final box = _key.currentContext?.findRenderObject() as RenderBox?;
-    if (box == null) return;
-    final offset = box.localToGlobal(Offset.zero);
-    final size = box.size;
-    _overlay = OverlayEntry(
-      builder: (_) => Stack(
-        children: [
-          Positioned.fill(
-            child: GestureDetector(
-              behavior: HitTestBehavior.translucent,
-              onTap: _close,
-            ),
-          ),
-          Positioned(
-            left: offset.dx,
-            top: offset.dy + size.height + 4,
-            child: Material(
-              elevation: 0,
-              color: Colors.transparent,
-              child: Container(
-                decoration: BoxDecoration(
-                  color: SpeakrColors.surface,
-                  border: Border.all(color: SpeakrColors.line),
-                  borderRadius: BorderRadius.circular(10),
-                  boxShadow: const [
-                    BoxShadow(
-                      color: Color(0x14000000),
-                      offset: Offset(0, 8),
-                      blurRadius: 20,
-                    ),
-                  ],
-                ),
-                padding: const EdgeInsets.all(4),
-                constraints: BoxConstraints(minWidth: widget.minWidth + 20),
-                child: IntrinsicWidth(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      for (final o in widget.options)
-                        InkWell(
-                          borderRadius: BorderRadius.circular(10),
-                          onTap: () {
-                            widget.onChanged(o.value);
-                            _close();
-                          },
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 10,
-                              vertical: 7,
-                            ),
-                            decoration: BoxDecoration(
-                              color: o.value == widget.value
-                                  ? SpeakrColors.bgAlt
-                                  : Colors.transparent,
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: Text(
-                              o.label,
-                              style: SpeakrText.sans(
-                                size: 12,
-                                color: SpeakrColors.ink,
-                              ),
-                            ),
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-    Overlay.of(context).insert(_overlay!);
-  }
-
-  void _close() {
-    _overlay?.remove();
-    _overlay = null;
-  }
-
-  @override
-  void dispose() {
-    _close();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      key: _key,
-      color: SpeakrColors.surface,
-      shape: RoundedRectangleBorder(
-        side: const BorderSide(color: SpeakrColors.line),
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(10),
-        onTap: _toggle,
-        child: ConstrainedBox(
-          constraints: BoxConstraints(minWidth: widget.minWidth),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 0),
-            child: SizedBox(
-              height: 36,
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    _labelFor(widget.value),
-                    style: SpeakrText.sans(size: 12, color: SpeakrColors.ink),
-                  ),
-                  const SizedBox(width: 6),
-                  CustomPaint(
-                    size: const Size(10, 10),
-                    painter: _ChevronPainter(SpeakrColors.ink2),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _ChevronPainter extends CustomPainter {
-  _ChevronPainter(this.color);
-  final Color color;
-  @override
-  void paint(Canvas canvas, Size size) {
-    final p = Paint()
-      ..color = color
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.3
-      ..strokeCap = StrokeCap.round;
-    final path = Path()
-      ..moveTo(size.width * 0.25, size.height * 0.4)
-      ..lineTo(size.width * 0.5, size.height * 0.65)
-      ..lineTo(size.width * 0.75, size.height * 0.4);
-    canvas.drawPath(path, p);
-  }
-
-  @override
-  bool shouldRepaint(covariant _ChevronPainter oldDelegate) =>
-      oldDelegate.color != color;
+  Widget build(BuildContext context) => MimioSelect<T>(
+    value: value,
+    minWidth: minWidth,
+    onChanged: onChanged,
+    options: [
+      for (final o in options)
+        MimioSelectOption(value: o.value, label: o.label),
+    ],
+  );
 }
 
 class SegmentOption<T> {
@@ -315,7 +161,7 @@ class DesktopSmallButton extends StatelessWidget {
     return Material(
       color: SpeakrColors.surface,
       shape: RoundedRectangleBorder(
-        side: const BorderSide(color: SpeakrColors.line),
+        side: BorderSide(color: SpeakrColors.line),
         borderRadius: BorderRadius.circular(10),
       ),
       child: InkWell(
@@ -361,7 +207,7 @@ class DesktopPillButton extends StatelessWidget {
     final fg = foreground ?? SpeakrColors.ink;
     return Material(
       color: background ?? SpeakrColors.surface,
-      shape: const StadiumBorder(side: BorderSide(color: SpeakrColors.line)),
+      shape: StadiumBorder(side: BorderSide(color: SpeakrColors.line)),
       child: InkWell(
         customBorder: const StadiumBorder(),
         onTap: onTap,
@@ -376,181 +222,6 @@ class DesktopPillButton extends StatelessWidget {
               Text(label, style: SpeakrText.sans(size: 12, color: fg)),
             ],
           ),
-        ),
-      ),
-    );
-  }
-}
-
-class DesktopActionItem {
-  const DesktopActionItem({
-    required this.icon,
-    required this.label,
-    required this.onTap,
-    this.subtitle,
-    this.dividerAbove = false,
-    this.danger = false,
-  });
-
-  final SpeakrIcon icon;
-  final String label;
-  final String? subtitle;
-  final VoidCallback onTap;
-  final bool dividerAbove;
-  final bool danger;
-}
-
-/// Anchored action menu used by the desktop detail header (and any other
-/// surface that wants a right-aligned popover of recording-level actions).
-/// Pass a [builder] that wires the trigger child's onTap to [toggle].
-class DesktopActionMenu extends StatefulWidget {
-  const DesktopActionMenu({
-    super.key,
-    required this.items,
-    required this.builder,
-    this.minWidth = 240,
-  });
-
-  final List<DesktopActionItem> items;
-  final Widget Function(BuildContext context, VoidCallback toggle) builder;
-  final double minWidth;
-
-  @override
-  State<DesktopActionMenu> createState() => _DesktopActionMenuState();
-}
-
-class _DesktopActionMenuState extends State<DesktopActionMenu> {
-  final GlobalKey _key = GlobalKey();
-  OverlayEntry? _overlay;
-
-  void _toggle() {
-    if (_overlay != null) {
-      _close();
-      return;
-    }
-    final box = _key.currentContext?.findRenderObject() as RenderBox?;
-    if (box == null) return;
-    final offset = box.localToGlobal(Offset.zero);
-    final size = box.size;
-    final screenWidth = MediaQuery.of(context).size.width;
-    _overlay = OverlayEntry(
-      builder: (_) => Stack(
-        children: [
-          Positioned.fill(
-            child: GestureDetector(
-              behavior: HitTestBehavior.translucent,
-              onTap: _close,
-            ),
-          ),
-          Positioned(
-            right: screenWidth - (offset.dx + size.width),
-            top: offset.dy + size.height + 4,
-            child: Material(
-              elevation: 0,
-              color: Colors.transparent,
-              child: Container(
-                decoration: BoxDecoration(
-                  color: SpeakrColors.surface,
-                  border: Border.all(color: SpeakrColors.line),
-                  borderRadius: BorderRadius.circular(10),
-                  boxShadow: const [
-                    BoxShadow(
-                      color: Color(0x14000000),
-                      offset: Offset(0, 8),
-                      blurRadius: 20,
-                    ),
-                  ],
-                ),
-                padding: const EdgeInsets.all(4),
-                constraints: BoxConstraints(minWidth: widget.minWidth),
-                child: IntrinsicWidth(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      for (final item in widget.items) ...[
-                        if (item.dividerAbove)
-                          const Padding(
-                            padding: EdgeInsets.symmetric(vertical: 4),
-                            child: Divider(height: 1, color: SpeakrColors.line),
-                          ),
-                        _ActionRow(
-                          item: item,
-                          onTap: () {
-                            _close();
-                            item.onTap();
-                          },
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-    Overlay.of(context).insert(_overlay!);
-  }
-
-  void _close() {
-    _overlay?.remove();
-    _overlay = null;
-  }
-
-  @override
-  void dispose() {
-    _close();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return KeyedSubtree(key: _key, child: widget.builder(context, _toggle));
-  }
-}
-
-class _ActionRow extends StatelessWidget {
-  const _ActionRow({required this.item, required this.onTap});
-  final DesktopActionItem item;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final color = item.danger ? SpeakrColors.danger : SpeakrColors.ink;
-    return InkWell(
-      borderRadius: BorderRadius.circular(10),
-      onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-        child: Row(
-          children: [
-            SpeakrIconView(item.icon, size: 14, color: color),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    item.label,
-                    style: SpeakrText.sans(size: 13, color: color),
-                  ),
-                  if (item.subtitle != null) ...[
-                    const SizedBox(height: 2),
-                    Text(
-                      item.subtitle!,
-                      style: SpeakrText.sans(
-                        size: 11,
-                        color: SpeakrColors.muted,
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-            ),
-          ],
         ),
       ),
     );

@@ -1,3 +1,4 @@
+import 'package:speakr_app/theme/appearance.dart';
 import 'package:speakr_app/l10n/strings.dart';
 
 import 'dart:io' show Platform;
@@ -39,6 +40,7 @@ class _AutoRecordSettingsScreenState
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     final settingsAsync = ref.watch(autoRecordSettingsProvider);
     final micUsersAsync = ref.watch(micUsersProvider);
     final controller = ref.read(autoRecordSettingsControllerProvider);
@@ -47,9 +49,8 @@ class _AutoRecordSettingsScreenState
       backgroundColor: SpeakrColors.bg,
       body: SafeArea(
         child: settingsAsync.when(
-          loading: () => const Center(
-            child: CircularProgressIndicator(color: SpeakrColors.ink),
-          ),
+          loading: () =>
+              Center(child: CircularProgressIndicator(color: SpeakrColors.ink)),
           error: (e, _) =>
               Center(child: Text(tr("Could not load settings: {0}", [e]))),
           data: (s) {
@@ -86,7 +87,7 @@ class _AutoRecordSettingsScreenState
                       const SizedBox(height: 6),
                       Text(
                         tr(
-                          "When an allowlisted app starts using your microphone, Minutes automatically begins recording. Recording continues until both the app has released the mic and the audio output has been idle for {0} seconds — then the recording pill counts down {1} seconds before stopping, unless you click Resume.",
+                          "When an allowlisted app starts using your microphone, Mimio automatically begins recording. Recording continues until both the app has released the mic and the audio output has been idle for {0} seconds — then the recording pill counts down {1} seconds before stopping, unless you click Resume.",
                           [s.silenceSeconds, kAutoStopCountdownSeconds],
                         ),
                         style: SpeakrText.sans(
@@ -147,6 +148,7 @@ class _AllowlistGroup extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     return SettingsGroup(
       label: tr("Allowlist"),
       children: [
@@ -205,6 +207,7 @@ class _AllowlistRow extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     final tagsAsync = ref.watch(tagsProvider);
     final knownTags = tagsAsync.value ?? const <Tag>[];
     final resolvedSpeakers = entry.speakers ?? defaults.defaultSpeakers;
@@ -224,7 +227,7 @@ class _AllowlistRow extends ConsumerWidget {
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.fromLTRB(24, 12, 16, 12),
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           border: Border(top: BorderSide(color: SpeakrColors.line)),
         ),
         child: Row(
@@ -249,11 +252,7 @@ class _AllowlistRow extends ConsumerWidget {
                 ],
               ),
             ),
-            const Icon(
-              Icons.chevron_right,
-              size: 18,
-              color: SpeakrColors.muted,
-            ),
+            Icon(Icons.chevron_right, size: 18, color: SpeakrColors.muted),
             const SizedBox(width: 4),
             InkWell(
               onTap: onRemove,
@@ -331,6 +330,7 @@ class _SuggestionsGroup extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     final recent =
         settings.recentlySeen
             .where((r) => !_isInAllowlist(r.toAllowlistEntry()))
@@ -410,6 +410,7 @@ class _SuggestionRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     return Container(
       padding: const EdgeInsets.fromLTRB(24, 12, 24, 0),
       child: Column(
@@ -431,6 +432,7 @@ class _AddChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     return InkWell(
       onTap: onTap,
       child: Container(
@@ -469,6 +471,7 @@ class _BehaviorGroup extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     final tagsAsync = ref.watch(tagsProvider);
     final knownTags = tagsAsync.value ?? const <Tag>[];
     final foldersAsync = ref.watch(foldersProvider);
@@ -580,6 +583,7 @@ class _IntStepper extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -635,6 +639,7 @@ class _StatusGroup extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     final summary = activeUsers.isEmpty
         ? tr("No apps currently using the mic.")
         : activeUsers.map((u) => u.displayName).join(', ');
@@ -658,12 +663,13 @@ class _PerAppConfigSheet extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     final settingsAsync = ref.watch(autoRecordSettingsProvider);
     final controller = ref.read(autoRecordSettingsControllerProvider);
     return SafeArea(
       top: false,
       child: settingsAsync.when(
-        loading: () => const Padding(
+        loading: () => Padding(
           padding: EdgeInsets.symmetric(vertical: 32),
           child: Center(
             child: CircularProgressIndicator(color: SpeakrColors.ink),
@@ -742,6 +748,7 @@ class _PerAppConfigSheetBody extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     final videoSupported =
         ref.watch(videoCaptureSupportedProvider).value ?? false;
     final tagsAsync = ref.watch(tagsProvider);
@@ -792,7 +799,7 @@ class _PerAppConfigSheetBody extends ConsumerWidget {
           ),
           Container(
             padding: const EdgeInsets.fromLTRB(24, 12, 24, 12),
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               border: Border(top: BorderSide(color: SpeakrColors.line)),
             ),
             child: Row(
@@ -835,7 +842,7 @@ class _PerAppConfigSheetBody extends ConsumerWidget {
             onTap: () => controller.setEntryOverrides(entry, tagIds: const []),
           ),
           tagsAsync.when(
-            loading: () => const Padding(
+            loading: () => Padding(
               padding: EdgeInsets.symmetric(vertical: 24),
               child: Center(
                 child: CircularProgressIndicator(color: SpeakrColors.ink),
@@ -884,7 +891,7 @@ class _PerAppConfigSheetBody extends ConsumerWidget {
             onTap: () => controller.setEntryOverrides(entry, clearFolder: true),
           ),
           foldersAsync.when(
-            loading: () => const Padding(
+            loading: () => Padding(
               padding: EdgeInsets.symmetric(vertical: 24),
               child: Center(
                 child: CircularProgressIndicator(color: SpeakrColors.ink),
@@ -999,6 +1006,7 @@ class _SystemAudioSection extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     final processSupported =
         ref.watch(processLoopbackSupportedProvider).value ?? false;
 
@@ -1087,6 +1095,7 @@ class _GlobalTagSheet extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     final tagsAsync = ref.watch(tagsProvider);
     return SafeArea(
       top: false,
@@ -1124,7 +1133,7 @@ class _GlobalTagSheet extends ConsumerWidget {
               onTap: () => onChanged(const []),
             ),
             tagsAsync.when(
-              loading: () => const Padding(
+              loading: () => Padding(
                 padding: EdgeInsets.symmetric(vertical: 24),
                 child: Center(
                   child: CircularProgressIndicator(color: SpeakrColors.ink),
@@ -1183,6 +1192,7 @@ class _FolderPickerSheet extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     final foldersAsync = ref.watch(foldersProvider);
     return SafeArea(
       top: false,
@@ -1206,7 +1216,7 @@ class _FolderPickerSheet extends ConsumerWidget {
               },
             ),
             foldersAsync.when(
-              loading: () => const Padding(
+              loading: () => Padding(
                 padding: EdgeInsets.symmetric(vertical: 24),
                 child: Center(
                   child: CircularProgressIndicator(color: SpeakrColors.ink),
@@ -1258,11 +1268,12 @@ class _SheetRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     return InkWell(
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.fromLTRB(24, 12, 24, 12),
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           border: Border(top: BorderSide(color: SpeakrColors.line)),
         ),
         child: Row(
@@ -1276,8 +1287,7 @@ class _SheetRow extends StatelessWidget {
               const SizedBox(width: 8),
             ],
             Expanded(child: Text(label, style: SpeakrText.sans(size: 14))),
-            if (selected)
-              const Icon(Icons.check, size: 18, color: SpeakrColors.ink),
+            if (selected) Icon(Icons.check, size: 18, color: SpeakrColors.ink),
           ],
         ),
       ),

@@ -107,10 +107,7 @@ abstract class LiveAudioRecorder {
   /// Throws [UnsupportedError] when the recorder lacks the requested
   /// capability ([SystemAudioMode.processOnly] without process-loopback
   /// support, or any non-`off` mode on a recorder without system audio).
-  Future<void> setSystemMode(
-    SystemAudioMode mode, {
-    int? processLoopbackPid,
-  });
+  Future<void> setSystemMode(SystemAudioMode mode, {int? processLoopbackPid});
 
   /// Point the video stream of a recording started with a `videoHwnd`
   /// at another window. `null` records black frames.
@@ -136,12 +133,12 @@ class CaptureWindow {
   });
 
   factory CaptureWindow.fromChannel(Map<Object?, Object?> m) => CaptureWindow(
-        hwnd: (m['hwnd'] as num).toInt(),
-        pid: (m['pid'] as num).toInt(),
-        title: m['title'] as String? ?? '',
-        width: (m['width'] as num?)?.toInt() ?? 0,
-        height: (m['height'] as num?)?.toInt() ?? 0,
-      );
+    hwnd: (m['hwnd'] as num).toInt(),
+    pid: (m['pid'] as num).toInt(),
+    title: m['title'] as String? ?? '',
+    width: (m['width'] as num?)?.toInt() ?? 0,
+    height: (m['height'] as num?)?.toInt() ?? 0,
+  );
 
   final int hwnd;
   final int pid;

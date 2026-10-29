@@ -258,7 +258,13 @@ int? _fieldWidth(String letter, int run) {
 }
 
 DateTime? _safeDateTime(
-    int year, int month, int day, int hour, int minute, int second) {
+  int year,
+  int month,
+  int day,
+  int hour,
+  int minute,
+  int second,
+) {
   // Reject date-out-of-range (e.g. February 30) by round-tripping.
   final dt = DateTime(year, month, day, hour, minute, second);
   if (dt.year != year ||

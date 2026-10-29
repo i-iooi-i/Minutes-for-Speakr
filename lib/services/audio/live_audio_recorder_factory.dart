@@ -32,8 +32,10 @@ class LiveAudioRecorderFactory {
       try {
         return await NativeLiveAudioRecorder.probe();
       } catch (e) {
-        debugPrint('LiveAudioRecorderFactory: native probe failed: $e — '
-            'falling back to mic-only recorder.');
+        debugPrint(
+          'LiveAudioRecorderFactory: native probe failed: $e — '
+          'falling back to mic-only recorder.',
+        );
         return RecordPluginAudioRecorder();
       }
     }

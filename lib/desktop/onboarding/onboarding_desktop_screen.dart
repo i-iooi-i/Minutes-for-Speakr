@@ -1,3 +1,4 @@
+import 'package:speakr_app/theme/appearance.dart';
 import 'package:speakr_app/l10n/strings.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
@@ -30,7 +31,7 @@ class _OnboardingDesktopScreenState
 
   static List<_SlideCopy> get _slides => [
     _SlideCopy(
-      eyebrow: 'Minutes for Speakr',
+      eyebrow: 'Mimio for Speakr',
       headLeading: tr("The quiet way to "),
       headEm: tr("capture"),
       headTrailing: tr(" a meeting."),
@@ -128,6 +129,7 @@ class _OnboardingDesktopScreenState
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     final slide = _slides[_step];
     return Scaffold(
       backgroundColor: SpeakrColors.bg,
@@ -438,6 +440,7 @@ class _ConnectForm extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     return ConstrainedBox(
       constraints: const BoxConstraints(maxWidth: 440),
       child: Column(
@@ -513,6 +516,7 @@ class _BackButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     return TextButton(
       onPressed: visible ? onTap : null,
       style: TextButton.styleFrom(
@@ -536,6 +540,7 @@ class _ContinueButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     return Material(
       color: SpeakrColors.ink,
       shape: const StadiumBorder(),
@@ -547,7 +552,7 @@ class _ContinueButton extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 22),
           alignment: Alignment.center,
           child: connecting
-              ? const SizedBox(
+              ? SizedBox(
                   width: 16,
                   height: 16,
                   child: CircularProgressIndicator(
@@ -567,7 +572,7 @@ class _ContinueButton extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: 8),
-                    const SpeakrIconView(
+                    SpeakrIconView(
                       SpeakrIcon.chev,
                       size: 16,
                       color: SpeakrColors.bg,

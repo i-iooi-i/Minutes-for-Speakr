@@ -10,22 +10,22 @@ enum TimeFormatPreference {
   twentyFourHour;
 
   String get storageValue => switch (this) {
-        TimeFormatPreference.system => 'system',
-        TimeFormatPreference.twelveHour => 'twelve',
-        TimeFormatPreference.twentyFourHour => 'twentyFour',
-      };
+    TimeFormatPreference.system => 'system',
+    TimeFormatPreference.twelveHour => 'twelve',
+    TimeFormatPreference.twentyFourHour => 'twentyFour',
+  };
 
   static TimeFormatPreference fromStorage(String? raw) => switch (raw) {
-        'twelve' => TimeFormatPreference.twelveHour,
-        'twentyFour' => TimeFormatPreference.twentyFourHour,
-        _ => TimeFormatPreference.system,
-      };
+    'twelve' => TimeFormatPreference.twelveHour,
+    'twentyFour' => TimeFormatPreference.twentyFourHour,
+    _ => TimeFormatPreference.system,
+  };
 
   bool resolve(bool systemUses24Hour) => switch (this) {
-        TimeFormatPreference.system => systemUses24Hour,
-        TimeFormatPreference.twelveHour => false,
-        TimeFormatPreference.twentyFourHour => true,
-      };
+    TimeFormatPreference.system => systemUses24Hour,
+    TimeFormatPreference.twelveHour => false,
+    TimeFormatPreference.twentyFourHour => true,
+  };
 }
 
 bool resolveUse24Hour(TimeFormatPreference pref, BuildContext context) =>

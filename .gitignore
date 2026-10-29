@@ -57,3 +57,20 @@ android/key.properties
 android/app/upload-keystore.jks
 *.jks
 *.keystore
+# Local development and runtime data (never publish)
+/.impeccable/
+/search-temp.txt
+/work/
+/outputs/
+.env
+.env.*
+!.env.example
+**/shared_preferences.json
+**/flutter_secure_storage*
+*.db
+*.sqlite
+*.sqlite3
+*.m4a
+*.wav
+*.mp3
+*.mp4

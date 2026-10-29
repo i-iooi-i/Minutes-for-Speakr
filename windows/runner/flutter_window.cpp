@@ -116,6 +116,15 @@ bool FlutterWindow::OnCreate() {
             tray_icon_->SetChinese(*language == "zh");
           }
           result->Success();
+        } else if (call.method_name() == "setAppearance") {
+          const auto* dark = call.arguments()
+              ? std::get_if<bool>(call.arguments()) : nullptr;
+          if (dark) {
+            SetDarkMode(*dark);
+            result->Success();
+          } else {
+            result->Error("invalid-appearance", "Expected a dark mode boolean");
+          }
         } else {
           result->NotImplemented();
         }

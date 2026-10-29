@@ -1,3 +1,4 @@
+import 'package:speakr_app/theme/appearance.dart';
 import 'package:speakr_app/l10n/strings.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
@@ -94,6 +95,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     return Scaffold(
       backgroundColor: SpeakrColors.bg,
       body: SafeArea(
@@ -130,7 +132,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       case 0:
         return _Slide(
           key: ValueKey('intro'),
-          eyebrow: 'Minutes for Speakr',
+          eyebrow: 'Mimio for Speakr',
           headline: tr("The quiet way to "),
           headlineEm: tr("capture"),
           headlineTail: tr(" a meeting."),
@@ -169,6 +171,7 @@ class _ProgressDots extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     return Padding(
       padding: const EdgeInsets.fromLTRB(28, 12, 28, 0),
       child: Row(
@@ -210,6 +213,7 @@ class _Slide extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     return Padding(
       padding: const EdgeInsets.fromLTRB(28, 32, 28, 16),
       child: Column(
@@ -265,6 +269,7 @@ class _ServerArt extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     return Container(
       width: 200,
       height: 200,
@@ -330,6 +335,7 @@ class _ConnectForm extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     return SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(28, 24, 28, 16),
       child: Column(
@@ -432,6 +438,7 @@ class _Footer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     return SafeArea(
       top: false,
       child: Padding(
@@ -480,7 +487,7 @@ class _Footer extends StatelessWidget {
                     ),
                   ),
                   child: connecting
-                      ? const SizedBox(
+                      ? SizedBox(
                           width: 16,
                           height: 16,
                           child: CircularProgressIndicator(
@@ -500,7 +507,7 @@ class _Footer extends StatelessWidget {
                               ),
                             ),
                             const SizedBox(width: 6),
-                            const SpeakrIconView(
+                            SpeakrIconView(
                               SpeakrIcon.chev,
                               size: 16,
                               color: SpeakrColors.bg,

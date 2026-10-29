@@ -1,5 +1,21 @@
 // UI copy only. Keep API values, user content and diagnostic logs unchanged.
 const zhCN = <String, String>{
+  'Simplified Chinese': '简体中文',
+  'English': '英语',
+  'Error': '错误',
+  'Search': '搜索',
+  'Yellow': '黄色',
+  'Red': '红色',
+  'Purple': '紫色',
+  'Orange': '橙色',
+  'Green': '绿色',
+  'Deep blue': '深蓝色',
+  'Blue': '蓝色',
+  'Could not save appearance. Please try again.': '外观设置保存失败，请重试。',
+  'Seven palettes shared with CoPage.': '与 CoPage 保持一致的七组配色。',
+  'Accent color': '主题配色',
+  'Follow system': '跟随系统',
+  'Color mode': '显示模式',
   'Transcribing': '转录中',
   'Start recording': '开始录音',
   'Prepare recording': '准备录音',
@@ -268,8 +284,8 @@ const zhCN = <String, String>{
       "当列表中的应用使用麦克风时，自动开始录音。",
   "Configure…": "配置…",
   "Start with Windows": "随 Windows 启动",
-  "Launches Minutes minimized to the tray when you sign in.":
-      "登录 Windows 时启动 Minutes，并最小化到托盘。",
+  "Launches Mimio minimized to the tray when you sign in.":
+      "登录 Windows 时启动 Mimio，并最小化到托盘。",
   "Could not update auto-start: {0}": "无法更新开机启动设置：{0}",
   "Auto-upload from folders": "自动上传文件夹",
   "Watch device folders and upload new recordings as they appear.":
@@ -295,8 +311,8 @@ const zhCN = <String, String>{
   "New recording": "新建录音",
   "Search library": "搜索录音库",
   "Open settings": "打开设置",
-  "System-wide hotkeys live on the roadmap. Today's shortcuts are active only while Minutes is focused.":
-      "目前的快捷键仅在 Minutes 窗口处于前台时生效，全局快捷键尚未实现。",
+  "System-wide hotkeys live on the roadmap. Today's shortcuts are active only while Mimio is focused.":
+      "目前的快捷键仅在 Mimio 窗口处于前台时生效，全局快捷键尚未实现。",
   "App version": "应用版本",
   "Storage used": "已用存储",
   "{0} · {1} recordings": "{0} · {1} 段录音",
@@ -355,10 +371,10 @@ const zhCN = <String, String>{
   "Phone state — to detect when calls end.": "电话状态：用于检测通话何时结束。",
   "Notifications — required for background uploads.": "通知：后台上传所必需。",
   "Folder access needed": "需要文件夹访问权限",
-  "Minutes now reads this folder through Android's folder picker instead of \"All files access\". Re-select the folder once to keep auto-upload running; your upload history is kept.":
-      "Minutes 现在通过 Android 文件夹选择器访问此文件夹，不再使用“所有文件访问权限”。请重新选择一次文件夹以继续自动上传，上传历史会保留。",
-  "Minutes no longer has permission to read this folder. Re-select it to grant access again.":
-      "Minutes 已无权读取此文件夹，请重新选择并授予访问权限。",
+  "Mimio now reads this folder through Android's folder picker instead of \"All files access\". Re-select the folder once to keep auto-upload running; your upload history is kept.":
+      "Mimio 现在通过 Android 文件夹选择器访问此文件夹，不再使用“所有文件访问权限”。请重新选择一次文件夹以继续自动上传，上传历史会保留。",
+  "Mimio no longer has permission to read this folder. Re-select it to grant access again.":
+      "Mimio 已无权读取此文件夹，请重新选择并授予访问权限。",
   "Re-select folder": "重新选择文件夹",
   "Last scan": "上次扫描",
   "never — receiver hasn't fired since install. READ_PHONE_STATE may be denied, or the OEM is suppressing manifest receivers (check OnePlus auto-launch / battery).":
@@ -473,7 +489,7 @@ const zhCN = <String, String>{
   "Failed to switch system audio mode: {0}": "切换系统声音模式失败：{0}",
   "Recorder returned no file path.": "录音器未返回文件路径。",
   "Upload failed: {0}": "上传失败：{0}",
-  "Minutes Recording": "Minutes 录音",
+  "Mimio Recording": "Mimio 录音",
   "Meeting ended": "会议已结束",
   "Stopping in {0}s": "{0} 秒后停止",
   "Stopping…": "正在停止…",
@@ -495,8 +511,8 @@ const zhCN = <String, String>{
   "Next": "下一步",
   "Connect": "连接",
   "Auto-record": "自动录音",
-  "When an allowlisted app starts using your microphone, Minutes automatically begins recording. Recording continues until both the app has released the mic and the audio output has been idle for {0} seconds — then the recording pill counts down {1} seconds before stopping, unless you click Resume.":
-      "允许列表中的应用开始使用麦克风时，Minutes 会自动录音。当应用释放麦克风且系统声音持续静默 {0} 秒后，迷你录音窗口会倒计时 {1} 秒并停止录音；点击“继续”可取消自动停止。",
+  "When an allowlisted app starts using your microphone, Mimio automatically begins recording. Recording continues until both the app has released the mic and the audio output has been idle for {0} seconds — then the recording pill counts down {1} seconds before stopping, unless you click Resume.":
+      "允许列表中的应用开始使用麦克风时，Mimio 会自动录音。当应用释放麦克风且系统声音持续静默 {0} 秒后，迷你录音窗口会倒计时 {1} 秒并停止录音；点击“继续”可取消自动停止。",
   "Windows only. This screen is read-only on other platforms.":
       "仅支持 Windows。在其他平台上，此页面为只读。",
   "Master": "总开关",
@@ -570,8 +586,8 @@ const zhCN = <String, String>{
   "Today": "今天",
   "Yesterday": "昨天",
   "Stop recording?": "停止录音？",
-  "Minutes has been auto-recording {0} for {1}. The mic and audio output have been idle.":
-      "Minutes 已自动录制 {0}，时长 {1}。麦克风和系统声音目前处于静默状态。",
+  "Mimio has been auto-recording {0} for {1}. The mic and audio output have been idle.":
+      "Mimio 已自动录制 {0}，时长 {1}。麦克风和系统声音目前处于静默状态。",
   "Continue recording": "继续录音",
   "AUTO-RECORDING · {0}": "自动录音 · {0}",
   "capture": "记录",
@@ -593,4 +609,17 @@ const zhCN = <String, String>{
   "folders": "文件夹",
   "Process audio": "进程声音",
   "seconds": "秒",
+  "Customize your profile on this device.": "自定义此设备上的个人资料。",
+  "Your avatar": "个人头像",
+  "Local avatar": "本地头像",
+  "Use a direct image link. Saved only on this device and used in Mimio; your Speakr account is unchanged.": "使用图片直链。头像仅保存在此设备上并用于 Mimio，不会修改 Speakr 账号。",
+  "Avatar image URL": "头像图片地址",
+  "If the image cannot load, Mimio shows your default avatar.": "图片无法加载时，会显示默认头像。",
+  "Apply avatar": "应用头像",
+  "Restore default avatar": "恢复默认头像",
+  "Default avatar restored.": "已恢复默认头像。",
+  "Avatar link saved.": "已保存头像地址。",
+  "Could not load avatar. Showing the default avatar.": "头像加载失败，已显示默认头像。",
+  "Enter a valid HTTP or HTTPS image URL without account credentials.": "请输入有效的 HTTP 或 HTTPS 图片地址，地址中不能包含账号密码。",
+  "Could not save avatar. Please try again.": "无法保存头像，请重试。",
 };

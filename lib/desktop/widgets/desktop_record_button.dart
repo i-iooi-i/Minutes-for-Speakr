@@ -1,3 +1,4 @@
+import 'package:speakr_app/theme/appearance.dart';
 import 'package:flutter/material.dart';
 import '../../l10n/strings.dart';
 import '../../theme/colors.dart';
@@ -11,6 +12,7 @@ class DesktopRecordButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     return InkWell(
       borderRadius: BorderRadius.circular(10),
       onTap: onTap,
@@ -60,4 +62,3 @@ class DesktopRecordButton extends StatelessWidget {
     );
   }
 }
-

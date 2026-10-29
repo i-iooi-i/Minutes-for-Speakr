@@ -51,6 +51,7 @@ class Win32Window {
 
   // If true, closing this window will quit the application.
   void SetQuitOnClose(bool quit_on_close);
+  void SetDarkMode(bool dark);
 
   // Return a RECT representing the bounds of the current client area.
   RECT GetClientArea();
@@ -88,7 +89,8 @@ class Win32Window {
   static Win32Window* GetThisFromHandle(HWND const window) noexcept;
 
   // Update the window frame's theme to match the system theme.
-  static void UpdateTheme(HWND const window);
+  void UpdateTheme(HWND const window);
+  int dark_mode_override_ = -1;
 
   bool quit_on_close_ = false;
 

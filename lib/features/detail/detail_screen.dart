@@ -1,3 +1,4 @@
+import 'package:speakr_app/theme/appearance.dart';
 import 'package:speakr_app/l10n/strings.dart';
 
 import 'dart:async';
@@ -78,13 +79,14 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     final asyncR = ref.watch(recordingDetailProvider(widget.recordingId));
     return Scaffold(
       backgroundColor: SpeakrColors.bg,
       body: SafeArea(
         bottom: false,
         child: asyncR.when(
-          loading: () => const Center(
+          loading: () => Center(
             child: CircularProgressIndicator(
               color: SpeakrColors.ink,
               strokeWidth: 2,
@@ -133,6 +135,7 @@ class _DetailBody extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     return Column(
       children: [
         _TopBar(
@@ -201,6 +204,7 @@ class _TopBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     final r = recording;
     return Padding(
       padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
@@ -233,6 +237,7 @@ class _MoreSheet extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     final inInbox = recording.isInbox;
     final highlighted = recording.isHighlighted;
     return SafeArea(
@@ -281,7 +286,7 @@ class _MoreSheet extends ConsumerWidget {
                 );
               },
             ),
-            const Divider(color: SpeakrColors.line, height: 1),
+            Divider(color: SpeakrColors.line, height: 1),
             ListTile(
               leading: const SpeakrIconView(SpeakrIcon.search),
               title: Text(
@@ -343,7 +348,7 @@ class _MoreSheet extends ConsumerWidget {
                 );
               },
             ),
-            const Divider(color: SpeakrColors.line, height: 1),
+            Divider(color: SpeakrColors.line, height: 1),
             ListTile(
               leading: const SpeakrIconView(SpeakrIcon.trash),
               title: Text(
@@ -403,6 +408,7 @@ class _AudioPlayerBarState extends State<_AudioPlayerBar> {
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     return Container(
       margin: const EdgeInsets.fromLTRB(16, 0, 16, 14),
       padding: const EdgeInsets.fromLTRB(14, 14, 14, 14),
@@ -497,7 +503,7 @@ class _AudioPlayerBarState extends State<_AudioPlayerBar> {
                                     child: LinearProgressIndicator(
                                       value: progress,
                                       backgroundColor: SpeakrColors.line,
-                                      valueColor: const AlwaysStoppedAnimation(
+                                      valueColor: AlwaysStoppedAnimation(
                                         SpeakrColors.ink,
                                       ),
                                       minHeight: 4,
@@ -557,8 +563,9 @@ class _TabBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     return Container(
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         border: Border.symmetric(
           horizontal: BorderSide(color: SpeakrColors.line),
         ),

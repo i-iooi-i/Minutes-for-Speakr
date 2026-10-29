@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import '../../theme/colors.dart';
+import '../../theme/appearance.dart';
 
 /// Illustrative horizontal waveform (not measured audio amplitude) used in the desktop detail player. Bars are
 /// pseudo-randomly tall (deterministic, seeded) with an envelope that swells
@@ -15,7 +16,7 @@ class DesktopWave extends StatefulWidget {
     this.playing = false,
     this.seed = 7,
     this.height = 48,
-    this.color = SpeakrColors.ink,
+    this.color,
     this.onSeek,
   });
 
@@ -23,7 +24,7 @@ class DesktopWave extends StatefulWidget {
   final double progress;
   final int seed;
   final double height;
-  final Color color;
+  final Color? color;
   final ValueChanged<double>? onSeek;
 
   @override
@@ -64,17 +65,18 @@ class _DesktopWaveState extends State<DesktopWave>
 
   @override
   Widget build(BuildContext context) {
+    AppearanceScope.watch(context);
     return LayoutBuilder(
       builder: (context, c) {
         final wave = RepaintBoundary(
           child: SizedBox(
             width: c.maxWidth,
-            height: widget.height,
+            height: widget.height + (widget.onSeek != null ? 24 : 0),
             child: CustomPaint(
               painter: _WavePainter(
                 progress: widget.progress,
                 seed: widget.seed,
-                color: widget.color,
+                color: widget.color ?? SpeakrColors.ink,
                 motion: _motion,
                 showPlayhead: widget.onSeek != null,
               ),
@@ -103,6 +105,7 @@ class _WavePainter extends CustomPainter {
     required this.motion,
     required this.showPlayhead,
   }) : super(repaint: motion);
+  final Color accent = SpeakrColors.accent;
   final bool showPlayhead;
   final Animation<double> motion;
   final double progress;
@@ -125,11 +128,11 @@ class _WavePainter extends CustomPainter {
       final pulse = motion.value == 0
           ? 1.0
           : 0.7 + 0.3 * math.sin(motion.value * math.pi * 2 + i * 1.7);
-      final bh = hRatio * h * pulse;
+      final bh = hRatio * (showPlayhead ? h - 24 : h) * pulse;
       final x = i * (bw + gap);
       final y = (h - bh) / 2;
       final past = (i / bars) < progress;
-      p.color = past ? SpeakrColors.accent : color.withValues(alpha: 0.32);
+      p.color = past ? accent : color.withValues(alpha: 0.32);
       canvas.drawRRect(
         RRect.fromRectAndRadius(
           Rect.fromLTWH(x, y, bw, bh),
@@ -141,7 +144,7 @@ class _WavePainter extends CustomPainter {
     if (showPlayhead) {
       final x = (progress.clamp(0.0, 1.0) * w).clamp(3.0, w - 3.0);
       p
-        ..color = SpeakrColors.accent
+        ..color = accent
         ..strokeWidth = 2;
       canvas.drawLine(Offset(x, 4), Offset(x, h - 1), p);
       canvas.drawCircle(Offset(x, 4), 3, p);
@@ -155,6 +158,7 @@ class _WavePainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _WavePainter oldDelegate) =>
+      oldDelegate.accent != accent ||
       oldDelegate.progress != progress ||
       oldDelegate.seed != seed ||
       oldDelegate.color != color;

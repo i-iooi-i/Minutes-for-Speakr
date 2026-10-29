@@ -1,3 +1,4 @@
+import 'package:speakr_app/theme/appearance.dart';
 import 'package:speakr_app/l10n/strings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -182,6 +183,7 @@ class _SpeakerReviewScreenState extends ConsumerState<SpeakerReviewScreen> {
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     return Scaffold(
       backgroundColor: SpeakrColors.bg,
       body: SafeArea(
@@ -214,7 +216,7 @@ class _SpeakerReviewScreenState extends ConsumerState<SpeakerReviewScreen> {
 
   Widget _buildBody() {
     if (_loading) {
-      return const Center(
+      return Center(
         child: CircularProgressIndicator(
           color: SpeakrColors.ink,
           strokeWidth: 2,
@@ -299,41 +301,45 @@ class _SpeakerReviewScreenState extends ConsumerState<SpeakerReviewScreen> {
         ),
         Container(
           padding: const EdgeInsets.fromLTRB(24, 12, 24, 16),
-          decoration: const BoxDecoration(
+          decoration: BoxDecoration(
             color: SpeakrColors.bg,
             border: Border(top: BorderSide(color: SpeakrColors.line)),
           ),
           child: SafeArea(
             top: false,
-            child: SizedBox(
-              width: double.infinity,
-              height: 48,
-              child: FilledButton(
-                onPressed: _saving ? null : _apply,
-                style: FilledButton.styleFrom(
-                  backgroundColor: SpeakrColors.ink,
-                  foregroundColor: SpeakrColors.bg,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(4),
+            child: Align(
+              alignment: Alignment.centerRight,
+              child: SizedBox(
+                width: 112,
+                height: 48,
+                child: FilledButton(
+                  onPressed: _saving ? null : _apply,
+                  style: FilledButton.styleFrom(
+                    backgroundColor: SpeakrColors.bgAlt,
+                    foregroundColor: SpeakrColors.ink,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      side: BorderSide(color: SpeakrColors.line),
+                    ),
                   ),
+                  child: _saving
+                      ? SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: SpeakrColors.ink,
+                          ),
+                        )
+                      : Text(
+                          tr("Apply"),
+                          style: SpeakrText.sans(
+                            size: 14,
+                            weight: FontWeight.w600,
+                            color: SpeakrColors.ink,
+                          ),
+                        ),
                 ),
-                child: _saving
-                    ? const SizedBox(
-                        width: 18,
-                        height: 18,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: SpeakrColors.bg,
-                        ),
-                      )
-                    : Text(
-                        tr("Apply"),
-                        style: SpeakrText.sans(
-                          size: 14,
-                          weight: FontWeight.w600,
-                          color: SpeakrColors.bg,
-                        ),
-                      ),
               ),
             ),
           ),
@@ -379,6 +385,7 @@ class _SpeakerField extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     final segs = row.segmentCount;
     final speakers = ref
         .watch(allSpeakersProvider)
@@ -438,15 +445,15 @@ class _SpeakerField extends ConsumerWidget {
                     ),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(4),
-                      borderSide: const BorderSide(color: SpeakrColors.line),
+                      borderSide: BorderSide(color: SpeakrColors.line),
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(4),
-                      borderSide: const BorderSide(color: SpeakrColors.line),
+                      borderSide: BorderSide(color: SpeakrColors.line),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(4),
-                      borderSide: const BorderSide(
+                      borderSide: BorderSide(
                         color: SpeakrColors.ink,
                         width: 1.2,
                       ),
@@ -549,6 +556,7 @@ class _SuggestionChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     final bg = highlighted ? SpeakrColors.ink : SpeakrColors.bg;
     final fg = highlighted ? SpeakrColors.bg : SpeakrColors.ink;
     return Tooltip(

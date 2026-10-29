@@ -39,7 +39,7 @@ bool TrayIcon::Install(HWND owner) {
   nid.uCallbackMessage = kTrayCallbackMessage;
   nid.hIcon = LoadIconW(GetModuleHandleW(nullptr),
                         MAKEINTRESOURCEW(IDI_APP_ICON));
-  wcsncpy_s(nid.szTip, L"Minutes for Speakr", _TRUNCATE);
+  wcsncpy_s(nid.szTip, L"Mimio", _TRUNCATE);
 
   if (!Shell_NotifyIconW(NIM_ADD, &nid)) {
     return false;
@@ -114,7 +114,7 @@ void TrayIcon::ShowContextMenu(HWND owner) {
   HMENU menu = CreatePopupMenu();
   if (menu == nullptr) return;
 
-  AppendMenuW(menu, MF_STRING, kMenuIdShow, chinese_ ? L"\u663e\u793a Speakr" : L"Show Speakr");
+  AppendMenuW(menu, MF_STRING, kMenuIdShow, chinese_ ? L"\u663e\u793a Mimio" : L"Show Mimio");
   AppendMenuW(menu, MF_STRING, kMenuIdStartRecording, chinese_ ? L"\u5f00\u59cb\u5f55\u97f3" : L"Start Recording");
   AppendMenuW(menu, MF_SEPARATOR, 0, nullptr);
   AppendMenuW(menu, MF_STRING, kMenuIdExit, chinese_ ? L"\u9000\u51fa" : L"Exit");

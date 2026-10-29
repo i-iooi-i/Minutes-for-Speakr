@@ -1,3 +1,4 @@
+import 'package:speakr_app/theme/appearance.dart';
 import 'package:speakr_app/l10n/strings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -8,6 +9,7 @@ import '../../../theme/colors.dart';
 import '../../../theme/typography.dart';
 import '../../../widgets/mono_eyebrow.dart';
 import '../../../widgets/speakr_icons.dart';
+import '../../../widgets/user_avatar.dart';
 
 class ChatTab extends ConsumerStatefulWidget {
   const ChatTab({super.key, required this.recordingId});
@@ -76,6 +78,7 @@ class _ChatTabState extends ConsumerState<ChatTab> {
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     return Column(
       children: [
         Expanded(
@@ -118,7 +121,7 @@ class _ChatTabState extends ConsumerState<ChatTab> {
                     children: [
                       const MonoEyebrow('Speakr', size: 9),
                       const SizedBox(width: 8),
-                      const SizedBox(
+                      SizedBox(
                         width: 14,
                         height: 14,
                         child: CircularProgressIndicator(
@@ -146,7 +149,7 @@ class _ChatTabState extends ConsumerState<ChatTab> {
         ),
         Container(
           padding: const EdgeInsets.all(12),
-          decoration: const BoxDecoration(
+          decoration: BoxDecoration(
             color: SpeakrColors.bg,
             border: Border(top: BorderSide(color: SpeakrColors.line)),
           ),
@@ -168,15 +171,15 @@ class _ChatTabState extends ConsumerState<ChatTab> {
                       ),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(100),
-                        borderSide: const BorderSide(color: SpeakrColors.line),
+                        borderSide: BorderSide(color: SpeakrColors.line),
                       ),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(100),
-                        borderSide: const BorderSide(color: SpeakrColors.line),
+                        borderSide: BorderSide(color: SpeakrColors.line),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(100),
-                        borderSide: const BorderSide(color: SpeakrColors.ink),
+                        borderSide: BorderSide(color: SpeakrColors.ink),
                       ),
                       contentPadding: const EdgeInsets.symmetric(
                         horizontal: 16,
@@ -193,11 +196,11 @@ class _ChatTabState extends ConsumerState<ChatTab> {
                     width: 40,
                     height: 40,
                     alignment: Alignment.center,
-                    decoration: const BoxDecoration(
+                    decoration: BoxDecoration(
                       color: SpeakrColors.ink,
                       shape: BoxShape.circle,
                     ),
-                    child: const SpeakrIconView(
+                    child: SpeakrIconView(
                       SpeakrIcon.send,
                       size: 18,
                       color: SpeakrColors.bg,
@@ -220,6 +223,7 @@ class _Message extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     final isUser = message.role == 'user';
     return Align(
       alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
@@ -232,6 +236,10 @@ class _Message extends StatelessWidget {
               ? CrossAxisAlignment.end
               : CrossAxisAlignment.start,
           children: [
+            if (isUser) const Padding(
+              padding: EdgeInsets.only(bottom: 6),
+              child: UserAvatar(size: 24),
+            ),
             if (!isUser) ...[
               const Padding(
                 padding: EdgeInsets.only(bottom: 4, left: 4),

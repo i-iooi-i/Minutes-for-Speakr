@@ -1,3 +1,4 @@
+import '../../../theme/appearance.dart';
 import 'dart:async';
 import 'dart:convert';
 
@@ -45,6 +46,11 @@ class RecordingMirror extends StateNotifier<RecordingState> {
               : Map<String, dynamic>.from(raw as Map);
           if (json['_uiLanguage'] is String) {
             applyLanguage(json['_uiLanguage'] as String);
+          }
+          if (json['_appearance'] is Map) {
+            appAppearance.apply(
+              Map<String, dynamic>.from(json['_appearance'] as Map),
+            );
           }
           state = RecordingState.fromJson(json);
         } catch (_) {}

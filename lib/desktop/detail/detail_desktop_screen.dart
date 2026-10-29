@@ -1,3 +1,6 @@
+import '../../widgets/playback_button.dart';
+import '../../widgets/mimio_panel.dart';
+import 'package:speakr_app/theme/appearance.dart';
 import '../../widgets/tag_chip.dart';
 import 'package:speakr_app/l10n/strings.dart';
 
@@ -25,7 +28,7 @@ import '../../services/preferences/time_format_providers.dart';
 import '../../theme/colors.dart';
 import '../../theme/typography.dart';
 import '../../utils/formatters.dart';
-import '../../widgets/speakr_icons.dart';
+
 import '../widgets/desktop_controls.dart';
 import '../widgets/desktop_wave.dart';
 import 'desktop_transcript_pane.dart';
@@ -131,6 +134,7 @@ class _DetailDesktopScreenState extends ConsumerState<DetailDesktopScreen> {
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     ref.listen(recordingDetailProvider(widget.recordingId), (_, next) {
       if (next.value?.audioAvailable == false) {
         unawaited(_audioPlayer.stop());
@@ -139,7 +143,7 @@ class _DetailDesktopScreenState extends ConsumerState<DetailDesktopScreen> {
     });
     final asyncR = ref.watch(recordingDetailProvider(widget.recordingId));
     return asyncR.when(
-      loading: () => const Center(
+      loading: () => Center(
         child: CircularProgressIndicator(
           color: SpeakrColors.ink,
           strokeWidth: 2,
@@ -204,6 +208,7 @@ class _Body extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     return Container(
       color: SpeakrColors.bg,
       child: Column(
@@ -258,13 +263,7 @@ class _DetailPanel extends StatelessWidget {
   const _DetailPanel({required this.child});
   final Widget child;
   @override
-  Widget build(BuildContext context) => Container(
-    clipBehavior: Clip.antiAlias,
-    decoration: BoxDecoration(
-      color: SpeakrColors.surface,
-      border: Border.all(color: SpeakrColors.line),
-      borderRadius: BorderRadius.circular(12),
-    ),
+  Widget build(BuildContext context) => MimioPanel(
     child: child,
   );
 }
@@ -276,6 +275,7 @@ class _TitleBlock extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     // The recording's embedded folder is a stub without a color (and the
     // detail endpoint may omit it), so resolve against /folders like the
     // library does.
@@ -383,6 +383,7 @@ class _PlayerBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     return Container(
       margin: const EdgeInsets.fromLTRB(32, 0, 32, 18),
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
@@ -398,32 +399,13 @@ class _PlayerBar extends StatelessWidget {
             stream: player.playerStateStream,
             builder: (context, snap) {
               final playing = snap.data?.playing ?? false;
-              return SizedBox(
-                width: 56,
-                height: 56,
-                child: Material(
-                  color: audioReady
-                      ? SpeakrColors.ink
-                      : SpeakrColors.muted.withValues(alpha: 0.5),
-                  shape: const CircleBorder(),
-                  child: InkWell(
-                    customBorder: const CircleBorder(),
-                    onTap: !audioReady
-                        ? null
-                        : () => playing ? player.pause() : player.play(),
-                    child: Semantics(
-                      button: true,
-                      label: playing ? tr("Pause") : tr("Play"),
-                      child: Center(
-                        child: SpeakrIconView(
-                          playing ? SpeakrIcon.pause : SpeakrIcon.play,
-                          size: 32,
-                          color: SpeakrColors.bg,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
+              return PlaybackButton(
+                size: 56,
+                playing: playing,
+                label: playing ? tr('Pause') : tr('Play'),
+                onPressed: !audioReady
+                    ? null
+                    : () => playing ? player.pause() : player.play(),
               );
             },
           ),
@@ -540,22 +522,19 @@ class _TranscriptColumn extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Container(
-          decoration: const BoxDecoration(
+          decoration: BoxDecoration(
             border: Border(bottom: BorderSide(color: SpeakrColors.line)),
           ),
           height: 48,
           padding: const EdgeInsets.symmetric(horizontal: 18),
           child: Row(
             children: [
-              const Icon(
-                Icons.subject_rounded,
-                size: 16,
-                color: SpeakrColors.ink2,
-              ),
+              Icon(Icons.subject_rounded, size: 16, color: SpeakrColors.ink2),
               const SizedBox(width: 7),
               Text(
                 tr("TRANSCRIPT"),
@@ -574,7 +553,7 @@ class _TranscriptColumn extends ConsumerWidget {
                 ),
                 isSelected: ref.watch(transcriptFollowProvider(recordingId)),
                 icon: const Icon(Icons.unfold_more_rounded, size: 18),
-                selectedIcon: const Icon(
+                selectedIcon: Icon(
                   Icons.unfold_more_rounded,
                   size: 18,
                   color: SpeakrColors.accent,
@@ -621,13 +600,14 @@ class _RightColumn extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     return Container(
       color: Colors.transparent,
       child: Column(
         children: [
           Container(
             height: 48,
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               border: Border(bottom: BorderSide(color: SpeakrColors.line)),
             ),
             child: Row(

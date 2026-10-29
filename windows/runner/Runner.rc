@@ -90,7 +90,7 @@ BEGIN
         BLOCK "040904e4"
         BEGIN
             VALUE "CompanyName", "com.inrego" "\0"
-            VALUE "FileDescription", "Minutes for Speakr" "\0"
+            VALUE "FileDescription", "Mimio" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
             VALUE "InternalName", "speakr_app" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2026 com.inrego. All rights reserved." "\0"

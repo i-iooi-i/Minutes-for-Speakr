@@ -15,7 +15,7 @@ class SettingsGroup extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         border: Border(top: BorderSide(color: SpeakrColors.line)),
       ),
       margin: const EdgeInsets.only(top: 8),
@@ -64,7 +64,7 @@ class SettingsRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final body = Container(
       padding: const EdgeInsets.fromLTRB(24, 12, 24, 12),
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         border: Border(top: BorderSide(color: SpeakrColors.line)),
       ),
       child: Column(
@@ -73,12 +73,16 @@ class SettingsRow extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                child: Text(label,
-                    style: SpeakrText.sans(size: 14, color: SpeakrColors.ink)),
+                child: Text(
+                  label,
+                  style: SpeakrText.sans(size: 14, color: SpeakrColors.ink),
+                ),
               ),
               if (toggleValue != null)
                 SettingsToggle(
-                    value: toggleValue!, onChanged: onToggle ?? (_) {})
+                  value: toggleValue!,
+                  onChanged: onToggle ?? (_) {},
+                )
               else if (trailing != null)
                 trailing!
               else
@@ -102,8 +106,7 @@ class SettingsRow extends StatelessWidget {
                 ),
               if (onTap != null) ...[
                 const SizedBox(width: 8),
-                const Icon(Icons.chevron_right,
-                    size: 18, color: SpeakrColors.muted),
+                Icon(Icons.chevron_right, size: 18, color: SpeakrColors.muted),
               ],
             ],
           ),
@@ -112,7 +115,10 @@ class SettingsRow extends StatelessWidget {
             Text(
               subtitle!,
               style: SpeakrText.mono(
-                  size: 11, color: SpeakrColors.muted, letterSpacing: 0),
+                size: 11,
+                color: SpeakrColors.muted,
+                letterSpacing: 0,
+              ),
             ),
           ],
         ],
@@ -153,7 +159,7 @@ class SettingsToggle extends StatelessWidget {
               child: Container(
                 width: 16,
                 height: 16,
-                decoration: const BoxDecoration(
+                decoration: BoxDecoration(
                   color: SpeakrColors.bg,
                   shape: BoxShape.circle,
                 ),

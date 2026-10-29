@@ -272,6 +272,11 @@ void Win32Window::OnDestroy() {
   // No-op; provided for subclasses.
 }
 
+void Win32Window::SetDarkMode(bool dark) {
+  dark_mode_override_ = dark ? 1 : 0;
+  UpdateTheme(window_handle_);
+}
+
 void Win32Window::UpdateTheme(HWND const window) {
   DWORD light_mode;
   DWORD light_mode_size = sizeof(light_mode);
@@ -280,10 +285,11 @@ void Win32Window::UpdateTheme(HWND const window) {
                                RRF_RT_REG_DWORD, nullptr, &light_mode,
                                &light_mode_size);
 
-  if (result == ERROR_SUCCESS) {
-    // The desktop audio workspace has a fixed dark palette.
-    BOOL enable_dark_mode = TRUE;
+  if (result == ERROR_SUCCESS || dark_mode_override_ >= 0) {
+    BOOL enable_dark_mode = dark_mode_override_ >= 0
+        ? dark_mode_override_ != 0 : light_mode == 0;
     DwmSetWindowAttribute(window, DWMWA_USE_IMMERSIVE_DARK_MODE,
                           &enable_dark_mode, sizeof(enable_dark_mode));
+    RedrawWindow(window, nullptr, nullptr, RDW_FRAME | RDW_INVALIDATE | RDW_UPDATENOW);
   }
 }

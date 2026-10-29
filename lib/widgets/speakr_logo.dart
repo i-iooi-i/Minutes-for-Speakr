@@ -4,11 +4,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import '../theme/colors.dart';
 
 class SpeakrLogo extends StatelessWidget {
-  const SpeakrLogo({
-    super.key,
-    this.size = 24,
-    this.color,
-  });
+  const SpeakrLogo({super.key, this.size = 24, this.color});
 
   final double size;
   final Color? color;
@@ -19,10 +15,7 @@ class SpeakrLogo extends StatelessWidget {
       'speakr-mark-square.svg',
       width: size,
       height: size,
-      colorFilter: ColorFilter.mode(
-        color ?? SpeakrColors.ink,
-        BlendMode.srcIn,
-      ),
+      colorFilter: ColorFilter.mode(color ?? SpeakrColors.ink, BlendMode.srcIn),
     );
   }
 }

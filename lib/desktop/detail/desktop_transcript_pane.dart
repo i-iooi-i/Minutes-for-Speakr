@@ -1,3 +1,4 @@
+import 'package:speakr_app/theme/appearance.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'dart:math' as math;
 import 'package:speakr_app/l10n/strings.dart';
@@ -54,10 +55,11 @@ class _DesktopTranscriptPaneState extends ConsumerState<DesktopTranscriptPane> {
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     final follow = ref.watch(transcriptFollowProvider(recordingId));
     final async = ref.watch(transcriptProvider(recordingId));
     return async.when(
-      loading: () => const Center(
+      loading: () => Center(
         child: CircularProgressIndicator(
           color: SpeakrColors.ink,
           strokeWidth: 2,

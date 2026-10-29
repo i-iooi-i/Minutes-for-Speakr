@@ -1,9 +1,12 @@
+import '../widgets/library_search.dart';
+import 'package:speakr_app/theme/appearance.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../theme/colors.dart';
+import '../../widgets/mimio_panel.dart';
 import 'desktop_shortcuts.dart';
 import 'desktop_sidebar.dart';
 import 'package:speakr_app/l10n/strings.dart';
@@ -22,31 +25,30 @@ class DesktopShell extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     return CallbackShortcuts(
       bindings: <ShortcutActivator, VoidCallback>{
         modActivator(LogicalKeyboardKey.keyR): () => context.push('/live'),
         modActivator(LogicalKeyboardKey.keyK): () {
-          ref.read(sidebarCollapsedProvider.notifier).state = false;
+          ref.read(librarySearchExpandedProvider.notifier).state = true;
+          if (GoRouterState.of(context).uri.path != '/library') {
+            context.go('/library');
+          }
           WidgetsBinding.instance.addPostFrameCallback((_) {
-            ref.read(sidebarSearchFocusProvider).requestFocus();
+            ref.read(librarySearchFocusProvider).requestFocus();
           });
         },
         modActivator(LogicalKeyboardKey.comma): () => context.push('/settings'),
       },
-      child: Focus(
+      child: FocusScope(
         autofocus: true,
         child: Scaffold(
           backgroundColor: SpeakrColors.bg,
           body: Row(
             children: [
-              Container(
+              MimioPanel(
+                radius: 18,
                 margin: const EdgeInsets.fromLTRB(8, 8, 0, 8),
-                decoration: BoxDecoration(
-                  color: SpeakrColors.surface,
-                  borderRadius: BorderRadius.circular(18),
-                  border: Border.all(color: SpeakrColors.line),
-                ),
-                clipBehavior: Clip.antiAlias,
                 child: DesktopSidebar(active: active),
               ),
               Expanded(child: child),

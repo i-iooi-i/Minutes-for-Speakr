@@ -1,3 +1,4 @@
+import 'package:speakr_app/theme/appearance.dart';
 import 'package:speakr_app/l10n/strings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -27,6 +28,7 @@ class DiscardOverlay extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     // If the recording stops (e.g. via the controller from elsewhere)
     // while the sheet is armed, drop the armed flag so the overlay
     // animates back out cleanly.
@@ -98,6 +100,7 @@ class DiscardSheet extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     final elapsed = ref.watch(
       recordingControllerProvider.select((s) => s.formattedElapsed),
     );
@@ -118,7 +121,7 @@ class DiscardSheet extends ConsumerWidget {
       type: MaterialType.transparency,
       child: Container(
         width: double.infinity,
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           color: SpeakrColors.bg,
           borderRadius: BorderRadius.only(
             topLeft: Radius.circular(14),

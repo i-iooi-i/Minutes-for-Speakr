@@ -76,8 +76,7 @@ const String _iidIAudioMeterInformation =
     '{C02216F6-8C67-4B5B-9D00-D008E73E0064}';
 const String _clsidMMDeviceEnumerator =
     '{bcde0395-e52f-467c-8e3d-c4579291692e}';
-const String _iidIMMDeviceEnumerator =
-    '{a95664d2-9614-4f35-a746-de8db63617e6}';
+const String _iidIMMDeviceEnumerator = '{a95664d2-9614-4f35-a746-de8db63617e6}';
 
 class _WindowsOutputMeter implements OutputMeter {
   _WindowsOutputMeter(this.interval) {
@@ -162,22 +161,26 @@ class _WindowsOutputMeter implements OutputMeter {
         // IMMDeviceEnumerator::GetDefaultAudioEndpoint is vtable index 4.
         final getDefaultAudioEndpoint = (enumerator.ref.vtable + 4)
             .cast<
-                Pointer<
-                    NativeFunction<
-                        Int32 Function(
-                          Pointer,
-                          Int32 dataFlow,
-                          Int32 role,
-                          Pointer<Pointer<COMObject>> ppEndpoint,
-                        )>>>()
+              Pointer<
+                NativeFunction<
+                  Int32 Function(
+                    Pointer,
+                    Int32 dataFlow,
+                    Int32 role,
+                    Pointer<Pointer<COMObject>> ppEndpoint,
+                  )
+                >
+              >
+            >()
             .value
             .asFunction<
-                int Function(
-                  Pointer,
-                  int dataFlow,
-                  int role,
-                  Pointer<Pointer<COMObject>> ppEndpoint,
-                )>();
+              int Function(
+                Pointer,
+                int dataFlow,
+                int role,
+                Pointer<Pointer<COMObject>> ppEndpoint,
+              )
+            >();
         final hr = getDefaultAudioEndpoint(
           enumerator.ref.lpVtbl,
           0 /* eRender */,
@@ -196,24 +199,28 @@ class _WindowsOutputMeter implements OutputMeter {
         // IMMDevice::Activate is vtable index 3.
         final activate = (device.ref.vtable + 3)
             .cast<
-                Pointer<
-                    NativeFunction<
-                        Int32 Function(
-                          Pointer,
-                          Pointer<GUID> iid,
-                          Uint32 dwClsCtx,
-                          Pointer<PROPVARIANT> pActivationParams,
-                          Pointer<Pointer> ppInterface,
-                        )>>>()
+              Pointer<
+                NativeFunction<
+                  Int32 Function(
+                    Pointer,
+                    Pointer<GUID> iid,
+                    Uint32 dwClsCtx,
+                    Pointer<PROPVARIANT> pActivationParams,
+                    Pointer<Pointer> ppInterface,
+                  )
+                >
+              >
+            >()
             .value
             .asFunction<
-                int Function(
-                  Pointer,
-                  Pointer<GUID> iid,
-                  int dwClsCtx,
-                  Pointer<PROPVARIANT> pActivationParams,
-                  Pointer<Pointer> ppInterface,
-                )>();
+              int Function(
+                Pointer,
+                Pointer<GUID> iid,
+                int dwClsCtx,
+                Pointer<PROPVARIANT> pActivationParams,
+                Pointer<Pointer> ppInterface,
+              )
+            >();
         final hr = activate(
           device.ref.lpVtbl,
           iidMeter,
@@ -280,9 +287,10 @@ class _WindowsOutputMeter implements OutputMeter {
       // see iunknown.dart:46–49.
       final fn = (m.ref.vtable + 3)
           .cast<
-              Pointer<
-                  NativeFunction<
-                      Int32 Function(Pointer, Pointer<Float> pfPeak)>>>()
+            Pointer<
+              NativeFunction<Int32 Function(Pointer, Pointer<Float> pfPeak)>
+            >
+          >()
           .value
           .asFunction<int Function(Pointer, Pointer<Float> pfPeak)>();
       final hr = fn(m.ref.lpVtbl, peakOut);

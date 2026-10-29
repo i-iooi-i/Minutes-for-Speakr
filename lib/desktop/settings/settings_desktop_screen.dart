@@ -1,3 +1,6 @@
+import 'package:speakr_app/widgets/avatar_settings.dart';
+import 'package:speakr_app/widgets/appearance_picker.dart';
+import 'package:speakr_app/theme/appearance.dart';
 import 'package:speakr_app/l10n/strings.dart';
 
 import 'dart:io' show Platform, SocketException;
@@ -21,6 +24,7 @@ import '../../services/preferences/time_format_preference.dart';
 import '../../services/preferences/time_format_providers.dart';
 import '../../theme/colors.dart';
 import '../../theme/typography.dart';
+import '../../theme/tokens.dart';
 import '../../utils/formatters.dart';
 import '../../widgets/speakr_icons.dart';
 import '../shell/desktop_shortcuts.dart';
@@ -130,6 +134,7 @@ class _SettingsDesktopScreenState extends ConsumerState<SettingsDesktopScreen> {
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     return Scaffold(
       backgroundColor: SpeakrColors.bg,
       body: Row(
@@ -140,7 +145,7 @@ class _SettingsDesktopScreenState extends ConsumerState<SettingsDesktopScreen> {
             onChange: (s) => setState(() => _section = s),
             onBack: () => context.go('/library'),
           ),
-          const VerticalDivider(width: 1, color: SpeakrColors.line),
+          VerticalDivider(width: 1, color: SpeakrColors.line),
           Expanded(
             child: SingleChildScrollView(
               padding: const EdgeInsets.fromLTRB(60, 40, 60, 60),
@@ -225,6 +230,7 @@ class _SubSidebar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     return SizedBox(
       width: 220,
       child: Material(
@@ -242,6 +248,7 @@ class _SubSidebar extends StatelessWidget {
             ),
             for (final (sec, label) in _items)
               InkWell(
+                borderRadius: SpeakrRadius.menu,
                 onTap: () => onChange(sec),
                 child: Container(
                   padding: const EdgeInsets.fromLTRB(22, 8, 22, 8),
@@ -282,14 +289,15 @@ class _BackChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     return Material(
       color: SpeakrColors.surface,
       shape: RoundedRectangleBorder(
-        side: const BorderSide(color: SpeakrColors.line),
-        borderRadius: BorderRadius.circular(5),
+        side: BorderSide(color: SpeakrColors.line),
+        borderRadius: SpeakrRadius.control,
       ),
       child: InkWell(
-        borderRadius: BorderRadius.circular(5),
+        borderRadius: SpeakrRadius.control,
         onTap: onTap,
         child: Container(
           height: 28,
@@ -297,7 +305,7 @@ class _BackChip extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const SpeakrIconView(
+              SpeakrIconView(
                 SpeakrIcon.back,
                 size: 16,
                 color: SpeakrColors.ink2,
@@ -326,6 +334,7 @@ class _SectionHead extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     return Padding(
       padding: const EdgeInsets.only(bottom: 28),
       child: Column(
@@ -334,7 +343,7 @@ class _SectionHead extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.only(bottom: 18),
             child: Container(
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 border: Border(bottom: BorderSide(color: SpeakrColors.line)),
               ),
               padding: const EdgeInsets.only(bottom: 18),
@@ -374,8 +383,9 @@ class _Field extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     return Container(
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         border: Border(bottom: BorderSide(color: SpeakrColors.line)),
       ),
       padding: const EdgeInsets.symmetric(vertical: 14),
@@ -427,6 +437,7 @@ class _TextValue extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     return Container(
       constraints: const BoxConstraints(maxWidth: 360),
       height: 34,
@@ -435,7 +446,7 @@ class _TextValue extends StatelessWidget {
       decoration: BoxDecoration(
         color: SpeakrColors.surface,
         border: Border.all(color: SpeakrColors.line),
-        borderRadius: BorderRadius.circular(5),
+        borderRadius: SpeakrRadius.menu,
       ),
       child: Text(
         text,
@@ -460,6 +471,7 @@ class _Toggle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     return Align(
       alignment: Alignment.centerLeft,
       child: InkWell(
@@ -480,7 +492,7 @@ class _Toggle extends StatelessWidget {
               child: Container(
                 width: 16,
                 height: 16,
-                decoration: const BoxDecoration(
+                decoration: BoxDecoration(
                   color: SpeakrColors.bg,
                   shape: BoxShape.circle,
                 ),
@@ -499,13 +511,14 @@ class _DropdownStub extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     return Container(
       height: 34,
       padding: const EdgeInsets.symmetric(horizontal: 12),
       decoration: BoxDecoration(
         color: SpeakrColors.surface,
         border: Border.all(color: SpeakrColors.line),
-        borderRadius: BorderRadius.circular(5),
+        borderRadius: SpeakrRadius.menu,
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -554,52 +567,16 @@ class _ProfileSection extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _SectionHead(
           title: tr("Profile"),
-          sub: tr("How you appear in shared recordings and team views."),
+          sub: tr("Customize your profile on this device."),
         ),
-        Container(
-          decoration: const BoxDecoration(
-            border: Border(bottom: BorderSide(color: SpeakrColors.line)),
-          ),
-          padding: const EdgeInsets.only(bottom: 14),
-          child: Row(
-            children: [
-              Container(
-                width: 72,
-                height: 72,
-                alignment: Alignment.center,
-                decoration: const BoxDecoration(
-                  color: SpeakrColors.ink,
-                  shape: BoxShape.circle,
-                ),
-                child: Text(
-                  tr("ME"),
-                  style: SpeakrText.serif(size: 28, color: SpeakrColors.bg),
-                ),
-              ),
-              const SizedBox(width: 18),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(tr("Connected user"), style: SpeakrText.serif(size: 22)),
-                  const SizedBox(height: 4),
-                  Text(
-                    tr("Speakr account · self-hosted"),
-                    style: SpeakrText.mono(
-                      size: 11,
-                      color: SpeakrColors.muted,
-                      letterSpacing: 0,
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
+        const AvatarSettings(),
+        const SizedBox(height: 24),
         _Field(
           label: tr("Display name"),
           child: _TextValue(text: tr("Speakr user")),
@@ -632,6 +609,7 @@ class _ServerSection extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     final asyncCreds = ref.watch(currentCredentialsProvider);
     final creds = asyncCreds.value;
     final url = creds?.baseUrl ?? '—';
@@ -661,7 +639,7 @@ class _ServerSection extends ConsumerWidget {
           child: Row(
             children: [
               if (checking)
-                const SizedBox(
+                SizedBox(
                   width: 12,
                   height: 12,
                   child: CircularProgressIndicator(
@@ -693,11 +671,11 @@ class _ServerSection extends ConsumerWidget {
               Material(
                 color: SpeakrColors.surface,
                 shape: RoundedRectangleBorder(
-                  side: const BorderSide(color: SpeakrColors.line),
-                  borderRadius: BorderRadius.circular(5),
+                  side: BorderSide(color: SpeakrColors.line),
+                  borderRadius: SpeakrRadius.control,
                 ),
                 child: InkWell(
-                  borderRadius: BorderRadius.circular(5),
+                  borderRadius: SpeakrRadius.control,
                   onTap: checking ? null : onRefresh,
                   child: Container(
                     height: 30,
@@ -732,6 +710,7 @@ class _RecordingSection extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     final settingsAsync = ref.watch(autoRecordSettingsProvider);
     final controller = ref.read(autoRecordSettingsControllerProvider);
     final settings = settingsAsync.value;
@@ -791,11 +770,11 @@ class _RecordingSection extends ConsumerWidget {
                 child: Material(
                   color: SpeakrColors.surface,
                   shape: RoundedRectangleBorder(
-                    side: const BorderSide(color: SpeakrColors.line),
-                    borderRadius: BorderRadius.circular(5),
+                    side: BorderSide(color: SpeakrColors.line),
+                    borderRadius: SpeakrRadius.control,
                   ),
                   child: InkWell(
-                    borderRadius: BorderRadius.circular(5),
+                    borderRadius: SpeakrRadius.control,
                     onTap: () => controller.setDefaultSystemScope(
                       isProcessOnly
                           ? SystemAudioScope.allSystem
@@ -861,11 +840,11 @@ class _RecordingSection extends ConsumerWidget {
               child: Material(
                 color: SpeakrColors.surface,
                 shape: RoundedRectangleBorder(
-                  side: const BorderSide(color: SpeakrColors.line),
-                  borderRadius: BorderRadius.circular(5),
+                  side: BorderSide(color: SpeakrColors.line),
+                  borderRadius: SpeakrRadius.control,
                 ),
                 child: InkWell(
-                  borderRadius: BorderRadius.circular(5),
+                  borderRadius: SpeakrRadius.control,
                   onTap: () => context.push('/settings/auto-record'),
                   child: Container(
                     height: 34,
@@ -881,7 +860,7 @@ class _RecordingSection extends ConsumerWidget {
                           ),
                         ),
                         const SizedBox(width: 8),
-                        const SpeakrIconView(
+                        SpeakrIconView(
                           SpeakrIcon.chev,
                           size: 14,
                           color: SpeakrColors.ink2,
@@ -905,11 +884,12 @@ class _AutoStartField extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     final asyncEnabled = ref.watch(autoStartEnabledProvider);
     final service = ref.read(autoStartServiceProvider);
     return _Field(
       label: tr("Start with Windows"),
-      hint: tr("Launches Minutes minimized to the tray when you sign in."),
+      hint: tr("Launches Mimio minimized to the tray when you sign in."),
       child: _Toggle(
         on: asyncEnabled.maybeWhen(data: (v) => v, orElse: () => false),
         onTap: asyncEnabled.hasValue
@@ -941,6 +921,7 @@ class _AutoUploadField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     return _Field(
       label: tr("Auto-upload from folders"),
       hint: tr(
@@ -951,11 +932,11 @@ class _AutoUploadField extends StatelessWidget {
         child: Material(
           color: SpeakrColors.surface,
           shape: RoundedRectangleBorder(
-            side: const BorderSide(color: SpeakrColors.line),
-            borderRadius: BorderRadius.circular(5),
+            side: BorderSide(color: SpeakrColors.line),
+            borderRadius: SpeakrRadius.control,
           ),
           child: InkWell(
-            borderRadius: BorderRadius.circular(5),
+            borderRadius: SpeakrRadius.control,
             onTap: () => context.push('/settings/auto-upload'),
             child: Container(
               height: 34,
@@ -968,7 +949,7 @@ class _AutoUploadField extends StatelessWidget {
                     style: SpeakrText.sans(size: 12, color: SpeakrColors.ink2),
                   ),
                   const SizedBox(width: 8),
-                  const SpeakrIconView(
+                  SpeakrIconView(
                     SpeakrIcon.chev,
                     size: 14,
                     color: SpeakrColors.ink2,
@@ -988,6 +969,7 @@ class _TranscriptionSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -1025,6 +1007,7 @@ class _AppearanceSection extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     final pref =
         ref.watch(timeFormatPreferenceProvider).asData?.value ??
         TimeFormatPreference.system;
@@ -1034,18 +1017,9 @@ class _AppearanceSection extends ConsumerWidget {
       children: [
         _SectionHead(title: tr("Appearance")),
         _Field(label: tr("Interface language"), child: const LanguagePicker()),
-        _Field(
-          label: tr("Theme"),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              _ThemeChip(label: tr("Light"), selected: true),
-              const SizedBox(width: 8),
-              _ThemeChip(label: tr("Dark"), selected: false, disabled: true),
-              const SizedBox(width: 8),
-              _ThemeChip(label: tr("System"), selected: false, disabled: true),
-            ],
-          ),
+        const Padding(
+          padding: EdgeInsets.symmetric(vertical: 20),
+          child: AppearancePicker(),
         ),
         _Field(
           label: tr("Time format"),
@@ -1079,40 +1053,6 @@ class _AppearanceSection extends ConsumerWidget {
   }
 }
 
-class _ThemeChip extends StatelessWidget {
-  const _ThemeChip({
-    required this.label,
-    required this.selected,
-    this.disabled = false,
-  });
-  final String label;
-  final bool selected;
-  final bool disabled;
-  @override
-  Widget build(BuildContext context) {
-    LanguageScope.watch(context);
-    return Opacity(
-      opacity: disabled ? 0.5 : 1,
-      child: Container(
-        height: 34,
-        padding: const EdgeInsets.symmetric(horizontal: 14),
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          color: selected ? SpeakrColors.bgAlt : SpeakrColors.surface,
-          border: Border.all(
-            color: selected ? SpeakrColors.ink : SpeakrColors.line,
-          ),
-          borderRadius: BorderRadius.circular(5),
-        ),
-        child: Text(
-          label,
-          style: SpeakrText.sans(size: 13, color: SpeakrColors.ink),
-        ),
-      ),
-    );
-  }
-}
-
 class _TimeChip extends StatelessWidget {
   const _TimeChip({
     required this.label,
@@ -1125,6 +1065,7 @@ class _TimeChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     return InkWell(
       borderRadius: BorderRadius.circular(100),
       onTap: selected ? null : onTap,
@@ -1169,6 +1110,7 @@ class _ShortcutsSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     if (!supportsKeyboardShortcuts) return const SizedBox.shrink();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1176,12 +1118,12 @@ class _ShortcutsSection extends StatelessWidget {
         _SectionHead(
           title: tr("Shortcuts"),
           sub: tr(
-            "System-wide hotkeys live on the roadmap. Today's shortcuts are active only while Minutes is focused.",
+            "System-wide hotkeys live on the roadmap. Today's shortcuts are active only while Mimio is focused.",
           ),
         ),
         for (final (label, key) in _buildRows())
           Container(
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               border: Border(bottom: BorderSide(color: SpeakrColors.line)),
             ),
             padding: const EdgeInsets.symmetric(vertical: 12),
@@ -1232,6 +1174,7 @@ class _AboutSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

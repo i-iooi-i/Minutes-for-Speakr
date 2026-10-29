@@ -1,3 +1,4 @@
+import 'package:speakr_app/theme/appearance.dart';
 import 'package:speakr_app/l10n/strings.dart';
 import 'package:flutter/material.dart';
 
@@ -32,6 +33,7 @@ class _LiveIndicatorState extends State<LiveIndicator>
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
@@ -89,6 +91,7 @@ class BreathingDot extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     final clamped = paused
         ? 0.05
         : (level.isFinite ? level.clamp(0.18, 1.0) : 0.18);
@@ -168,6 +171,7 @@ class RecordingTimer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     return Column(
       children: [
         Text(
@@ -277,6 +281,7 @@ class MetadataCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     final hPad = compact ? 12.0 : 16.0;
     final vPad = compact ? 10.0 : 12.0;
     final hMargin = compact ? 12.0 : 20.0;
@@ -350,7 +355,7 @@ class MetadataCard extends StatelessWidget {
           ),
           Container(
             padding: EdgeInsets.fromLTRB(hPad, vPad, hPad, vPad),
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               border: Border(top: BorderSide(color: SpeakrColors.line)),
             ),
             child: Row(
@@ -409,7 +414,7 @@ class MetadataCard extends StatelessWidget {
             ),
           Container(
             padding: EdgeInsets.fromLTRB(hPad, vPad, hPad, vPad),
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               border: Border(top: BorderSide(color: SpeakrColors.line)),
             ),
             child: Column(
@@ -464,11 +469,7 @@ class MetadataCard extends StatelessWidget {
                 ),
                 if (tagPickerOpen && suggestable.isNotEmpty) ...[
                   const SizedBox(height: 10),
-                  const Divider(
-                    color: SpeakrColors.line,
-                    thickness: 1,
-                    height: 1,
-                  ),
+                  Divider(color: SpeakrColors.line, thickness: 1, height: 1),
                   const SizedBox(height: 10),
                   MonoEyebrow(tr("Suggested"), size: 9),
                   const SizedBox(height: 6),
@@ -515,6 +516,7 @@ class _FolderSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     final selected = folders.firstWhere(
       (f) => f.id == folderId,
       orElse: () => const Folder(id: -1, name: ''),
@@ -522,7 +524,7 @@ class _FolderSection extends StatelessWidget {
     final hasSelection = selected.id != -1;
     return Container(
       padding: EdgeInsets.fromLTRB(hPad, vPad, hPad, vPad),
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         border: Border(top: BorderSide(color: SpeakrColors.line)),
       ),
       child: Column(
@@ -592,6 +594,7 @@ class _StepperButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     return InkWell(
       customBorder: const CircleBorder(),
       onTap: onTap,
@@ -644,13 +647,14 @@ class PillSourceCard<T> extends StatelessWidget {
   final ValueChanged<T> onChanged;
   final bool pending;
 
-  static const _onPip = SpeakrColors.ok;
+  static Color get _onPip => SpeakrColors.ok;
 
   bool get _on => options.isNotEmpty && value != options.first.id;
 
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     final on = _on;
     return AnimatedContainer(
       duration: const Duration(milliseconds: 150),
@@ -702,7 +706,7 @@ class PillSourceCard<T> extends StatelessWidget {
                 ),
                 if (pending) ...[
                   const SizedBox(width: 6),
-                  const SizedBox(
+                  SizedBox(
                     width: 12,
                     height: 12,
                     child: CircularProgressIndicator(
@@ -742,6 +746,7 @@ class _Segments<T> extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     return Semantics(
       label: label,
       container: true,
@@ -783,6 +788,7 @@ class _Segment<T> extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     final fg = active ? SpeakrColors.bg : SpeakrColors.ink2;
     return Semantics(
       selected: active,
@@ -855,6 +861,7 @@ class RecordingControls extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     return Padding(
       padding: const EdgeInsets.fromLTRB(28, 24, 28, 0),
       child: Row(
@@ -865,7 +872,7 @@ class RecordingControls extends StatelessWidget {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const SpeakrIconView(
+                SpeakrIconView(
                   SpeakrIcon.trash,
                   size: 12,
                   color: SpeakrColors.muted,
@@ -889,7 +896,7 @@ class RecordingControls extends StatelessWidget {
             horizontalPadding: 18,
             onTap: busy ? null : onStop,
             child: busy
-                ? const SizedBox(
+                ? SizedBox(
                     width: 18,
                     height: 18,
                     child: CircularProgressIndicator(
@@ -951,7 +958,7 @@ class RecordingControls extends StatelessWidget {
       child: Container(
         width: 84,
         height: 84,
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           color: SpeakrColors.ink,
           shape: BoxShape.circle,
           boxShadow: [

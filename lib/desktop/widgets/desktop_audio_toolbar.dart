@@ -1,3 +1,5 @@
+import 'package:speakr_app/theme/appearance.dart';
+import 'package:speakr_app/widgets/mimio_menu.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -25,6 +27,7 @@ class DesktopAudioToolbar extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     final state = ref.watch(recordingControllerProvider);
     final controller = ref.read(recordingControllerProvider.notifier);
     final folders = ref.watch(foldersProvider).value ?? [];
@@ -36,7 +39,7 @@ class DesktopAudioToolbar extends ConsumerWidget {
           : const EdgeInsets.symmetric(horizontal: 22, vertical: 10),
       decoration: embedded
           ? null
-          : const BoxDecoration(
+          : BoxDecoration(
               border: Border(bottom: BorderSide(color: SpeakrColors.line)),
             ),
       child: LayoutBuilder(
@@ -69,26 +72,26 @@ class DesktopAudioToolbar extends ConsumerWidget {
                           borderRadius: BorderRadius.circular(9),
                           border: Border.all(color: SpeakrColors.line),
                         ),
-                        child: PopupMenuButton<int>(
+                        child: MimioMenuButton<int>(
                           enabled: !state.uploading,
                           tooltip: tr('Folder for the new recording'),
                           color: SpeakrColors.bgAlt,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
                           onSelected: (id) =>
                               controller.setFolder(id == -1 ? null : id),
                           itemBuilder: (_) => [
-                            CheckedPopupMenuItem(
+                            MimioMenuItem(
                               value: -1,
-                              checked: state.folderId == null,
-                              child: Text(tr('No folder')),
+                              selected: state.folderId == null,
+                              label: tr('No folder'),
+                              icon: Icons.folder_outlined,
                             ),
                             for (final f in folders)
-                              CheckedPopupMenuItem(
+                              MimioMenuItem(
                                 value: f.id,
-                                checked: f.id == state.folderId,
-                                child: Text(f.name),
+                                selected: f.id == state.folderId,
+                                label: f.name,
+                                icon: Icons.folder_outlined,
+                                iconColor: parseHexColor(f.color),
                               ),
                           ],
                           child: Padding(
@@ -118,7 +121,7 @@ class DesktopAudioToolbar extends ConsumerWidget {
                                   ),
                                 ),
                                 const SizedBox(width: 8),
-                                const Icon(
+                                Icon(
                                   Icons.expand_more,
                                   size: 15,
                                   color: SpeakrColors.muted,
@@ -192,6 +195,7 @@ class AudioSessionReadout extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     final running = state.started && !state.paused && !state.uploading;
     final color = state.uploading
         ? SpeakrColors.tagDesign

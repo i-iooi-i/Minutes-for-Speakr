@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../../theme/colors.dart';
-import '../../../theme/typography.dart';
+import '../../../widgets/mimio_menu.dart';
 
 /// Shows a single-item "Copy" context menu at [globalPosition]. Selecting it
 /// writes [text] to the system clipboard. Used by both the mobile transcript
@@ -24,11 +24,13 @@ Future<void> showTranscriptCopyMenu(
       overlay.size.width - globalPosition.dx,
       overlay.size.height - globalPosition.dy,
     ),
-    color: SpeakrColors.bg,
+    color: SpeakrColors.bgAlt,
+    constraints: mimioMenuConstraints,
     items: [
-      PopupMenuItem<String>(
+      MimioMenuItem<String>(
         value: 'copy',
-        child: Text(tr("Copy"), style: SpeakrText.sans(size: 13)),
+        label: tr('Copy'),
+        icon: Icons.copy_outlined,
       ),
     ],
   );

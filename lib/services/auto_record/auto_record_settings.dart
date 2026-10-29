@@ -106,9 +106,13 @@ class AllowlistEntry {
       key: key ?? this.key,
       displayName: displayName ?? this.displayName,
       kind: kind ?? this.kind,
-      speakers: identical(speakers, _sentinel) ? this.speakers : speakers as int?,
+      speakers: identical(speakers, _sentinel)
+          ? this.speakers
+          : speakers as int?,
       tagIds: tagIds ?? this.tagIds,
-      folderId: identical(folderId, _sentinel) ? this.folderId : folderId as int?,
+      folderId: identical(folderId, _sentinel)
+          ? this.folderId
+          : folderId as int?,
       micEnabled: identical(micEnabled, _sentinel)
           ? this.micEnabled
           : micEnabled as bool?,
@@ -125,18 +129,18 @@ class AllowlistEntry {
   }
 
   Map<String, dynamic> toJson() => {
-        'key': key,
-        'displayName': displayName,
-        'kind': kind.name,
-        if (speakers != null) 'speakers': speakers,
-        if (tagIds.isNotEmpty) 'tagIds': tagIds,
-        if (folderId != null) 'folderId': folderId,
-        // Preserve explicit `false` overrides — drop only when `null`.
-        if (micEnabled != null) 'micEnabled': micEnabled,
-        if (systemEnabled != null) 'systemEnabled': systemEnabled,
-        if (systemScope != null) 'systemScope': _scopeToJson(systemScope!),
-        if (videoEnabled != null) 'videoEnabled': videoEnabled,
-      };
+    'key': key,
+    'displayName': displayName,
+    'kind': kind.name,
+    if (speakers != null) 'speakers': speakers,
+    if (tagIds.isNotEmpty) 'tagIds': tagIds,
+    if (folderId != null) 'folderId': folderId,
+    // Preserve explicit `false` overrides — drop only when `null`.
+    if (micEnabled != null) 'micEnabled': micEnabled,
+    if (systemEnabled != null) 'systemEnabled': systemEnabled,
+    if (systemScope != null) 'systemScope': _scopeToJson(systemScope!),
+    if (videoEnabled != null) 'videoEnabled': videoEnabled,
+  };
 
   factory AllowlistEntry.fromJson(Map<String, dynamic> json) {
     final rawKind = json['kind'] as String? ?? AllowlistKind.exeBasename.name;
@@ -146,7 +150,8 @@ class AllowlistEntry {
     );
     return AllowlistEntry(
       key: (json['key'] as String?) ?? '',
-      displayName: (json['displayName'] as String?) ?? (json['key'] as String? ?? ''),
+      displayName:
+          (json['displayName'] as String?) ?? (json['key'] as String? ?? ''),
       kind: kind,
       speakers: (json['speakers'] as num?)?.toInt(),
       tagIds: (json['tagIds'] as List? ?? const [])
@@ -190,11 +195,11 @@ class RecentlySeenEntry {
   final int lastSeenMs;
 
   Map<String, dynamic> toJson() => {
-        'key': key,
-        'displayName': displayName,
-        'kind': kind.name,
-        'lastSeenMs': lastSeenMs,
-      };
+    'key': key,
+    'displayName': displayName,
+    'kind': kind.name,
+    'lastSeenMs': lastSeenMs,
+  };
 
   factory RecentlySeenEntry.fromJson(Map<String, dynamic> json) {
     final rawKind = json['kind'] as String? ?? AllowlistKind.exeBasename.name;
@@ -298,21 +303,21 @@ class AutoRecordSettings {
   }
 
   Map<String, dynamic> toJson() => {
-        'enabled': enabled,
-        'allowlist': allowlist.map((e) => e.toJson()).toList(),
-        'recentlySeen': recentlySeen.map((e) => e.toJson()).toList(),
-        'silenceSeconds': silenceSeconds,
-        'minKeepSeconds': minKeepSeconds,
-        'defaultSpeakers': defaultSpeakers,
-        'defaultTagIds': defaultTagIds,
-        if (defaultFolderId != null) 'defaultFolderId': defaultFolderId,
-        // Always emit, including explicit `false`, so user-toggled-off
-        // defaults round-trip correctly.
-        'defaultMicEnabled': defaultMicEnabled,
-        'defaultSystemEnabled': defaultSystemEnabled,
-        'defaultSystemScope': _scopeToJson(defaultSystemScope),
-        'defaultVideoEnabled': defaultVideoEnabled,
-      };
+    'enabled': enabled,
+    'allowlist': allowlist.map((e) => e.toJson()).toList(),
+    'recentlySeen': recentlySeen.map((e) => e.toJson()).toList(),
+    'silenceSeconds': silenceSeconds,
+    'minKeepSeconds': minKeepSeconds,
+    'defaultSpeakers': defaultSpeakers,
+    'defaultTagIds': defaultTagIds,
+    if (defaultFolderId != null) 'defaultFolderId': defaultFolderId,
+    // Always emit, including explicit `false`, so user-toggled-off
+    // defaults round-trip correctly.
+    'defaultMicEnabled': defaultMicEnabled,
+    'defaultSystemEnabled': defaultSystemEnabled,
+    'defaultSystemScope': _scopeToJson(defaultSystemScope),
+    'defaultVideoEnabled': defaultVideoEnabled,
+  };
 
   factory AutoRecordSettings.fromJson(Map<String, dynamic> json) {
     return AutoRecordSettings(
@@ -335,7 +340,8 @@ class AutoRecordSettings {
       defaultFolderId: (json['defaultFolderId'] as num?)?.toInt(),
       defaultMicEnabled: json['defaultMicEnabled'] as bool? ?? true,
       defaultSystemEnabled: json['defaultSystemEnabled'] as bool? ?? false,
-      defaultSystemScope: _scopeFromJson(json['defaultSystemScope']) ??
+      defaultSystemScope:
+          _scopeFromJson(json['defaultSystemScope']) ??
           SystemAudioScope.allSystem,
       defaultVideoEnabled: json['defaultVideoEnabled'] as bool? ?? false,
     );

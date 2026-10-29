@@ -1,3 +1,4 @@
+import 'package:speakr_app/theme/appearance.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
@@ -5,6 +6,7 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'zh_cn.dart';
+import '../widgets/mimio_menu.dart';
 
 /// Per-engine locale. Mini windows receive updates through existing state IPC.
 final appLanguage = ValueNotifier<String>('zh');
@@ -80,19 +82,19 @@ class LanguagePicker extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     return Align(
       alignment: Alignment.centerLeft,
       widthFactor: 1,
-      child: DropdownButton<String>(
-        menuWidth: 180,
+      child: MimioSelect<String>(
         value: appLanguage.value,
-        underline: const SizedBox.shrink(),
-        items: const [
-          DropdownMenuItem(value: 'zh', child: Text('简体中文')),
-          DropdownMenuItem(value: 'en', child: Text('English')),
+        icon: Icons.language_rounded,
+        tooltip: tr('Interface language'),
+        options: [
+          MimioSelectOption(value: 'zh', label: tr('Simplified Chinese')),
+          MimioSelectOption(value: 'en', label: tr('English')),
         ],
         onChanged: (value) async {
-          if (value == null) return;
           try {
             await setLanguage(value);
           } catch (_) {

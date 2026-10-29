@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../api/models.dart';
 import '../theme/colors.dart';
+import '../theme/appearance.dart';
 import '../theme/typography.dart';
 
 class TagChip extends StatelessWidget {
@@ -11,6 +12,7 @@ class TagChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppearanceScope.watch(context);
     final c = parseHexColor(tag.color);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 2),
@@ -21,7 +23,7 @@ class TagChip extends StatelessWidget {
       ),
       child: Text(
         tag.name.toUpperCase(),
-        style: SpeakrText.mono(size: 10, color: c, letterSpacing: 1),
+        style: SpeakrText.mono(size: 10, color: _tagInk(c), letterSpacing: 1),
       ),
     );
   }
@@ -44,6 +46,7 @@ class CustomColorTagChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppearanceScope.watch(context);
     final inner = Container(
       padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
       decoration: BoxDecoration(
@@ -56,7 +59,7 @@ class CustomColorTagChip extends StatelessWidget {
         children: [
           Text(
             label.toUpperCase(),
-            style: SpeakrText.sans(size: 11, color: color),
+            style: SpeakrText.sans(size: 11, color: _tagInk(color)),
           ),
           if (trailing != null) const SizedBox(width: 5),
           if (trailing != null) trailing!,
@@ -86,6 +89,7 @@ class DashedTagChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppearanceScope.watch(context);
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(100),
@@ -95,7 +99,7 @@ class DashedTagChip extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
           child: Text(
             '+ ${label.toUpperCase()}',
-            style: SpeakrText.sans(size: 11, color: color),
+            style: SpeakrText.sans(size: 11, color: _tagInk(color)),
           ),
         ),
       ),
@@ -136,4 +140,23 @@ class _DashedBorderPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _DashedBorderPainter old) => old.color != color;
+}
+
+// Keep category hues while ensuring readable text on either theme.
+Color _tagInk(Color source) {
+  var result = source;
+  final background = SpeakrColors.bgAlt.computeLuminance();
+  for (var i = 0; i < 24; i++) {
+    final l = result.computeLuminance();
+    final ratio =
+        (l > background ? l + .05 : background + .05) /
+        (l > background ? background + .05 : l + .05);
+    if (ratio >= 4.5) break;
+    result = Color.lerp(
+      result,
+      appAppearance.brightness == Brightness.dark ? Colors.white : Colors.black,
+      .08,
+    )!;
+  }
+  return result;
 }

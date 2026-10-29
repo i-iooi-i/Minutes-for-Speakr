@@ -1,3 +1,4 @@
+import 'package:speakr_app/theme/appearance.dart';
 import 'package:speakr_app/l10n/strings.dart';
 
 import 'dart:async';
@@ -147,6 +148,7 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     final asyncItems = ref.watch(libraryItemsProvider);
     _evaluatePolling(asyncItems.value);
     final totalCount = asyncItems.value?.length ?? 0;
@@ -222,6 +224,7 @@ class _Header extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 14, 16, 8),
       child: Row(
@@ -248,7 +251,7 @@ class _Header extends StatelessWidget {
                   )
                 : const Padding(
                     padding: EdgeInsets.symmetric(horizontal: 8),
-                    child: MonoEyebrow('Minutes'),
+                    child: MonoEyebrow('Mimio'),
                   ),
           ),
           if (!kIsWeb &&
@@ -272,6 +275,7 @@ class _Title extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     return Padding(
       padding: const EdgeInsets.fromLTRB(24, 4, 24, 18),
       child: Column(
@@ -299,6 +303,7 @@ class _ItemsList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     final groups = groupBy<LibraryItem, String>(
       items,
       (i) => formatRelativeDay(i.when),
@@ -477,6 +482,7 @@ class _PendingTileState extends ConsumerState<_PendingTile> {
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     final p = widget.pending;
     final name = p.file.name;
     final errors =
@@ -498,7 +504,7 @@ class _PendingTileState extends ConsumerState<_PendingTile> {
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.fromLTRB(24, 14, 24, 14),
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           border: Border(top: BorderSide(color: SpeakrColors.line)),
         ),
         child: Row(
@@ -543,7 +549,7 @@ class _PendingTileState extends ConsumerState<_PendingTile> {
             ),
             const SizedBox(width: 10),
             if (_uploading)
-              const SizedBox(
+              SizedBox(
                 width: 18,
                 height: 18,
                 child: CircularProgressIndicator(
@@ -570,6 +576,7 @@ class _NotUploadedBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
@@ -582,7 +589,7 @@ class _NotUploadedBadge extends StatelessWidget {
           Container(
             width: 6,
             height: 6,
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               color: SpeakrColors.muted,
               shape: BoxShape.circle,
             ),
@@ -604,6 +611,7 @@ class _ErrorBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
@@ -616,14 +624,14 @@ class _ErrorBadge extends StatelessWidget {
           Container(
             width: 6,
             height: 6,
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               color: SpeakrColors.danger,
               shape: BoxShape.circle,
             ),
           ),
           const SizedBox(width: 6),
           Text(
-            'error',
+            tr('Error'),
             style: SpeakrText.mono(
               size: 10,
               letterSpacing: 1,
@@ -643,6 +651,7 @@ class _RecordingTile extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     final r = recording;
     final completed = r.status == RecordingStatus.completed;
     // Failed often just means summary generation failed — audio and transcript
@@ -673,7 +682,7 @@ class _RecordingTile extends ConsumerWidget {
             ),
           Container(
             padding: const EdgeInsets.fromLTRB(24, 14, 24, 14),
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               border: Border(top: BorderSide(color: SpeakrColors.line)),
             ),
             child: Column(
@@ -793,9 +802,10 @@ class _Loading extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     return ListView(
       physics: const AlwaysScrollableScrollPhysics(),
-      children: const [
+      children: [
         SizedBox(height: 80),
         Center(
           child: CircularProgressIndicator(
@@ -813,6 +823,7 @@ class _Empty extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     return ListView(
       physics: const AlwaysScrollableScrollPhysics(),
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 80),
@@ -844,6 +855,7 @@ class _ErrorView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     return ListView(
       physics: const AlwaysScrollableScrollPhysics(),
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 60),
@@ -865,6 +877,7 @@ class _RecordFab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     return SizedBox(
       width: 64,
       height: 64,
@@ -873,11 +886,7 @@ class _RecordFab extends StatelessWidget {
         backgroundColor: SpeakrColors.ink,
         elevation: 8,
         shape: const CircleBorder(),
-        child: const SpeakrIconView(
-          SpeakrIcon.mic,
-          size: 26,
-          color: SpeakrColors.bg,
-        ),
+        child: SpeakrIconView(SpeakrIcon.mic, size: 26, color: SpeakrColors.bg),
       ),
     );
   }

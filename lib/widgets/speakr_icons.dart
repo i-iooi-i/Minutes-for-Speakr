@@ -97,8 +97,12 @@ class _IconPainter extends CustomPainter {
         canvas.drawRRect(body, stroke);
         final arc = Path()
           ..moveTo(4.5, 9.5)
-          ..arcToPoint(const Offset(15.5, 9.5),
-              radius: const Radius.circular(5.5), largeArc: false, clockwise: false);
+          ..arcToPoint(
+            const Offset(15.5, 9.5),
+            radius: const Radius.circular(5.5),
+            largeArc: false,
+            clockwise: false,
+          );
         canvas.drawPath(arc, stroke);
         canvas.drawLine(const Offset(10, 15), const Offset(10, 17.5), stroke);
         break;
@@ -202,13 +206,19 @@ class _IconPainter extends CustomPainter {
             cog.moveTo(start.dx, start.dy);
           }
           final outerEnd = at(outerR, a2);
-          cog.arcToPoint(outerEnd,
-              radius: const Radius.circular(outerR), clockwise: true);
+          cog.arcToPoint(
+            outerEnd,
+            radius: const Radius.circular(outerR),
+            clockwise: true,
+          );
           final innerStart = at(innerR, a2);
           cog.lineTo(innerStart.dx, innerStart.dy);
           final innerEnd = at(innerR, a3);
-          cog.arcToPoint(innerEnd,
-              radius: const Radius.circular(innerR), clockwise: true);
+          cog.arcToPoint(
+            innerEnd,
+            radius: const Radius.circular(innerR),
+            clockwise: true,
+          );
           final nextOuter = at(outerR, a3);
           cog.lineTo(nextOuter.dx, nextOuter.dy);
         }
@@ -281,8 +291,16 @@ class _IconPainter extends CustomPainter {
           ..style = PaintingStyle.stroke
           ..strokeWidth = 1.4 * k
           ..strokeCap = StrokeCap.round;
-        canvas.drawLine(Offset(1.5 * k, 3 * k), Offset(11.5 * k, 3 * k), funnel);
-        canvas.drawLine(Offset(3 * k, 6.5 * k), Offset(10 * k, 6.5 * k), funnel);
+        canvas.drawLine(
+          Offset(1.5 * k, 3 * k),
+          Offset(11.5 * k, 3 * k),
+          funnel,
+        );
+        canvas.drawLine(
+          Offset(3 * k, 6.5 * k),
+          Offset(10 * k, 6.5 * k),
+          funnel,
+        );
         canvas.drawLine(Offset(5 * k, 10 * k), Offset(8 * k, 10 * k), funnel);
         break;
       case SpeakrIcon.speaker:
@@ -300,17 +318,21 @@ class _IconPainter extends CustomPainter {
         // Two arcs to the right of the box.
         final wave1 = Path()
           ..moveTo(12.5, 7.5)
-          ..arcToPoint(const Offset(12.5, 12.5),
-              radius: const Radius.circular(2.8),
-              largeArc: false,
-              clockwise: true);
+          ..arcToPoint(
+            const Offset(12.5, 12.5),
+            radius: const Radius.circular(2.8),
+            largeArc: false,
+            clockwise: true,
+          );
         canvas.drawPath(wave1, stroke);
         final wave2 = Path()
           ..moveTo(14.6, 5.5)
-          ..arcToPoint(const Offset(14.6, 14.5),
-              radius: const Radius.circular(5.0),
-              largeArc: false,
-              clockwise: true);
+          ..arcToPoint(
+            const Offset(14.6, 14.5),
+            radius: const Radius.circular(5.0),
+            largeArc: false,
+            clockwise: true,
+          );
         canvas.drawPath(wave2, stroke);
         break;
       case SpeakrIcon.expand:
@@ -323,7 +345,10 @@ class _IconPainter extends CustomPainter {
           ..lineTo(17.5, 8.75);
         canvas.drawPath(tr, stroke);
         canvas.drawLine(
-            const Offset(17.5, 2.5), const Offset(11.25, 8.75), stroke);
+          const Offset(17.5, 2.5),
+          const Offset(11.25, 8.75),
+          stroke,
+        );
         // Bottom-left corner: M7 14 H2 V9 + diagonal M2 14 l5 -5
         final bl = Path()
           ..moveTo(8.75, 17.5)
@@ -331,11 +356,18 @@ class _IconPainter extends CustomPainter {
           ..lineTo(2.5, 11.25);
         canvas.drawPath(bl, stroke);
         canvas.drawLine(
-            const Offset(2.5, 17.5), const Offset(8.75, 11.25), stroke);
+          const Offset(2.5, 17.5),
+          const Offset(8.75, 11.25),
+          stroke,
+        );
         break;
       case SpeakrIcon.trash:
         // Lid
-        canvas.drawLine(const Offset(3.5, 5.5), const Offset(16.5, 5.5), stroke);
+        canvas.drawLine(
+          const Offset(3.5, 5.5),
+          const Offset(16.5, 5.5),
+          stroke,
+        );
         // Handle on lid
         final handle = Path()
           ..moveTo(8, 5.5)
@@ -352,7 +384,11 @@ class _IconPainter extends CustomPainter {
         canvas.drawPath(bin, stroke);
         // Inner ribs
         canvas.drawLine(const Offset(8.5, 8.5), const Offset(8.5, 14), stroke);
-        canvas.drawLine(const Offset(11.5, 8.5), const Offset(11.5, 14), stroke);
+        canvas.drawLine(
+          const Offset(11.5, 8.5),
+          const Offset(11.5, 14),
+          stroke,
+        );
         break;
     }
   }
@@ -364,7 +400,12 @@ class _IconPainter extends CustomPainter {
 
 /// 36×36 ghost icon button used throughout the design (`iconBtn` in JSX).
 class GhostIconButton extends StatelessWidget {
-  const GhostIconButton({super.key, required this.icon, this.onTap, this.size = 20});
+  const GhostIconButton({
+    super.key,
+    required this.icon,
+    this.onTap,
+    this.size = 20,
+  });
   final SpeakrIcon icon;
   final VoidCallback? onTap;
   final double size;

@@ -67,7 +67,7 @@ void main() {
         ),
       ),
     );
-    await tester.tap(find.byType(PopupMenuButton<String>));
+    await tester.tap(find.byWidgetPredicate((widget) => widget is PopupMenuButton<String>));
     await tester.pumpAndSettle();
     await tester.ensureVisible(find.text('仅删除音频'));
     await tester.tap(find.text('仅删除音频'));
@@ -80,5 +80,3 @@ void main() {
     dio.close();
   });
 }
-
-

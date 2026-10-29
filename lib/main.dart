@@ -1,3 +1,5 @@
+import 'theme/appearance.dart';
+import 'services/preferences/local_avatar.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io' show Platform;
@@ -33,6 +35,8 @@ Future<void> main(List<String> args) async {
     () async {
       WidgetsFlutterBinding.ensureInitialized();
       await loadLanguage();
+      await appAppearance.load();
+      await localAvatar.load();
 
       // Windows-only: when invoked as a child engine by desktop_multi_window
       // the args are ['multi_window', '<int windowId>', '<jsonArgs>'].
@@ -46,7 +50,13 @@ Future<void> main(List<String> args) async {
           }
         } catch (_) {}
         if (role == MiniIpc.argRoleMini && windowId > 0) {
-          runApp(ProviderScope(child: MiniRecorderApp(windowId: windowId)));
+          runApp(
+            ProviderScope(
+              child: AppearanceApp(
+                builder: () => MiniRecorderApp(windowId: windowId),
+              ),
+            ),
+          );
           return;
         }
       }
@@ -96,7 +106,7 @@ Future<void> main(List<String> args) async {
       runApp(
         UncontrolledProviderScope(
           container: container,
-          child: const SpeakrApp(),
+          child: AppearanceApp(builder: () => const SpeakrApp()),
         ),
       );
     },

@@ -1,3 +1,4 @@
+import 'package:speakr_app/theme/appearance.dart';
 import 'package:speakr_app/l10n/strings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -28,6 +29,7 @@ class _LibraryFilterBarState extends ConsumerState<LibraryFilterBar> {
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     final filter = ref.watch(libraryFilterProvider);
     final folders = ref.watch(foldersProvider).value ?? const <Folder>[];
     final tags = ref.watch(tagsProvider).value ?? const <Tag>[];
@@ -98,6 +100,7 @@ class _FiltersPill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     final filled = open || count > 0;
     final fg = filled ? SpeakrColors.bg : SpeakrColors.ink2;
     return InkWell(
@@ -158,6 +161,7 @@ class _ActiveChipsStrip extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     final notifier = ref.read(libraryFilterProvider.notifier);
     final children = <Widget>[];
 
@@ -166,7 +170,7 @@ class _ActiveChipsStrip extends ConsumerWidget {
       children.add(
         _ActiveChip(
           leading: key == 'highlighted'
-              ? const SpeakrIconView(
+              ? SpeakrIconView(
                   SpeakrIcon.star,
                   size: 10,
                   color: SpeakrColors.ink2,
@@ -242,6 +246,7 @@ class _ActiveChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     return InkWell(
       borderRadius: BorderRadius.circular(100),
       onTap: onTap,
@@ -285,6 +290,7 @@ class _ClearButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     return InkWell(
       borderRadius: BorderRadius.circular(4),
       onTap: onTap,
@@ -320,6 +326,7 @@ class _PickerPanel extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     final notifier = ref.read(libraryFilterProvider.notifier);
     return Container(
       margin: const EdgeInsets.only(top: 10),
@@ -405,6 +412,7 @@ class _SectionLabel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     return Padding(
       padding: const EdgeInsets.only(bottom: 6),
       child: Text(
@@ -441,6 +449,7 @@ class _PickerChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     final tinted = tint != null;
     final fg = tinted
         ? (active ? SpeakrColors.bg : tint!)

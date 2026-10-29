@@ -1,3 +1,4 @@
+import 'package:speakr_app/theme/appearance.dart';
 import 'package:speakr_app/l10n/strings.dart';
 
 import 'dart:async';
@@ -60,14 +61,15 @@ class _MiniRecorderScreenState extends ConsumerState<MiniRecorderScreen> {
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     final state = ref.watch(recordingMirrorProvider);
     final mirror = ref.read(recordingMirrorProvider.notifier);
 
     return Scaffold(
       // The Win32 window underneath is a rounded popup clipped via
-      // SetWindowRgn. Painting the entire surface with ink keeps the
+      // SetWindowRgn. Painting the entire surface with the dark panel color keeps the
       // corners visually clean during any pre-clip frame.
-      backgroundColor: SpeakrColors.ink,
+      backgroundColor: SpeakrColors.bgAlt,
       body: Center(
         child: state.autoStopSecondsLeft != null
             ? _MeetingEndedPill(
@@ -111,6 +113,7 @@ class _Pill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     final paused = state.paused;
     final uploading = state.uploading;
     final timerText = state.formattedElapsed;
@@ -119,7 +122,7 @@ class _Pill extends StatelessWidget {
       height: 36,
       padding: const EdgeInsets.fromLTRB(12, 0, 4, 0),
       decoration: BoxDecoration(
-        color: SpeakrColors.ink,
+        color: SpeakrColors.bgAlt,
         borderRadius: BorderRadius.circular(18),
       ),
       child: Row(
@@ -139,24 +142,26 @@ class _Pill extends StatelessWidget {
           _PillButton(
             background: discardArmed
                 ? SpeakrColors.recordingDot.withValues(alpha: 0.95)
-                : const Color(0x14FFFFFF), // ~8% white
+                : SpeakrColors.ink.withValues(alpha: .08), // ~8% white
             onTap: () => onDiscard(),
             child: SpeakrIconView(
               SpeakrIcon.trash,
               size: 14,
               color: discardArmed
-                  ? SpeakrColors.bg
-                  : SpeakrColors.bg.withValues(alpha: 0.7),
+                  ? SpeakrColors.ink
+                  : SpeakrColors.ink.withValues(alpha: 0.7),
             ),
           ),
           const SizedBox(width: 9),
           _PillButton(
-            background: const Color(0x29FFFFFF), // ~16% white — primary
+            background: SpeakrColors.ink.withValues(
+              alpha: .16,
+            ), // ~16% white — primary
             onTap: onTogglePause,
             child: SpeakrIconView(
               paused ? SpeakrIcon.play : SpeakrIcon.pause,
               size: 12,
-              color: SpeakrColors.bg,
+              color: SpeakrColors.ink,
             ),
           ),
           const SizedBox(width: 9),
@@ -164,19 +169,19 @@ class _Pill extends StatelessWidget {
             background: SpeakrColors.recordingDot.withValues(alpha: 0.95),
             onTap: onStop,
             child: uploading
-                ? const SizedBox(
+                ? SizedBox(
                     width: 12,
                     height: 12,
                     child: CircularProgressIndicator(
                       strokeWidth: 1.6,
-                      color: SpeakrColors.bg,
+                      color: SpeakrColors.ink,
                     ),
                   )
                 : Container(
                     width: 8,
                     height: 8,
                     decoration: BoxDecoration(
-                      color: SpeakrColors.bg,
+                      color: SpeakrColors.ink,
                       borderRadius: BorderRadius.circular(1.5),
                     ),
                   ),
@@ -185,12 +190,12 @@ class _Pill extends StatelessWidget {
           _PillDrag(onDragStart: onDragStart, child: const _Hairline()),
           const SizedBox(width: 9),
           _PillButton(
-            background: const Color(0x14FFFFFF),
+            background: SpeakrColors.ink.withValues(alpha: .08),
             onTap: () => onOpenMain(),
             child: SpeakrIconView(
               SpeakrIcon.expand,
               size: 13,
-              color: SpeakrColors.bg.withValues(alpha: 0.85),
+              color: SpeakrColors.ink.withValues(alpha: 0.85),
             ),
           ),
         ],
@@ -217,6 +222,7 @@ class _MeetingEndedPill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     // Main pushes whole seconds; animate each step to the *next* second's
     // value over one second so the bar drains continuously, not in jumps.
     final target =
@@ -226,7 +232,7 @@ class _MeetingEndedPill extends StatelessWidget {
       borderRadius: BorderRadius.circular(18),
       child: Container(
         height: 36,
-        color: SpeakrColors.ink,
+        color: SpeakrColors.bgAlt,
         child: Stack(
           children: [
             Positioned.fill(
@@ -236,7 +242,9 @@ class _MeetingEndedPill extends StatelessWidget {
                 builder: (context, value, _) => FractionallySizedBox(
                   alignment: Alignment.centerLeft,
                   widthFactor: value,
-                  child: const ColoredBox(color: Color(0x1FFFFFFF)),
+                  child: ColoredBox(
+                    color: SpeakrColors.ink.withValues(alpha: .12),
+                  ),
                 ),
               ),
             ),
@@ -267,7 +275,7 @@ class _MeetingEndedPill extends StatelessWidget {
                   style: SpeakrText.sans(
                     size: 12,
                     weight: FontWeight.w600,
-                    color: SpeakrColors.bg,
+                    color: SpeakrColors.ink,
                   ),
                 ),
                 Text(
@@ -277,7 +285,7 @@ class _MeetingEndedPill extends StatelessWidget {
                   style:
                       SpeakrText.mono(
                         size: 10,
-                        color: SpeakrColors.bg.withValues(alpha: 0.6),
+                        color: SpeakrColors.ink.withValues(alpha: 0.6),
                       ).copyWith(
                         fontFeatures: const [FontFeature.tabularFigures()],
                       ),
@@ -288,7 +296,9 @@ class _MeetingEndedPill extends StatelessWidget {
         ),
         const SizedBox(width: 8),
         Material(
-          color: const Color(0x29FFFFFF), // ~16% white — primary
+          color: SpeakrColors.ink.withValues(
+            alpha: .16,
+          ), // ~16% white — primary
           shape: const StadiumBorder(),
           child: InkWell(
             customBorder: const StadiumBorder(),
@@ -299,10 +309,10 @@ class _MeetingEndedPill extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const SpeakrIconView(
+                  SpeakrIconView(
                     SpeakrIcon.play,
                     size: 10,
-                    color: SpeakrColors.bg,
+                    color: SpeakrColors.ink,
                   ),
                   const SizedBox(width: 6),
                   Text(
@@ -310,7 +320,7 @@ class _MeetingEndedPill extends StatelessWidget {
                     style: SpeakrText.sans(
                       size: 12,
                       weight: FontWeight.w600,
-                      color: SpeakrColors.bg,
+                      color: SpeakrColors.ink,
                     ),
                   ),
                 ],
@@ -344,6 +354,7 @@ class _LeftCluster extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     return SizedBox(
       width: _slotWidth,
       child: armed
@@ -372,8 +383,8 @@ class _LeftCluster extends StatelessWidget {
                         SpeakrText.mono(
                           size: 11,
                           color: paused
-                              ? SpeakrColors.bg.withValues(alpha: 0.55)
-                              : SpeakrColors.bg,
+                              ? SpeakrColors.ink.withValues(alpha: 0.55)
+                              : SpeakrColors.ink,
                           letterSpacing: 0.4,
                         ).copyWith(
                           fontFeatures: const [FontFeature.tabularFigures()],
@@ -394,7 +405,12 @@ class _Hairline extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
-    return Container(width: 1, height: 16, color: const Color(0x24FFFFFF));
+    AppearanceScope.watch(context);
+    return Container(
+      width: 1,
+      height: 16,
+      color: SpeakrColors.ink.withValues(alpha: .14),
+    );
   }
 }
 
@@ -429,11 +445,12 @@ class _PulsingDotState extends State<_PulsingDot>
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     if (widget.paused) {
       return Container(
         width: 6,
         height: 6,
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           color: SpeakrColors.muted,
           shape: BoxShape.circle,
         ),
@@ -474,6 +491,7 @@ class _PillButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     final enabled = onTap != null;
     return Opacity(
       opacity: enabled ? 1.0 : 0.4,
@@ -500,6 +518,7 @@ class _PillDrag extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     return MouseRegion(
       cursor: SystemMouseCursors.move,
       child: Listener(

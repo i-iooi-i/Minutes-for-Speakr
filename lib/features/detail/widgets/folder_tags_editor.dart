@@ -1,3 +1,4 @@
+import 'package:speakr_app/theme/appearance.dart';
 import 'package:speakr_app/l10n/strings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -54,6 +55,7 @@ class _FolderTagsEditorState extends ConsumerState<FolderTagsEditor> {
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     final folders = ref.watch(foldersProvider).value ?? const <Folder>[];
     final allTags = ref.watch(tagsProvider).value ?? const <Tag>[];
     final folderColor = resolveFolderColor(_folderId, folders);
@@ -169,6 +171,7 @@ class _ChipRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     final hasFolder = folderName != null && folderName!.isNotEmpty;
     final hasContent = hasFolder || tags.isNotEmpty;
     final actionLabel = editing
@@ -216,6 +219,7 @@ class _EditorCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     final selectedIds = selectedTags.map((t) => t.id).toSet();
     final suggested = allTags
         .where((t) => !selectedIds.contains(t.id))
@@ -316,6 +320,7 @@ class _NoneFolderChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(3),
@@ -347,6 +352,7 @@ class _DashedTextButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(3),

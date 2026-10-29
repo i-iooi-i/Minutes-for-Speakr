@@ -76,7 +76,8 @@ class AutoRecordCoordinator {
     int? processSourcePid,
     bool? videoEnabled,
     List<int>? videoPids,
-  }) startRecording;
+  })
+  startRecording;
   final Future<void> Function() stopAndUpload;
   final Future<void> Function() cancelRecording;
 
@@ -89,7 +90,8 @@ class AutoRecordCoordinator {
     String? exePath,
     required String matchKey,
     required AllowlistKind kind,
-  })? findProcessPids;
+  })?
+  findProcessPids;
 
   final AutoRecordSettingsStore store;
 
@@ -105,7 +107,8 @@ class AutoRecordCoordinator {
     required int speakers,
     required List<int> tagIds,
     required int? folderId,
-  })? applyTriggerMetadata;
+  })?
+  applyTriggerMetadata;
 
   /// Publishes the idle stop-countdown to the UI: seconds left while it
   /// runs, `null` once it is cancelled. When provided and the mini pill
@@ -241,9 +244,15 @@ class AutoRecordCoordinator {
     // mic — that's the "this meeting ended" boundary, after which a new
     // acquisition should auto-start as before.
     if (_dismissedTriggerKey != null && _dismissedTriggerKind != null) {
-      final stillInUse = users.any((u) =>
-          u.isInUse &&
-          _userMatchesTrigger(u, _dismissedTriggerKey!, _dismissedTriggerKind!));
+      final stillInUse = users.any(
+        (u) =>
+            u.isInUse &&
+            _userMatchesTrigger(
+              u,
+              _dismissedTriggerKey!,
+              _dismissedTriggerKind!,
+            ),
+      );
       if (!stillInUse) {
         _dismissedTriggerKey = null;
         _dismissedTriggerKind = null;
@@ -259,7 +268,10 @@ class AutoRecordCoordinator {
       if (_dismissedTriggerKey != null &&
           _dismissedTriggerKind != null &&
           _userMatchesTrigger(
-              user, _dismissedTriggerKey!, _dismissedTriggerKind!)) {
+            user,
+            _dismissedTriggerKey!,
+            _dismissedTriggerKind!,
+          )) {
         continue;
       }
       final entry = _firstAllowlistMatch(settings.allowlist, user);
@@ -358,8 +370,9 @@ class AutoRecordCoordinator {
     // Fire only when both the trigger app's mic and the system audio
     // output have been simultaneously inactive for [silenceSeconds] — the
     // later of the two "since" timestamps is when both became idle.
-    final bothInactiveSince =
-        silentSince.isAfter(releasedSince) ? silentSince : releasedSince;
+    final bothInactiveSince = silentSince.isAfter(releasedSince)
+        ? silentSince
+        : releasedSince;
     final inactiveFor = now.difference(bothInactiveSince);
     if (inactiveFor < Duration(seconds: settings.silenceSeconds)) return;
 
@@ -368,10 +381,12 @@ class AutoRecordCoordinator {
       return;
     }
 
-    _prompts.add(StopPromptRequest(
-      triggerLabel: _activeTriggerLabel ?? 'recording',
-      elapsed: Duration(seconds: _recordingState.elapsedSeconds),
-    ));
+    _prompts.add(
+      StopPromptRequest(
+        triggerLabel: _activeTriggerLabel ?? 'recording',
+        elapsed: Duration(seconds: _recordingState.elapsedSeconds),
+      ),
+    );
   }
 
   // ── Pill stop-countdown ───────────────────────────────────────────────────
@@ -421,7 +436,8 @@ class AutoRecordCoordinator {
     final elapsed = _recordingState.elapsedSeconds;
     if (elapsed < settings.minKeepSeconds) {
       debugPrint(
-          '[auto-record] discarded short clip (${elapsed}s < ${settings.minKeepSeconds}s)');
+        '[auto-record] discarded short clip (${elapsed}s < ${settings.minKeepSeconds}s)',
+      );
       await cancelRecording();
     } else {
       await stopAndUpload();
@@ -441,7 +457,8 @@ class AutoRecordCoordinator {
 
   Future<void> _startAutoRecording(MicUser user, AllowlistEntry entry) async {
     debugPrint(
-        '[auto-record] start trigger=${user.key} kind=${user.kind.name}');
+      '[auto-record] start trigger=${user.key} kind=${user.kind.name}',
+    );
     _autoSession = true;
     _activeTriggerKey = entry.key;
     _activeTriggerKind = entry.kind;
@@ -459,8 +476,7 @@ class AutoRecordCoordinator {
     final systemOn =
         entry.systemEnabled ?? preStartSettings.defaultSystemEnabled;
     final scope = entry.systemScope ?? preStartSettings.defaultSystemScope;
-    final videoOn =
-        entry.videoEnabled ?? preStartSettings.defaultVideoEnabled;
+    final videoOn = entry.videoEnabled ?? preStartSettings.defaultVideoEnabled;
 
     // Resolve the trigger process PIDs when system audio is on — even
     // when the configured scope is allSystem. The PID doesn't affect the
@@ -490,9 +506,10 @@ class AutoRecordCoordinator {
         systemMode = SystemAudioMode.allSystem;
         if (scope == SystemAudioScope.processOnly) {
           debugPrint(
-              '[auto-record] processOnly requested but no PIDs found for '
-              '${user.displayName} (matchKey=${user.key} '
-              'exe=${user.exePath ?? '<unset>'}) — falling back to allSystem');
+            '[auto-record] processOnly requested but no PIDs found for '
+            '${user.displayName} (matchKey=${user.key} '
+            'exe=${user.exePath ?? '<unset>'}) — falling back to allSystem',
+          );
         }
       }
     }
@@ -538,8 +555,7 @@ class AutoRecordCoordinator {
   ) async {
     if (users.isEmpty) return;
     final byKey = <(String, AllowlistKind), RecentlySeenEntry>{
-      for (final r in settings.recentlySeen)
-        (r.key.toLowerCase(), r.kind): r,
+      for (final r in settings.recentlySeen) (r.key.toLowerCase(), r.kind): r,
     };
     var dirty = false;
     final nowMs = DateTime.now().millisecondsSinceEpoch;

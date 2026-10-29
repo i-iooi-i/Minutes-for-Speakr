@@ -1,3 +1,4 @@
+import 'package:speakr_app/theme/appearance.dart';
 import 'package:speakr_app/l10n/strings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -27,6 +28,7 @@ class _AutoRecordPromptListenerState
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     ref.listen(autoRecordPromptsProvider, (_, next) {
       next.whenData((req) => _show(req));
     });
@@ -88,12 +90,13 @@ class _StopPromptDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     return AlertDialog(
       backgroundColor: SpeakrColors.bg,
       title: Text(tr("Stop recording?"), style: SpeakrText.serif(size: 20)),
       content: Text(
         tr(
-          "Minutes has been auto-recording {0} for {1}. The mic and audio output have been idle.",
+          "Mimio has been auto-recording {0} for {1}. The mic and audio output have been idle.",
           [req.triggerLabel, _formatElapsed(req.elapsed)],
         ),
         style: SpeakrText.sans(size: 14, color: SpeakrColors.ink2),

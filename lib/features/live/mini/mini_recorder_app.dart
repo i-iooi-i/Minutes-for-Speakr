@@ -1,3 +1,4 @@
+import 'package:speakr_app/theme/appearance.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:speakr_app/l10n/strings.dart';
 import 'package:flutter/material.dart';
@@ -30,12 +31,13 @@ class _MiniRecorderAppState extends ConsumerState<MiniRecorderApp> {
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     return LocalizedApp(
       builder: (locale) => MaterialApp(
         locale: locale,
         supportedLocales: appLocales,
         localizationsDelegates: GlobalMaterialLocalizations.delegates,
-        title: tr("Minutes Recording"),
+        title: tr("Mimio Recording"),
         debugShowCheckedModeBanner: false,
         theme: buildSpeakrTheme(),
         home: const MiniRecorderScreen(),

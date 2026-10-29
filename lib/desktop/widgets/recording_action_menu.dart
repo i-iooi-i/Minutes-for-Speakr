@@ -1,3 +1,5 @@
+import 'package:speakr_app/theme/appearance.dart';
+import 'package:speakr_app/widgets/mimio_menu.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -163,42 +165,24 @@ class _RecordingActionMenuState extends ConsumerState<RecordingActionMenu> {
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     final r = widget.recording;
     PopupMenuEntry<String> item(
       String value,
       String label,
       IconData icon, {
       bool danger = false,
-    }) => PopupMenuItem(
-      height: 40,
+    }) => MimioMenuItem<String>(
       value: value,
-      child: Row(
-        children: [
-          Icon(
-            icon,
-            size: 17,
-            color: danger ? SpeakrColors.danger : SpeakrColors.ink2,
-          ),
-          const SizedBox(width: 10),
-          Text(
-            tr(label),
-            style: TextStyle(
-              fontSize: 13,
-              color: danger ? SpeakrColors.danger : null,
-            ),
-          ),
-        ],
-      ),
+      label: tr(label),
+      icon: icon,
+      danger: danger,
     );
-    return PopupMenuButton<String>(
+    return MimioMenuButton<String>(
       color: SpeakrColors.bgAlt,
       surfaceTintColor: Colors.transparent,
       elevation: 12,
       shadowColor: Colors.black54,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: const BorderSide(color: SpeakrColors.line),
-      ),
       position: PopupMenuPosition.under,
       offset: const Offset(0, 6),
       tooltip: tr('More'),
@@ -221,20 +205,14 @@ class _RecordingActionMenuState extends ConsumerState<RecordingActionMenu> {
           r.isArchived ? 'Unarchive recording' : 'Archive recording',
           Icons.archive_outlined,
         ),
-        const PopupMenuItem<String>(
-          enabled: false, height: 12,
-          child: Divider(height: 1, color: SpeakrColors.line),
-        ),
+        MimioMenuDivider<String>(),
         item('organize', 'Folder and tags', Icons.folder_outlined),
         item('speakers', 'Edit speakers', Icons.people_outline),
         if (r.audioAvailable != false && !r.status.isInProgress)
           item('transcribe', 'Reprocess transcription', Icons.mic_none),
         item('summary', 'Reprocess summary', Icons.refresh),
         item('share', 'Share recording', Icons.share_outlined),
-        const PopupMenuItem<String>(
-          enabled: false, height: 12,
-          child: Divider(height: 1, color: SpeakrColors.line),
-        ),
+        MimioMenuDivider<String>(),
         if (r.audioAvailable != false && !r.status.isInProgress)
           item(
             'audio',

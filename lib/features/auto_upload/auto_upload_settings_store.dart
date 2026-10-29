@@ -41,7 +41,8 @@ class AutoUploadSettingsStore {
   static const _kLastPhoneState = 'auto_upload.last_phone_state';
   static const _kLastPhoneStateMs = 'auto_upload.last_phone_state_ms';
   static const _kLastPhoneStatePrev = 'auto_upload.last_phone_state_prev';
-  static const _kLastPhoneStateDecision = 'auto_upload.last_phone_state_decision';
+  static const _kLastPhoneStateDecision =
+      'auto_upload.last_phone_state_decision';
   static const _kLastCallEndEnqueueMs = 'auto_upload.last_call_end_enqueue_ms';
 
   List<FolderUploadConfig> readAll() {
@@ -304,10 +305,9 @@ class AutoUploadSettingsStore {
     String oldFolderPath,
     Map<String, String> newKeysByName,
   ) {
-    final normalizedDir = oldFolderPath.replaceAll('\\', '/').replaceAll(
-          RegExp(r'/+$'),
-          '',
-        );
+    final normalizedDir = oldFolderPath
+        .replaceAll('\\', '/')
+        .replaceAll(RegExp(r'/+$'), '');
     final out = <String, String>{};
     for (final key in {...readFileErrors().keys, ...readUploadedFiles().keys}) {
       final normalized = key.replaceAll('\\', '/');

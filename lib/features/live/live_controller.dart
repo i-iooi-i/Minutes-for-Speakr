@@ -1,3 +1,4 @@
+import '../../theme/appearance.dart';
 import 'package:speakr_app/l10n/strings.dart';
 
 import 'dart:async';
@@ -32,6 +33,7 @@ class RecordingController extends StateNotifier<RecordingState> {
   RecordingController(this._ref) : super(const RecordingState()) {
     _registerMainIpcHandler();
     appLanguage.addListener(_pushLanguageToMini);
+    appAppearance.addListener(_pushLanguageToMini);
     addListener(_pushStateToMini, fireImmediately: false);
     _ref.listen<AsyncValue<List<Tag>>>(tagsProvider, (_, next) {
       final tags = next.value;
@@ -185,7 +187,11 @@ class RecordingController extends StateNotifier<RecordingState> {
     DesktopMultiWindow.invokeMethod(
       mini.windowId,
       MiniIpc.stateUpdate,
-      jsonEncode({...s.toJson(), '_uiLanguage': appLanguage.value}),
+      jsonEncode({
+        ...s.toJson(),
+        '_uiLanguage': appLanguage.value,
+        '_appearance': appAppearance.toJson(),
+      }),
     ).catchError((_) => null);
   }
 
@@ -752,7 +758,7 @@ class RecordingController extends StateNotifier<RecordingState> {
         jsonEncode({'role': MiniIpc.argRoleMini}),
       );
       _miniController = c;
-      await c.setTitle(tr("Minutes Recording"));
+      await c.setTitle(tr("Mimio Recording"));
       await c.show();
       // Update state — listener will push the current snapshot to the mini.
       state = state.copyWith(miniOpen: true, miniWindowId: c.windowId);
@@ -824,6 +830,7 @@ class RecordingController extends StateNotifier<RecordingState> {
   @override
   void dispose() {
     appLanguage.removeListener(_pushLanguageToMini);
+    appAppearance.removeListener(_pushLanguageToMini);
     _ticker?.cancel();
     _unsubscribeAudioLevel();
     _recorder.dispose();

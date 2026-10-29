@@ -1,3 +1,4 @@
+import 'package:speakr_app/theme/appearance.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../l10n/strings.dart';
@@ -9,7 +10,7 @@ import '../recording_statistics.dart';
 class RecordingStatsTab extends ConsumerWidget {
   const RecordingStatsTab({super.key, required this.recordingId});
   final int recordingId;
-  static const _colors = [
+  static final _colors = [
     SpeakrColors.accent,
     SpeakrColors.recordingDot,
     SpeakrColors.tagDesign,
@@ -21,6 +22,7 @@ class RecordingStatsTab extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     return ref
         .watch(transcriptProvider(recordingId))
         .when(
@@ -55,7 +57,7 @@ class RecordingStatsTab extends ConsumerWidget {
                 ),
                 _metric(tr('Speakers'), '${rows.length}'),
                 _metric(tr('Transcript segments'), '$count'),
-                const Divider(height: 32, color: SpeakrColors.line),
+                Divider(height: 32, color: SpeakrColors.line),
                 Text(
                   tr('Speaker activity'),
                   style: SpeakrText.sans(size: 14, weight: FontWeight.w600),

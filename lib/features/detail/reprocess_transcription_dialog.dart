@@ -1,3 +1,4 @@
+import 'package:speakr_app/theme/appearance.dart';
 import 'package:speakr_app/l10n/strings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -7,6 +8,7 @@ import '../../api/models.dart';
 import '../../api/providers.dart';
 import '../../theme/colors.dart';
 import '../../theme/typography.dart';
+import '../../widgets/mimio_menu.dart';
 
 class ReprocessTranscriptionParams {
   const ReprocessTranscriptionParams({
@@ -88,6 +90,7 @@ class _ReprocessTranscriptionDialogState
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     final configAsync = ref.watch(configProvider);
     return AlertDialog(
       backgroundColor: SpeakrColors.bg,
@@ -162,6 +165,7 @@ class _Body extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     final showDiarization =
         config.connectorSupportsDiarization ||
         config.connectorSupportsSpeakerCount;
@@ -186,15 +190,16 @@ class _Body extends StatelessWidget {
         const SizedBox(height: 16),
         if (config.transcriptionModelOptions.isNotEmpty) ...[
           _label(tr("Model")),
-          DropdownButtonFormField<String>(
-            initialValue: modelValue,
-            isExpanded: true,
-            items: [
+          MimioSelect<String>(
+            value: modelValue,
+            expanded: true,
+            placeholder: tr('Server default'),
+            tooltip: tr('Model'),
+            options: [
               for (final o in config.transcriptionModelOptions)
-                DropdownMenuItem(value: o.value, child: Text(o.label)),
+                MimioSelectOption(value: o.value, label: o.label),
             ],
             onChanged: onModelChanged,
-            style: SpeakrText.sans(size: 14),
           ),
           const SizedBox(height: 12),
         ],
@@ -279,6 +284,7 @@ class _ErrorBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,

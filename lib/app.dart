@@ -1,3 +1,4 @@
+import 'package:speakr_app/theme/appearance.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:speakr_app/l10n/strings.dart';
 import 'package:flutter/material.dart';
@@ -16,6 +17,7 @@ class SpeakrApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     // Wait for the credentials provider to resolve so the router can
     // pick the correct initial location (library vs onboarding).
     final asyncCreds = ref.watch(currentCredentialsProvider);
@@ -29,7 +31,7 @@ class SpeakrApp extends ConsumerWidget {
             locale: locale,
             supportedLocales: appLocales,
             localizationsDelegates: GlobalMaterialLocalizations.delegates,
-            title: 'Minutes for Speakr',
+            title: 'Mimio for Speakr',
             debugShowCheckedModeBanner: false,
             theme: buildSpeakrTheme(),
             routerConfig: router,
@@ -50,13 +52,11 @@ class _Splash extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: buildSpeakrTheme(),
-      home: const Scaffold(
-        backgroundColor: SpeakrColors.bg,
-        body: SizedBox.shrink(),
-      ),
+      home: Scaffold(backgroundColor: SpeakrColors.bg, body: SizedBox.shrink()),
     );
   }
 }

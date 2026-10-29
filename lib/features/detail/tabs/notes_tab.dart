@@ -1,3 +1,4 @@
+import 'package:speakr_app/theme/appearance.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -23,6 +24,7 @@ class _NotesTabState extends ConsumerState<NotesTab> {
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     final result = ref.watch(recordingNotesProvider(recordingId));
     if (_editing) {
       return _NotesEditor(
@@ -141,6 +143,7 @@ class _NotesEditorState extends ConsumerState<_NotesEditor> {
   @override
   Widget build(BuildContext context) {
     LanguageScope.watch(context);
+    AppearanceScope.watch(context);
     return Padding(
       padding: const EdgeInsets.all(16),
       child: Column(

@@ -13,8 +13,8 @@ class ParticipantAvatars extends StatelessWidget {
         .where((s) => s.isNotEmpty)
         .toSet()
         .toList();
-    const palette = [
-      SpeakrColors.accent,
+    final palette = [
+      SpeakrColors.tagEngineering,
       SpeakrColors.tagCustomer,
       SpeakrColors.tagDesign,
       SpeakrColors.tag1on1,
@@ -44,8 +44,8 @@ class ParticipantAvatars extends StatelessWidget {
                   ),
                   child: Text(
                     visible[i].characters.first.toUpperCase(),
-                    style: const TextStyle(
-                      color: SpeakrColors.bg,
+                    style: TextStyle(
+                      color: const Color(0xFF111416),
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
                     ),
@@ -58,10 +58,7 @@ class ParticipantAvatars extends StatelessWidget {
                 top: 6,
                 child: Text(
                   '+${names.length - 3}',
-                  style: const TextStyle(
-                    fontSize: 11,
-                    color: SpeakrColors.muted,
-                  ),
+                  style: TextStyle(fontSize: 11, color: SpeakrColors.muted),
                 ),
               ),
           ],

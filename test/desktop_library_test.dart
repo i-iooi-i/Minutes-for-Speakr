@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:speakr_app/api/models.dart';
 import 'package:speakr_app/desktop/library/library_desktop_screen.dart';
+import 'package:speakr_app/desktop/shell/desktop_shell.dart';
 import 'package:speakr_app/features/library/library_controller.dart';
 import 'package:speakr_app/l10n/strings.dart';
 import 'package:speakr_app/services/preferences/time_format_preference.dart';
@@ -23,10 +25,16 @@ void main() {
       addTearDown(tester.view.resetDevicePixelRatio);
       applyLanguage('zh');
       final router = GoRouter(
+        initialLocation: '/library',
         routes: [
           GoRoute(
-            path: '/',
-            builder: (_, _) => const Scaffold(body: LibraryDesktopScreen()),
+            path: '/library',
+            builder: (_, _) => width == 1100
+                ? const DesktopShell(
+                    active: DesktopShellRoute.library,
+                    child: LibraryDesktopScreen(),
+                  )
+                : const Scaffold(body: LibraryDesktopScreen()),
           ),
           GoRoute(
             path: '/recording/:id',
@@ -57,6 +65,8 @@ void main() {
               ],
             ),
             foldersProvider.overrideWith((_) async => []),
+            tagsProvider.overrideWith((_) async => []),
+            libraryCountsRecordingsProvider.overrideWith((_) async => []),
             timeFormatPreferenceProvider.overrideWith(
               (_) async => TimeFormatPreference.system,
             ),
@@ -71,6 +81,20 @@ void main() {
       );
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
+      await tester.tap(find.byTooltip('搜索 (Ctrl+K)'));
+      await tester.pumpAndSettle();
+      expect(find.byType(TextField), findsOneWidget);
+      expect(tester.takeException(), isNull);
+      await tester.tap(find.byTooltip(tr('Clear search')));
+      await tester.pumpAndSettle();
+      if (width == 1100) {
+        await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+        await tester.sendKeyEvent(LogicalKeyboardKey.keyK);
+        await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+        await tester.pumpAndSettle();
+        expect(find.byType(TextField), findsOneWidget);
+        expect(tester.takeException(), isNull);
+      }
       await tester.tap(find.byTooltip('播放'));
       await tester.pumpAndSettle();
       expect(find.text('42:1'), findsOneWidget);

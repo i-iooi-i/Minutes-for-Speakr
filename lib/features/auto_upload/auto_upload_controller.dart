@@ -8,15 +8,17 @@ import 'auto_upload_settings.dart';
 import 'auto_upload_settings_store.dart';
 import 'datetime_parser.dart';
 
-final autoUploadStoreProvider =
-    FutureProvider<AutoUploadSettingsStore>((ref) async {
+final autoUploadStoreProvider = FutureProvider<AutoUploadSettingsStore>((
+  ref,
+) async {
   return AutoUploadSettingsStore.open();
 });
 
 /// All configured folder entries. Refreshed by writing through
 /// [folderConfigsControllerProvider].
-final folderConfigsProvider =
-    FutureProvider<List<FolderUploadConfig>>((ref) async {
+final folderConfigsProvider = FutureProvider<List<FolderUploadConfig>>((
+  ref,
+) async {
   final store = await ref.watch(autoUploadStoreProvider.future);
   return store.readAll();
 });
@@ -28,8 +30,10 @@ final folderConfigsProvider =
 ///
 /// Keyed by [FolderUploadConfig.treeUri] (a value type) rather than the
 /// config object so rebuilt config instances share one cached answer.
-final folderAccessProvider =
-    FutureProvider.autoDispose.family<bool, String?>((ref, treeUri) async {
+final folderAccessProvider = FutureProvider.autoDispose.family<bool, String?>((
+  ref,
+  treeUri,
+) async {
   if (!Platform.isAndroid) return true;
   if (treeUri == null) return false;
   try {
@@ -87,9 +91,7 @@ class FolderConfigsController {
 
   Future<void> updateFolder(FolderUploadConfig next) async {
     final list = await _read();
-    final out = [
-      for (final c in list) c.id == next.id ? next : c,
-    ];
+    final out = [for (final c in list) c.id == next.id ? next : c];
     await _writeAll(out);
   }
 
@@ -98,9 +100,7 @@ class FolderConfigsController {
     FolderUploadConfig Function(FolderUploadConfig) patch,
   ) async {
     final list = await _read();
-    final out = [
-      for (final c in list) c.id == id ? patch(c) : c,
-    ];
+    final out = [for (final c in list) c.id == id ? patch(c) : c];
     await _writeAll(out);
   }
 
@@ -165,16 +165,15 @@ class FolderConfigsController {
     required String regex,
     required int captureGroup,
     required String format,
-  }) =>
-      _patch(
-        id,
-        (c) => c.copyWith(
-          parsePresetId: kCustomPresetId,
-          customRegex: regex,
-          customCaptureGroup: captureGroup,
-          customFormat: format,
-        ),
-      );
+  }) => _patch(
+    id,
+    (c) => c.copyWith(
+      parsePresetId: kCustomPresetId,
+      customRegex: regex,
+      customCaptureGroup: captureGroup,
+      customFormat: format,
+    ),
+  );
 
   Future<void> setTagId(String id, int? tagId) =>
       _patch(id, (c) => c.copyWith(tagId: tagId));
@@ -219,8 +218,9 @@ class PendingFile {
 /// duration-read failures). Keyed by [AutoUploadFile.key]. Watched by the
 /// Library's pending tile to switch from the "not uploaded" badge to an
 /// error badge with a Delete / Force-upload dialog.
-final pendingFileErrorsProvider =
-    FutureProvider<Map<String, String>>((ref) async {
+final pendingFileErrorsProvider = FutureProvider<Map<String, String>>((
+  ref,
+) async {
   final store = await ref.watch(autoUploadStoreProvider.future);
   return store.readFileErrors();
 });
@@ -247,12 +247,14 @@ final pendingFilesProvider = FutureProvider<List<PendingFile>>((ref) async {
       try {
         final stat = await f.stat();
         if (stat == null) continue;
-        out.add(PendingFile(
-          file: f,
-          dateTime: resolveDateTime(f.name, stat.modified, config),
-          size: stat.size,
-          config: config,
-        ));
+        out.add(
+          PendingFile(
+            file: f,
+            dateTime: resolveDateTime(f.name, stat.modified, config),
+            size: stat.size,
+            config: config,
+          ),
+        );
       } catch (_) {
         // Permission error or transient filesystem issue — skip silently.
       }
